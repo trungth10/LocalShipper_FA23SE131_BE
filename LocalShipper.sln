@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LSAPI", "LSAPI\LSAPI.csproj", "{91AFE46F-E251-469B-B344-8B7E6E64938D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LSAPI", "LSAPI\LSAPI.csproj", "{91AFE46F-E251-469B-B344-8B7E6E64938D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocalShipper.Data", "LocalShipper.Data\LocalShipper.Data.csproj", "{2D8040A8-D19C-4B1F-8B89-B8D45DA9D7B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalShipper.Data", "LocalShipper.Data\LocalShipper.Data.csproj", "{2D8040A8-D19C-4B1F-8B89-B8D45DA9D7B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocalShipper.Service", "LocalShipper.Service\LocalShipper.Service.csproj", "{C122858E-9EF5-4B18-B829-1C466ACF2B6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalShipper.Service", "LocalShipper.Service\LocalShipper.Service.csproj", "{C122858E-9EF5-4B18-B829-1C466ACF2B6F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
