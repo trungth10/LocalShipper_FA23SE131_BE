@@ -13,4 +13,14 @@
     <ProjectReference Include="..\LocalShipper.Data\LocalShipper.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Caches\" />
+    <Folder Include="DTO\Response\" />
+    <Folder Include="DTO\Request\" />
+    <Folder Include="Exceptions\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="Services\Implement\" />
+    <Folder Include="Services\Interface\" />
+  </ItemGroup>
+
 </Project>
