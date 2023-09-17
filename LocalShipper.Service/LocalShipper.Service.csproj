@@ -9,6 +9,9 @@
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Cronos" Version="0.7.0" />
     <PackageReference Include="EntityFramework" Version="6.4.4" />
+    <PackageReference Include="Firebase.Auth" Version="1.0.0" />
+    <PackageReference Include="FirebaseAdmin" Version="2.0.0" />
+    <PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
     <PackageReference Include="GeoAPI.Core" Version="1.7.5" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.0" />
     <PackageReference Include="Hangfire.Core" Version="1.8.0" />
@@ -32,12 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Caches\" />
-    <Folder Include="DTO\Response\" />
-    <Folder Include="DTO\Request\" />
     <Folder Include="Exceptions\" />
-    <Folder Include="Helpers\" />
-    <Folder Include="Services\Implement\" />
     <Folder Include="Services\Interface\" />
   </ItemGroup>
 
