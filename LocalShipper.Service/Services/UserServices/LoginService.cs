@@ -8,20 +8,21 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging; // Thêm using này cho việc logging
+using Microsoft.Extensions.Logging; 
 using System.Linq;
 using LocalShipper.Service.DTOs;
+using LocalShipper.Service.DTOs.Response;
 
 public class LoginService
 {
     private readonly IGenericRepository<Account> _accountRepository;
     private readonly IConfiguration _configuration;
-    private readonly ILogger<LoginService> _logger; // Thêm logger
+    private readonly ILogger<LoginService> _logger; 
 
     public LoginService(
         IGenericRepository<Account> accountRepository,
         IConfiguration configuration,
-        ILogger<LoginService> logger) // Thêm logger vào constructor
+        ILogger<LoginService> logger) 
     {
         _accountRepository = accountRepository;
         _configuration = configuration;
@@ -39,7 +40,7 @@ public class LoginService
         {
             var account = await _accountRepository
                 .GetAll()
-                .Where(a => a.Email == email)
+                .Where(a => a.Email == email).Include(a => a.Role)
                 .FirstOrDefaultAsync();
 
             if (account == null)
@@ -68,7 +69,7 @@ public class LoginService
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-                return new AuthenticationResult { Success = true, AccessToken = tokenString };
+                return new AuthenticationResult { Success = true, AccessToken = tokenString, UserName =account.Email, FullName  =account.Fullname,Role = account.Role.Name } ;
             }
             else
             {

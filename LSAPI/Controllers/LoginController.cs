@@ -30,7 +30,7 @@ namespace LSAPI.Controllers
             {
                 if (dynamicResult.Success)
                 {
-                    return Ok(new { AccessToken = dynamicResult.AccessToken });
+                    return Ok(new { AccessToken = dynamicResult.AccessToken, UserName = result.UserName ,FullName = result.FullName,Role = result.Role });
                 }
                 else
                 {
