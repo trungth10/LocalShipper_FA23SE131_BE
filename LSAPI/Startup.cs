@@ -10,6 +10,10 @@ using System.Text;
 using LocalShipper.Data.Models;
 using LocalShipper.Data.Repository;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
+using System.Reflection;
+using System;
+using LocalShipper.Service.Services.Helpers;
 
 namespace LSAPI
 {
@@ -24,6 +28,19 @@ namespace LSAPI
 
         public void ConfigureServices(IServiceCollection services)
         {
+
+
+            //services.AddAuthorization(options =>
+            //{
+            //    options.AddPolicy("Bearer", policy =>
+            //    {
+            //        policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
+            //        policy.RequireAuthenticatedUser();
+            //    });
+            //});
+
+
+            #region JWT
             var jwtSettings = Configuration.GetSection("JwtAuth");
             var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]);
 
@@ -48,9 +65,35 @@ namespace LSAPI
                     ValidateLifetime = true,
                 };
             });
+
             services.AddDbContext<LocalShipperCPContext>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("DBLocalShipper")); 
+                options.UseSqlServer(Configuration.GetConnectionString("DBLocalShipper"));
+            });
+            #endregion
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(Roles.Admin, policy =>
+               {
+                   policy.RequireRole(Roles.Admin);
+               });
+                options.AddPolicy(Roles.Staff, policy =>
+               {
+                   policy.RequireRole(Roles.Staff);
+               });
+                options.AddPolicy(Roles.Store, policy =>
+               {
+                   policy.RequireRole(Roles.Store);
+               });
+                options.AddPolicy(Roles.Brand, policy =>
+               {
+                   policy.RequireRole(Roles.Brand);
+               });
+                options.AddPolicy(Roles.Shipper, policy =>
+               {
+                   policy.RequireRole(Roles.Shipper);
+               });
             });
 
             services.AddScoped<IGenericRepository<Account>, GenericRepository<Account>>();
@@ -63,8 +106,40 @@ namespace LSAPI
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "LSAPI", Version = "v1" });
+
+                // Thêm khai báo bảo mật Bearer
+                var securitySchema = new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                };
+                c.AddSecurityDefinition("Bearer", securitySchema
+                   );
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+                {
+                        securitySchema,
+                    new string[] { "Bearer" }
+                    }
+                }
+
+                );
+
+
             });
+
+
         }
+
+
 
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

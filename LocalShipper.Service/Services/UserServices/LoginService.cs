@@ -8,21 +8,22 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging; 
+using Microsoft.Extensions.Logging;
 using System.Linq;
 using LocalShipper.Service.DTOs;
 using LocalShipper.Service.DTOs.Response;
+using System.Collections.Generic;
 
 public class LoginService
 {
     private readonly IGenericRepository<Account> _accountRepository;
     private readonly IConfiguration _configuration;
-    private readonly ILogger<LoginService> _logger; 
+    private readonly ILogger<LoginService> _logger;
 
     public LoginService(
         IGenericRepository<Account> accountRepository,
         IConfiguration configuration,
-        ILogger<LoginService> logger) 
+        ILogger<LoginService> logger)
     {
         _accountRepository = accountRepository;
         _configuration = configuration;
@@ -50,10 +51,13 @@ public class LoginService
 
             if (password == account.Password)
             {
-                var claims = new[]
+                var claims = new List<Claim>
                 {
-                new Claim(ClaimTypes.Name, account.Email)
-            };
+                new Claim(ClaimTypes.Name, account.Email),
+                new Claim(ClaimTypes.Role, account.Role.Name),
+                };
+               
+
 
                 var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtAuth:Key"]));
                 var issuer = _configuration["JwtAuth:Issuer"];
@@ -69,7 +73,7 @@ public class LoginService
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-                return new AuthenticationResult { Success = true, AccessToken = tokenString, UserName =account.Email, FullName  =account.Fullname,Role = account.Role.Name } ;
+                return new AuthenticationResult { Success = true, AccessToken = tokenString, UserName = account.Email, FullName = account.Fullname, Role = account.Role.Name };
             }
             else
             {

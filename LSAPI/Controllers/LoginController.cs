@@ -1,11 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using LocalShipper.Service.DTOs;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using LocalShipper.Data.Models;
+using LocalShipper.Service.Services.Helpers;
 
 namespace LSAPI.Controllers
 {
-    [Route("api/[controller]")]
+
     [ApiController]
+    [Route("api/[controller]")]
     public class LoginController : ControllerBase
     {
         private readonly LoginService _loginService;
@@ -14,7 +19,10 @@ namespace LSAPI.Controllers
         {
             _loginService = loginService;
         }
+
+       
         [HttpPost]
+      
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (request == null || string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
