@@ -30,11 +30,15 @@ public class LoginService
         _logger = logger;
     }
 
-    public async Task<AuthenticationResult> AuthenticateAsync(string email, string password)
+    public async Task<LoginResponse> AuthenticateAsync(string email, string password)
     {
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
         {
-            return new AuthenticationResult { Success = false, Message = "Email and password are required." };
+            return new LoginResponse
+            {
+                Success = false,
+                Message = "Email and password are required."
+            };
         }
 
         try
@@ -46,7 +50,11 @@ public class LoginService
 
             if (account == null)
             {
-                return new AuthenticationResult { Success = false, Message = "Invalid email or password." };
+                return new LoginResponse
+                {
+                    Success = false,
+                    Message = "Invalid email or password."
+                };
             }
 
             if (password == account.Password)
@@ -56,7 +64,7 @@ public class LoginService
                 new Claim(ClaimTypes.Name, account.Email),
                 new Claim(ClaimTypes.Role, account.Role.Name),
                 };
-               
+
 
 
                 var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtAuth:Key"]));
@@ -73,17 +81,32 @@ public class LoginService
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-                return new AuthenticationResult { Success = true, AccessToken = tokenString, UserName = account.Email, FullName = account.Fullname, Role = account.Role.Name };
+                return new LoginResponse
+                {
+                    Success = true,
+                    AccessToken = tokenString,
+                    UserName = account.Email,
+                    FullName = account.Fullname,
+                    Role = account.Role.Name
+                };
             }
             else
             {
-                return new AuthenticationResult { Success = false, Message = "Invalid email or password." };
+                return new LoginResponse
+                {
+                    Success = false,
+                    Message = "Invalid email or password."
+                };
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred during authentication.");
-            return new AuthenticationResult { Success = false, Message = "An error occurred during authentication." };
+            return new LoginResponse
+            {
+                Success = false,
+                Message = "An error occurred during authentication."
+            };
         }
     }
 

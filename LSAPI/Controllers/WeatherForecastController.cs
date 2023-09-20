@@ -24,6 +24,7 @@ namespace LSAPI.Controllers
         {
             _logger = logger;
         }
+        //test thử authorize, nếu role = Staff thì mới xài đc API dự báo thời tiết
         [Authorize(Policy = Roles.Staff)]
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
