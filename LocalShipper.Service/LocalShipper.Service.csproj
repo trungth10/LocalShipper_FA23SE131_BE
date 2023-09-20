@@ -9,20 +9,14 @@
     <Compile Remove="DTO\**" />
     <Compile Remove="Exceptions\**" />
     <Compile Remove="Helpers\**" />
-    <Compile Remove="Services\Implement\**" />
-    <Compile Remove="Services\Interface\**" />
     <EmbeddedResource Remove="Caches\**" />
     <EmbeddedResource Remove="DTO\**" />
     <EmbeddedResource Remove="Exceptions\**" />
     <EmbeddedResource Remove="Helpers\**" />
-    <EmbeddedResource Remove="Services\Implement\**" />
-    <EmbeddedResource Remove="Services\Interface\**" />
     <None Remove="Caches\**" />
     <None Remove="DTO\**" />
     <None Remove="Exceptions\**" />
     <None Remove="Helpers\**" />
-    <None Remove="Services\Implement\**" />
-    <None Remove="Services\Interface\**" />
   </ItemGroup>
 
   <ItemGroup>
