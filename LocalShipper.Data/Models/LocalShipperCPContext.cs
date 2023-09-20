@@ -223,6 +223,10 @@ namespace LocalShipper.Data.Models
                     .HasColumnType("datetime")
                     .HasColumnName("cancel_time");
 
+                entity.Property(e => e.CancleReason)
+                   .HasColumnType("text")
+                   .HasColumnName("cancle_reason");
+
                 entity.Property(e => e.CompleteTime)
                     .HasColumnType("datetime")
                     .HasColumnName("complete_time");
@@ -379,7 +383,7 @@ namespace LocalShipper.Data.Models
                     .HasColumnName("createdAt")
                     .HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.PackageId).HasColumnName("packageId");
+             
             });
 
             modelBuilder.Entity<PackageType>(entity =>
@@ -393,7 +397,7 @@ namespace LocalShipper.Data.Models
                     .HasColumnName("createdAt")
                     .HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.PackageId).HasColumnName("packageId");
+              
 
                 entity.Property(e => e.PackageType1)
                     .IsRequired()

@@ -13,7 +13,6 @@ namespace LocalShipper.Data.Models
         }
 
         public int Id { get; set; }
-        public int PackageId { get; set; }
         public string PackageType1 { get; set; }
         public DateTime? CreatedAt { get; set; }
 

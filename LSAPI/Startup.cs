@@ -14,6 +14,10 @@ using System.IO;
 using System.Reflection;
 using System;
 using LocalShipper.Service.Services.Helpers;
+using LocalShipper.Service.Services.Implement;
+using LocalShipper.Service.Services.Interface;
+using LocalShipper.Data.UnitOfWork;
+using AutoMapper;
 
 namespace LSAPI
 {
@@ -97,6 +101,14 @@ namespace LSAPI
             });
 
             services.AddScoped<IGenericRepository<Account>, GenericRepository<Account>>();
+            services.AddScoped<IShipperService, ShipperService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IBatchService, BatchService>();
+            services.AddScoped<IPackageService, PackageService >();
+
+            services.AddAutoMapper(typeof(Startup));
+
 
             // Đăng ký LoginService
             services.AddScoped<LoginService>();
@@ -144,12 +156,12 @@ namespace LSAPI
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
+            //if (env.IsDevelopment())
+            
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LSAPI v1"));
-            }
+            
 
             app.UseHttpsRedirection();
             app.UseRouting();

@@ -12,8 +12,7 @@ namespace LocalShipper.Data.Models
             Packages = new HashSet<Package>();
         }
 
-        public int Id { get; set; }
-        public int? PackageId { get; set; }
+        public int Id { get; set; }       
         public int? ActionType { get; set; }
         public DateTime? CreatedAt { get; set; }
 
