@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using LocalShipper.Data.Models;
 using LocalShipper.Service.Services.Helpers;
+using System;
 
 namespace LSAPI.Controllers
 {
@@ -38,7 +39,7 @@ namespace LSAPI.Controllers
             {
                 if (dynamicResult.Success)
                 {
-                    return Ok(new { AccessToken = dynamicResult.AccessToken, UserName = result.UserName ,FullName = result.FullName,Role = result.Role });
+                    return Ok(new { AccessToken = dynamicResult.AccessToken, UserName = result.UserName ,FullName = result.FullName});
                 }
                 else
                 {
@@ -48,5 +49,33 @@ namespace LSAPI.Controllers
 
             return BadRequest("Invalid result.");
         }
+        
+        [HttpGet("role")]
+        public async Task<IActionResult> GetUserRole(string accesstoken)
+        {
+            try
+            {
+                // Lấy AccessToken từ tiêu đề Authorization
+                var accessToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+                // Gọi hàm GetUserRoleFromAccessTokenAsync từ LoginService
+                var userRole = await _loginService.GetUserRoleFromAccessTokenAsync(accessToken);
+
+                if (userRole != null)
+                {
+                    return Ok(new { Role = userRole });
+                }
+                else
+                {
+                    return BadRequest("Role not found in AccessToken.");
+                }
+            }
+            catch (Exception ex)
+            {
+               // _logger.LogError(ex, "An error occurred while getting user role.");
+                return StatusCode(500, "An error occurred while getting user role.");
+            }
+        }
     }
+
 }
