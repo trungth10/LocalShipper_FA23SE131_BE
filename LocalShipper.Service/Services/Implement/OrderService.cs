@@ -245,7 +245,73 @@ namespace LocalShipper.Service.Services.Implement
             return orderResponses;
         }
 
-        
+        public async Task<List<OrderResponse>> GetOrderByShipperId(int shippperId)
+        {
+            var orders = await _unitOfWork.Repository<Order>().GetAll().Include(o => o.Store).Include(o => o.Batch).Where(f => f.ShipperId == shippperId).ToListAsync();
+            var orderResponses = new List<OrderResponse>();
+            foreach (var order in orders)
+            {
+                var orderResponse = new OrderResponse
+                {
+                    Id = order.Id,
+                    storeId = order.StoreId,
+                    batchId = order.BatchId,
+                    shipperId = order.ShipperId,
+                    status = order.Status,
+                    trackingNumber = order.TrackingNumber,
+                    createTime = order.CreateTime,
+                    orderTime = order.OrderTime,
+                    acceptTime = order.AcceptTime,
+                    pickupTime = order.PickupTime,
+                    cancleTime = order.CancelTime,
+                    cancleReason = order.CancleReason,
+                    completeTime = order.CompleteTime,
+                    distancePrice = order.DistancePrice,
+                    subTotalprice = order.SubtotalPrice,
+                    totalPrice = order.TotalPrice,
+                    other = order.Other,
+                };
+
+                if (order.Batch != null)
+                {
+                    orderResponse.Batches = new BatchResponse
+                    {
+                        Id = order.Batch.Id,
+                        StoreId = order.Batch.StoreId,
+                        BatchName = order.Batch.BatchName,
+                        BatchDescription = order.Batch.BatchDescription,
+                        CreatedAt = order.Batch.CreatedAt,
+                        UpdateAt = order.Batch.UpdateAt,
+                    };
+                }
+
+                if (order.Store != null)
+                {
+                    orderResponse.Store = new StoreResponse
+                    {
+                        Id = order.StoreId,
+                        StoreName = order.Store.StoreName,
+                        StoreAddress = order.Store.StoreAddress,
+                        StorePhone = order.Store.StorePhone,
+                        StoreEmail = order.Store.StoreEmail,
+                        OpenTime = order.Store.OpenTime,
+                        CloseTime = order.Store.CloseTime,
+                        StoreDescription = order.Store.StoreDescription,
+                        Status = order.Store.Status,
+                        BrandId = order.Store.BrandId,
+                        TemplateId = order.Store.TemplateId,
+                        ZoneId = order.Store.ZoneId,
+                        AccountId = order.Store.AccountId,
+                    };
+                }
+
+                orderResponses.Add(orderResponse);
+
+            }                         
+           return orderResponses;
+        }
+
+
 
 
 

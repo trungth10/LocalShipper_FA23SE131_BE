@@ -99,5 +99,12 @@ namespace LSAPI.Controllers
             var orders = await _orderService.GetOrdersByAssigning();
             return Ok(orders);
         }
+
+        [HttpGet("shipper/{shipperId}")]
+        public async Task<ActionResult<List<OrderResponse>>> GetOrderByShipperId(int shipperId)
+        {
+            var rs = await _orderService.GetOrderByShipperId(shipperId);
+            return Ok(rs);
+        }
     }
 }
