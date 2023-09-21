@@ -1,6 +1,8 @@
 ﻿using LocalShipper.Service.DTOs.Response;
+using LocalShipper.Service.Services.Helpers;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,7 +11,7 @@ namespace LSAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-
+    [Authorize(Roles = Roles.Shipper + "," + Roles.Store)]
     public class PackageController : Controller
     {
         private readonly IPackageService _packageService;
@@ -17,7 +19,7 @@ namespace LSAPI.Controllers
         {
             _packageService = packageService;
         }
-
+        
         [HttpGet("{batchId}")]
         public async Task<ActionResult<List<PackageResponse>>> GetPackageByBatchId(int batchId)
         {
