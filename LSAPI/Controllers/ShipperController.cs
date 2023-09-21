@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using System;
 using LocalShipper.Service.Services.Interface;
 using LocalShipper.Service.Services.Implement;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LSAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "Shipper")]
     public class ShipperController : Controller
     {
 

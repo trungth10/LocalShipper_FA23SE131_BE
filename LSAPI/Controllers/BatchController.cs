@@ -1,6 +1,7 @@
 ﻿using LocalShipper.Service.DTOs.Response;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -8,6 +9,7 @@ namespace LSAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "Shipper")]
     public class BatchController : Controller
     {
         private readonly IBatchService _batchService;

@@ -105,7 +105,7 @@ namespace LSAPI
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IBatchService, BatchService>();
-            services.AddScoped<IPackageService, PackageService >();
+            services.AddScoped<IPackageService, PackageService>();
 
             services.AddAutoMapper(typeof(Startup));
 
@@ -157,11 +157,11 @@ namespace LSAPI
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             //if (env.IsDevelopment())
-            
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LSAPI v1"));
-            
+
+            app.UseDeveloperExceptionPage();
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LSAPI v1"));
+
 
             app.UseHttpsRedirection();
             app.UseRouting();
