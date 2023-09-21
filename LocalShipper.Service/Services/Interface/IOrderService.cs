@@ -16,5 +16,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<OrderResponse> CancelOrder(int orderId, UpdateOrderStatusRequest request);
         Task<OrderResponse> GetOrderById(int id);
         Task<List<OrderResponse>> GetOrdersByAssigning();
+        Task<List<OrderResponse>> GetOrdersByShipperId(int shipperId);
     }
 }

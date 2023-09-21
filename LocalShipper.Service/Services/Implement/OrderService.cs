@@ -245,8 +245,37 @@ namespace LocalShipper.Service.Services.Implement
             return orderResponses;
         }
 
-        
 
+        public async Task<List<OrderResponse>> GetOrdersByShipperId(int shipperId)
+        {
+            //var status = (int)OrderStatusEnum.ASSIGNING;
+            var orders = await _unitOfWork.Repository<Order>().GetAll()
+                .Where(f => f.ShipperId == shipperId)
+                .ToListAsync();
+
+            var orderResponses = orders.Select(order => new OrderResponse
+            {
+                Id = order.Id,
+                storeId = order.StoreId,
+                batchId = order.BatchId,
+                shipperId = order.ShipperId,
+                status = order.Status,
+                trackingNumber = order.TrackingNumber,
+                createTime = order.CreateTime,
+                orderTime = order.OrderTime,
+                acceptTime = order.AcceptTime,
+                pickupTime = order.PickupTime,
+                cancleTime = order.CancelTime,
+                cancleReason = order.CancleReason,
+                completeTime = order.CompleteTime,
+                distancePrice = order.DistancePrice,
+                subTotalprice = order.SubtotalPrice,
+                totalPrice = order.TotalPrice,
+                other = order.Other,
+            }).ToList();
+
+            return orderResponses;
+        }
 
 
     }

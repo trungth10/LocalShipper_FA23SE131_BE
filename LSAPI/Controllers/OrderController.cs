@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using AutoMapper.Configuration.Conventions;
 
 namespace LSAPI.Controllers
 {
@@ -97,6 +98,13 @@ namespace LSAPI.Controllers
         public async Task<ActionResult<List<OrderResponse>>> GetOrdersByAssigning()
         {
             var orders = await _orderService.GetOrdersByAssigning();
+            return Ok(orders);
+        }
+
+        [HttpGet("ShipperId")]
+        public async Task<ActionResult<List<OrderResponse>>> GetOrdersByShipperId(int shipperId)
+        {
+            var orders = await _orderService.GetOrdersByShipperId(shipperId);
             return Ok(orders);
         }
     }
