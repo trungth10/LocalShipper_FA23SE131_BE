@@ -12,7 +12,7 @@ namespace LSAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "Shipper")]
+    //[Authorize(Policy = "Shipper")]
     public class OrderController : Controller
     {
         private readonly IOrderService _orderService;
@@ -108,5 +108,8 @@ namespace LSAPI.Controllers
             var rs = await _orderService.GetOrderByShipperId(shipperId);
             return Ok(rs);
         }
+
+
+        
     }
 }

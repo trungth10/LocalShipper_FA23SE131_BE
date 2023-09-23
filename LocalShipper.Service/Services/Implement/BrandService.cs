@@ -69,7 +69,7 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<BrandResponse> GetBrandByID(int id)
         {
-            var brand = await _unitOfWork.Repository<Brand>().GetAll().Where(x => x.Id == id && x.Active == true).FirstOrDefaultAsync();
+            var brand = await _unitOfWork.Repository<Brand>().GetAll().Where(x => x.Id == id).FirstOrDefaultAsync();
             if (brand != null)
             {
                 return new BrandResponse
@@ -129,48 +129,7 @@ namespace LocalShipper.Service.Services.Implement
             }
         }
 
-        public async Task<PagedResults<BrandResponse>> GetBrandsPaging(BrandPagingRequest request)
-        {
-            List<BrandResponse> list = null;
-            try
-            {
-                List<Brand> brands = null;
-                if (request.AccountId != 0)
-                {
-                    brands = await _unitOfWork.Repository<Brand>()
-                           .GetAll()
-                               .Where(x => x.BrandName.ToLower()
-                           .Contains(request.KeySearch.ToLower())
-                           && x.Active == true && x.AccountId == request.AccountId).ToListAsync();
-                }
-                else
-                {
-                    brands = await _unitOfWork.Repository<Brand>()
-                           .GetAll()
-                    .Where(x => x.BrandName.ToLower()
-                    .Contains(request.KeySearch.ToLower())
-                           && x.Active == true).ToListAsync();
-                }
-                IEnumerable<BrandResponse> rs = brands.Select(x => new BrandResponse
-                {
-                    Id = x.Id,
-                    BrandName = x.BrandName,
-                    IconUrl = x.IconUrl,
-                    ImageUrl = x.ImageUrl,
-                    Active = x.Active,
-                    AccountId = x.AccountId
-                }).AsEnumerable();
-
-                list = PageHelper<BrandResponse>.Sorting((SortType.SortOrder)request.SortType, rs, request.ColName);
-                var result = PageHelper<BrandResponse>.Paging(list, request.Page, request.PageSize);
-                return result;
-            }
-            catch (Exception e)
-            {
-                throw new CrudException(HttpStatusCode.BadRequest, "Get Brands Error!!!", e.InnerException?.Message);
-            }
-        }
-
+        
         public async Task<BrandResponse> PostBrand(PostBrandRequest model, int role)
         {
             Brand brand = new Brand

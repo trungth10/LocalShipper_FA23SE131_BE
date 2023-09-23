@@ -17,5 +17,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<OrderResponse> GetOrderById(int id);
         Task<List<OrderResponse>> GetOrdersByAssigning();
         Task<List<OrderResponse>> GetOrderByShipperId(int shipperId);
+        
     }
 }

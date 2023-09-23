@@ -22,9 +22,9 @@ namespace LSAPI.Controllers
             _loginService = loginService;
         }
 
-       
+
         [HttpPost]
-      
+
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (request == null || string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
@@ -40,7 +40,13 @@ namespace LSAPI.Controllers
             {
                 if (dynamicResult.Success)
                 {
-                    return Ok(new { AccessToken = dynamicResult.AccessToken, UserName = result.UserName ,FullName = result.FullName,Role = result.Role });
+                    return Ok(new
+                    {
+                        AccessToken = dynamicResult.AccessToken,
+                        UserName = result.UserName,
+                        FullName = result.FullName,
+                        Role = result.Role
+                    });
                 }
                 else
                 {

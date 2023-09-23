@@ -60,18 +60,7 @@ namespace LSAPI.Controllers
         }
 
 
-        /// <summary>
-        /// Get Brands Paging
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [AllowAnonymous]
-        [HttpGet("paging")]
-        public async Task<ActionResult<List<BrandResponse>>> GetBrandsPaging([FromQuery] BrandPagingRequest request)
-        {
-            var rs = await _brandService.GetBrandsPaging(request);
-            return Ok(rs);
-        }
+        
     }
 
 }

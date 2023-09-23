@@ -10,7 +10,8 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IShipperService
     {
-        Task<ShipperResponse> UpdateShipperStatus(int shipperId, UpdateShipperStatusRequest request);
 
+        Task<ShipperResponse> UpdateShipperStatus(int shipperId, UpdateShipperStatusRequest request);
+        Task<ShipperResponse> GetShipperById(int id);
     }
 }

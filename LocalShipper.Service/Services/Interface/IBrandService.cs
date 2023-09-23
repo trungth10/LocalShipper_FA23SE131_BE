@@ -11,7 +11,6 @@ namespace LocalShipper.Service.Services.Interface
     public interface IBrandService
     {
         Task<List<BrandResponse>> GetBrands(BrandPagingRequest request);
-        Task<PagedResults<BrandResponse>> GetBrandsPaging(BrandPagingRequest request);
         Task<BrandResponse> PostBrand(PostBrandRequest model, int role);
         Task<BrandResponse> PutBrand(int id, PostBrandRequest model);
         Task<BrandResponse> DeleteBrand(int id);

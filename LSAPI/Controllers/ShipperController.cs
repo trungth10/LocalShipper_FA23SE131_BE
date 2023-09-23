@@ -6,12 +6,13 @@ using System;
 using LocalShipper.Service.Services.Interface;
 using LocalShipper.Service.Services.Implement;
 using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
 
 namespace LSAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "Shipper")]
+    //[Authorize(Policy = "Shipper")]
     public class ShipperController : Controller
     {
 
@@ -38,6 +39,13 @@ namespace LSAPI.Controllers
             {              
                 return BadRequest($"Cập nhật trạng thái người giao hàng thất bại: {ex.Message}");
             }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ShipperResponse>> GetTotalPriceById(int id)
+        {
+            var rs = await _shipperService.GetShipperById(id);
+            return Ok(rs);
         }
     }
 }
