@@ -7,6 +7,11 @@ namespace LocalShipper.Data.Models
 {
     public partial class Package
     {
+        public Package()
+        {
+            Payments = new HashSet<Payment>();
+        }
+
         public int Id { get; set; }
         public int BatchId { get; set; }
         public int Capacity { get; set; }
@@ -20,15 +25,15 @@ namespace LocalShipper.Data.Models
         public string CustomerName { get; set; }
         public string CustomerEmail { get; set; }
         public string CancelReason { get; set; }
-        public int PaymentId { get; set; }
-        public decimal PackagePrice { get; set; }
         public decimal SubtotalPrice { get; set; }
         public decimal DistancePrice { get; set; }
+        public decimal? TotalPrice { get; set; }
         public int ActionId { get; set; }
         public int? TypeId { get; set; }
 
         public virtual PackageAction Action { get; set; }
         public virtual Batch Batch { get; set; }
         public virtual PackageType Type { get; set; }
+        public virtual ICollection<Payment> Payments { get; set; }
     }
 }

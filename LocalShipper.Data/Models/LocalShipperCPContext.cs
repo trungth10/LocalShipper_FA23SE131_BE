@@ -65,8 +65,6 @@ namespace LocalShipper.Data.Models
 
                 entity.Property(e => e.Active).HasColumnName("active");
 
-                entity.Property(e => e.BrandId).HasColumnName("brandId");
-
                 entity.Property(e => e.CreateDate)
                     .HasColumnType("datetime")
                     .HasColumnName("create_date")
@@ -224,8 +222,8 @@ namespace LocalShipper.Data.Models
                     .HasColumnName("cancel_time");
 
                 entity.Property(e => e.CancleReason)
-                   .HasColumnType("text")
-                   .HasColumnName("cancle_reason");
+                    .HasColumnType("text")
+                    .HasColumnName("cancle_reason");
 
                 entity.Property(e => e.CompleteTime)
                     .HasColumnType("datetime")
@@ -334,21 +332,19 @@ namespace LocalShipper.Data.Models
 
                 entity.Property(e => e.PackageLength).HasColumnName("package_length");
 
-                entity.Property(e => e.PackagePrice)
-                    .HasColumnType("decimal(10, 2)")
-                    .HasColumnName("package_price");
-
                 entity.Property(e => e.PackageWeight).HasColumnName("package_weight");
 
                 entity.Property(e => e.PackageWidth).HasColumnName("package_width");
-
-                entity.Property(e => e.PaymentId).HasColumnName("paymentId");
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
                 entity.Property(e => e.SubtotalPrice)
                     .HasColumnType("decimal(10, 2)")
                     .HasColumnName("subtotal_price");
+
+                entity.Property(e => e.TotalPrice)
+                    .HasColumnType("decimal(10, 2)")
+                    .HasColumnName("total_price");
 
                 entity.Property(e => e.TypeId).HasColumnName("typeId");
 
@@ -376,14 +372,14 @@ namespace LocalShipper.Data.Models
 
                 entity.Property(e => e.Id).HasColumnName("id");
 
-                entity.Property(e => e.ActionType).HasColumnName("actionType");
+                entity.Property(e => e.ActionType)
+                    .HasMaxLength(255)
+                    .HasColumnName("actionType");
 
                 entity.Property(e => e.CreatedAt)
                     .HasColumnType("datetime")
                     .HasColumnName("createdAt")
                     .HasDefaultValueSql("(getdate())");
-
-             
             });
 
             modelBuilder.Entity<PackageType>(entity =>
@@ -396,8 +392,6 @@ namespace LocalShipper.Data.Models
                     .HasColumnType("datetime")
                     .HasColumnName("createdAt")
                     .HasDefaultValueSql("(getdate())");
-
-              
 
                 entity.Property(e => e.PackageType1)
                     .IsRequired()
@@ -413,7 +407,7 @@ namespace LocalShipper.Data.Models
                     .ValueGeneratedNever()
                     .HasColumnName("id");
 
-                entity.Property(e => e.OrderId).HasColumnName("orderId");
+                entity.Property(e => e.PackageId).HasColumnName("packageId");
 
                 entity.Property(e => e.PaymentCode)
                     .HasMaxLength(50)
@@ -432,11 +426,11 @@ namespace LocalShipper.Data.Models
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
-                entity.HasOne(d => d.Order)
+                entity.HasOne(d => d.Package)
                     .WithMany(p => p.Payments)
-                    .HasForeignKey(d => d.OrderId)
+                    .HasForeignKey(d => d.PackageId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Payment_Order");
+                    .HasConstraintName("FK_Payment_Package");
             });
 
             modelBuilder.Entity<Rating>(entity =>
@@ -502,7 +496,6 @@ namespace LocalShipper.Data.Models
                     .HasColumnName("email_shipper");
 
                 entity.Property(e => e.Fcmtoken)
-                    .IsRequired()
                     .HasMaxLength(255)
                     .HasColumnName("fcmtoken");
 
@@ -522,6 +515,8 @@ namespace LocalShipper.Data.Models
 
                 entity.Property(e => e.TransportId).HasColumnName("transportId");
 
+                entity.Property(e => e.WalletId).HasColumnName("walletId");
+
                 entity.Property(e => e.ZoneId).HasColumnName("zoneId");
 
                 entity.HasOne(d => d.Account)
@@ -535,6 +530,12 @@ namespace LocalShipper.Data.Models
                     .HasForeignKey(d => d.TransportId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Shipper_Transport");
+
+                entity.HasOne(d => d.Wallet)
+                    .WithMany(p => p.Shippers)
+                    .HasForeignKey(d => d.WalletId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Shipper_Wallet");
 
                 entity.HasOne(d => d.Zone)
                     .WithMany(p => p.Shippers)
@@ -585,6 +586,8 @@ namespace LocalShipper.Data.Models
 
                 entity.Property(e => e.TemplateId).HasColumnName("templateId");
 
+                entity.Property(e => e.WalletId).HasColumnName("walletId");
+
                 entity.Property(e => e.ZoneId).HasColumnName("zoneId");
 
                 entity.HasOne(d => d.Account)
@@ -603,6 +606,12 @@ namespace LocalShipper.Data.Models
                     .WithMany(p => p.Stores)
                     .HasForeignKey(d => d.TemplateId)
                     .HasConstraintName("FK_Store_Template");
+
+                entity.HasOne(d => d.Wallet)
+                    .WithMany(p => p.Stores)
+                    .HasForeignKey(d => d.WalletId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Store_Wallet");
 
                 entity.HasOne(d => d.Zone)
                     .WithMany(p => p.Stores)
@@ -634,9 +643,7 @@ namespace LocalShipper.Data.Models
             {
                 entity.ToTable("Transaction");
 
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.Amount)
                     .HasColumnType("decimal(10, 2)")
@@ -744,29 +751,10 @@ namespace LocalShipper.Data.Models
                     .HasColumnName("created_at")
                     .HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.OwnerId).HasColumnName("owner_id");
-
-                entity.Property(e => e.OwnerType)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .HasColumnName("owner_type");
-
                 entity.Property(e => e.UpdatedAt)
                     .HasColumnType("datetime")
                     .HasColumnName("updated_at")
                     .HasDefaultValueSql("(getdate())");
-
-                entity.HasOne(d => d.Owner)
-                    .WithMany(p => p.Wallets)
-                    .HasForeignKey(d => d.OwnerId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Wallet_Shipper");
-
-                entity.HasOne(d => d.OwnerNavigation)
-                    .WithMany(p => p.Wallets)
-                    .HasForeignKey(d => d.OwnerId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Wallet_Store");
             });
 
             modelBuilder.Entity<WalletTransaction>(entity =>

@@ -13,7 +13,6 @@ namespace LocalShipper.Data.Models
             Histories = new HashSet<History>();
             Orders = new HashSet<Order>();
             Ratings = new HashSet<Rating>();
-            Wallets = new HashSet<Wallet>();
         }
 
         public int Id { get; set; }
@@ -28,16 +27,17 @@ namespace LocalShipper.Data.Models
         public int BrandId { get; set; }
         public int? TemplateId { get; set; }
         public int? ZoneId { get; set; }
+        public int WalletId { get; set; }
         public int AccountId { get; set; }
 
         public virtual Account Account { get; set; }
         public virtual Brand Brand { get; set; }
         public virtual Template Template { get; set; }
+        public virtual Wallet Wallet { get; set; }
         public virtual Zone Zone { get; set; }
         public virtual ICollection<Batch> Batches { get; set; }
         public virtual ICollection<History> Histories { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<Rating> Ratings { get; set; }
-        public virtual ICollection<Wallet> Wallets { get; set; }
     }
 }

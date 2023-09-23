@@ -22,7 +22,6 @@ namespace LocalShipper.Data.Models
         public bool? Active { get; set; }
         public string FcmToken { get; set; }
         public DateTime CreateDate { get; set; }
-        public int? BrandId { get; set; }
         public string ImageUrl { get; set; }
         public string Password { get; set; }
 

@@ -11,7 +11,6 @@ namespace LocalShipper.Data.Models
         {
             Orders = new HashSet<Order>();
             Ratings = new HashSet<Rating>();
-            Wallets = new HashSet<Wallet>();
         }
 
         public int Id { get; set; }
@@ -25,12 +24,13 @@ namespace LocalShipper.Data.Models
         public int ZoneId { get; set; }
         public int? Status { get; set; }
         public string Fcmtoken { get; set; }
+        public int WalletId { get; set; }
 
         public virtual Account Account { get; set; }
         public virtual Transport Transport { get; set; }
+        public virtual Wallet Wallet { get; set; }
         public virtual Zone Zone { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<Rating> Ratings { get; set; }
-        public virtual ICollection<Wallet> Wallets { get; set; }
     }
 }

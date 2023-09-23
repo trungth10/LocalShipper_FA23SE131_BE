@@ -44,8 +44,6 @@ namespace LocalShipper.Service.Services.Implement
                 CustomerName= package.CustomerName,
                 CustomerEmail= package.CustomerEmail,
                 CancelReason= package.CancelReason,
-                PaymentId= package.PaymentId,
-                PackagePrice= package.PackagePrice,
                 SubtotalPrice= package.SubtotalPrice,
                 DistancePrice= package.DistancePrice,
                 ActionId= package.ActionId,
