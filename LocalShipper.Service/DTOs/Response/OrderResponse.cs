@@ -14,12 +14,12 @@ namespace LocalShipper.Service.DTOs.Response
         public int shipperId { get; set; }
         public int status { get; set; }
         public string trackingNumber { get; set; }
-        public DateTime? createTime { get; set;}
-        public DateTime? orderTime { get; set;}
+        public DateTime? createTime { get; set; }
+        public DateTime? orderTime { get; set; }
         public DateTime? acceptTime { get; set; }
-        public DateTime? pickupTime { get; set;}
-        public DateTime? cancleTime { get; set; }
-        public string cancleReason { get; set; }
+        public DateTime? pickupTime { get; set; }
+        public DateTime? cancelTime { get; set; }
+        public string cancelReason { get; set; }
         public DateTime? completeTime { get; set; }
         public decimal? distancePrice { get; set; }
         public decimal? subTotalprice { get; set; }
@@ -27,6 +27,5 @@ namespace LocalShipper.Service.DTOs.Response
         public string other { get; set; }
         public StoreResponse Store { get; set; }
         public BatchResponse Batches { get; set; }
-
     }
 }

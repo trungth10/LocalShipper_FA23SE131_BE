@@ -221,9 +221,9 @@ namespace LocalShipper.Data.Models
                     .HasColumnType("datetime")
                     .HasColumnName("cancel_time");
 
-                entity.Property(e => e.CancleReason)
+                entity.Property(e => e.CancelReason)
                     .HasColumnType("text")
-                    .HasColumnName("cancle_reason");
+                    .HasColumnName("cancel_reason");
 
                 entity.Property(e => e.CompleteTime)
                     .HasColumnType("datetime")
@@ -486,10 +486,10 @@ namespace LocalShipper.Data.Models
 
                 entity.Property(e => e.AccountId).HasColumnName("accountId");
 
-                entity.Property(e => e.AdressShipper)
+                entity.Property(e => e.AddressShipper)
                     .IsRequired()
                     .HasMaxLength(100)
-                    .HasColumnName("adress_shipper");
+                    .HasColumnName("address_shipper");
 
                 entity.Property(e => e.EmailShipper)
                     .HasMaxLength(100)

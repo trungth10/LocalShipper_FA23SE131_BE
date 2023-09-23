@@ -11,6 +11,6 @@ namespace LocalShipper.Service.DTOs.Request
         public int storeId { get; set; }
         public int batchId { get; set; }
         public int shipperId { get; set; }
-        public string cancleReason { get; set; }
+        public string cancelReason { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using LocalShipper.Data.Models;
+using LocalShipper.Data.Repository;
 using LocalShipper.Data.UnitOfWork;
 using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
@@ -42,8 +43,8 @@ namespace LocalShipper.Service.Services.Implement
                 order.ShipperId = (int)request.shipperId;
                 order.AcceptTime = DateTime.Now;
 
-                 await _unitOfWork.Repository<Order>().Update(order, orderId);
-                 await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<Order>().Update(order, orderId);
+                await _unitOfWork.CommitAsync();
 
 
                 //return _mapper.Map<Shipper, OrderResponse>(order);
@@ -53,19 +54,19 @@ namespace LocalShipper.Service.Services.Implement
                     storeId = order.StoreId,
                     batchId = order.BatchId,
                     shipperId = order.ShipperId,
-                    status= order.Status,
+                    status = order.Status,
                     trackingNumber = order.TrackingNumber,
                     createTime = order.CreateTime,
                     orderTime = order.OrderTime,
                     acceptTime = order.AcceptTime,
                     pickupTime = order.PickupTime,
-                    cancleTime = order.CancelTime,
-                    cancleReason= order.CancleReason,
-                    completeTime= order.CompleteTime,
+                    cancelTime = order.CancelTime,
+                    cancelReason = order.CancelReason,
+                    completeTime = order.CompleteTime,
                     distancePrice = order.DistancePrice,
-                    subTotalprice= order.SubtotalPrice,
-                    totalPrice= order.TotalPrice,
-                    other= order.Other,
+                    subTotalprice = order.SubtotalPrice,
+                    totalPrice = order.TotalPrice,
+                    other = order.Other,
 
                 };
             }
@@ -140,7 +141,7 @@ namespace LocalShipper.Service.Services.Implement
 
                 order.Status = (int)OrderStatusEnum.CANCELLED;
                 order.CancelTime = DateTime.Now;
-                order.CancleReason = request.cancelReason;
+                order.CancelReason = request.cancelReason;
 
                 await _unitOfWork.Repository<Order>().Update(order, orderId);
                 await _unitOfWork.CommitAsync();
@@ -156,7 +157,7 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<OrderResponse> GetOrderById(int id)
         {
-            var order = await _unitOfWork.Repository<Order>().GetAll().Include(o => o.Store).Include(o => o.Batch).Where(f => f.Id == id ).FirstOrDefaultAsync();
+            var order = await _unitOfWork.Repository<Order>().GetAll().Include(o => o.Store).Include(o => o.Batch).Where(f => f.Id == id).FirstOrDefaultAsync();
             var orderResponse = new OrderResponse
             {
                 Id = order.Id,
@@ -169,8 +170,8 @@ namespace LocalShipper.Service.Services.Implement
                 orderTime = order.OrderTime,
                 acceptTime = order.AcceptTime,
                 pickupTime = order.PickupTime,
-                cancleTime = order.CancelTime,
-                cancleReason = order.CancleReason,
+                cancelTime = order.CancelTime,
+                cancelReason = order.CancelReason,
                 completeTime = order.CompleteTime,
                 distancePrice = order.DistancePrice,
                 subTotalprice = order.SubtotalPrice,
@@ -195,19 +196,19 @@ namespace LocalShipper.Service.Services.Implement
             {
                 orderResponse.Store = new StoreResponse
                 {
-                   Id = order.StoreId,
-                   StoreName = order.Store.StoreName,
-                   StoreAddress= order.Store.StoreAddress,
-                   StorePhone = order.Store.StorePhone,
-                   StoreEmail= order.Store.StoreEmail,
-                   OpenTime = order.Store.OpenTime,
-                   CloseTime  = order.Store.CloseTime,
-                   StoreDescription= order.Store.StoreDescription,
-                   Status= order.Store.Status,
-                   BrandId= order.Store.BrandId,
-                   TemplateId= order.Store.TemplateId,
-                   ZoneId= order.Store.ZoneId,
-                   AccountId= order.Store.AccountId,
+                    Id = order.StoreId,
+                    StoreName = order.Store.StoreName,
+                    StoreAddress = order.Store.StoreAddress,
+                    StorePhone = order.Store.StorePhone,
+                    StoreEmail = order.Store.StoreEmail,
+                    OpenTime = order.Store.OpenTime,
+                    CloseTime = order.Store.CloseTime,
+                    StoreDescription = order.Store.StoreDescription,
+                    Status = order.Store.Status,
+                    BrandId = order.Store.BrandId,
+                    TemplateId = order.Store.TemplateId,
+                    ZoneId = order.Store.ZoneId,
+                    AccountId = order.Store.AccountId,
                 };
             }
 
@@ -233,8 +234,8 @@ namespace LocalShipper.Service.Services.Implement
                 orderTime = order.OrderTime,
                 acceptTime = order.AcceptTime,
                 pickupTime = order.PickupTime,
-                cancleTime = order.CancelTime,
-                cancleReason = order.CancleReason,
+                cancelTime = order.CancelTime,
+                cancelReason = order.CancelReason,
                 completeTime = order.CompleteTime,
                 distancePrice = order.DistancePrice,
                 subTotalprice = order.SubtotalPrice,
@@ -263,8 +264,8 @@ namespace LocalShipper.Service.Services.Implement
                     orderTime = order.OrderTime,
                     acceptTime = order.AcceptTime,
                     pickupTime = order.PickupTime,
-                    cancleTime = order.CancelTime,
-                    cancleReason = order.CancleReason,
+                    cancelTime = order.CancelTime,
+                    cancelReason = order.CancelReason,
                     completeTime = order.CompleteTime,
                     distancePrice = order.DistancePrice,
                     subTotalprice = order.SubtotalPrice,
@@ -307,13 +308,10 @@ namespace LocalShipper.Service.Services.Implement
 
                 orderResponses.Add(orderResponse);
 
-            }                         
-           return orderResponses;
+            }
+            return orderResponses;
         }
-
-
-
-
+        
 
     }
 }

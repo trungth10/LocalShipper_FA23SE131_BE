@@ -13,7 +13,7 @@ namespace LocalShipper.Service.DTOs.Request
         public DateTime CreatedAt { get; set; }
         public string IconUrl { get; set; }
         public string ImageUrl { get; set; }
-        //public bool Active { get; set; }
+        public bool Active { get; set; }
         public int AccountId { get; set; }
     }
 }
