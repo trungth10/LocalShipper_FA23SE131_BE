@@ -13,8 +13,8 @@ namespace LocalShipper.Data.Models
         public int Status { get; set; }
         public string PaymentCode { get; set; }
         public string PaymentImage { get; set; }
-        public int OrderId { get; set; }
+        public int PackageId { get; set; }
 
-        public virtual Order Order { get; set; }
+        public virtual Package Package { get; set; }
     }
 }

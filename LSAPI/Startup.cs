@@ -106,6 +106,7 @@ namespace LSAPI
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IBatchService, BatchService>();
             services.AddScoped<IPackageService, PackageService>();
+            services.AddScoped<IBrandService, BrandService>();
 
             services.AddAutoMapper(typeof(Startup));
 

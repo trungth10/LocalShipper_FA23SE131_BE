@@ -16,11 +16,11 @@ namespace LocalShipper.Data.Models
         public int Id { get; set; }
         public string ZoneName { get; set; }
         public string ZoneDescription { get; set; }
-        public decimal Latitude { get; set; }
-        public decimal Longitude { get; set; }
-        public decimal Radius { get; set; }
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
+        public decimal? Radius { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime UpdateAt { get; set; }
+        public DateTime? UpdateAt { get; set; }
 
         public virtual ICollection<Shipper> Shippers { get; set; }
         public virtual ICollection<Store> Stores { get; set; }

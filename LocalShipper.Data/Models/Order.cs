@@ -9,7 +9,6 @@ namespace LocalShipper.Data.Models
     {
         public Order()
         {
-            Payments = new HashSet<Payment>();
             Transactions = new HashSet<Transaction>();
         }
 
@@ -34,7 +33,6 @@ namespace LocalShipper.Data.Models
         public virtual Batch Batch { get; set; }
         public virtual Shipper Shipper { get; set; }
         public virtual Store Store { get; set; }
-        public virtual ICollection<Payment> Payments { get; set; }
         public virtual ICollection<Transaction> Transactions { get; set; }
     }
 }
