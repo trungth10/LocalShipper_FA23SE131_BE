@@ -42,7 +42,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ShipperResponse>> GetTotalPriceById(int id)
+        public async Task<ActionResult<ShipperResponse>> GetShipperById(int id)
         {
             var rs = await _shipperService.GetShipperById(id);
             return Ok(rs);

@@ -109,7 +109,12 @@ namespace LSAPI.Controllers
             return Ok(rs);
         }
 
+        [HttpGet("{orderId}/TotalPrice")]
+        public async Task<ActionResult<TotalPriceResponse>> GetTotalPriceByOrderId(int orderId)
+        {
+            var rs = await _orderService.GetTotalPriceByOrderId(orderId);
+            return Ok(rs);
+        }
 
-        
     }
 }
