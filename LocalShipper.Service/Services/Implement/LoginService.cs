@@ -111,5 +111,35 @@ namespace LocalShipper.Service.Services.Implement
             }
         }
 
+        public async Task<string> GetUserRoleFromAccessTokenAsync(string accessToken)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = tokenHandler.ReadJwtToken(accessToken);
+
+                // Lấy danh sách các Claims từ AccessToken
+                var claims = token.Claims;
+
+                // Tìm Claim có kiểu là "role"
+                var roleClaim = claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role);
+
+                if (roleClaim != null)
+                {
+                    var userRole = roleClaim.Value;
+                    return userRole;
+                }
+                else
+                {
+                    return null; // Không tìm thấy vai trò
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting user role from AccessToken.");
+                return null; // Xảy ra lỗi
+            }
+        }
+
     }
 }

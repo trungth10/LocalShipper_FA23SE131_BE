@@ -7,6 +7,7 @@ using LocalShipper.Data.Models;
 using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.DTOs.Request;
+using System;
 
 namespace LSAPI.Controllers
 {
@@ -45,7 +46,7 @@ namespace LSAPI.Controllers
                         AccessToken = dynamicResult.AccessToken,
                         UserName = result.UserName,
                         FullName = result.FullName,
-                        Role = result.Role
+                       
                     });
                 }
                 else
@@ -55,6 +56,33 @@ namespace LSAPI.Controllers
             }
 
             return BadRequest("Invalid result.");
+        }
+
+        [HttpGet("AccesstokenToRole")]
+        public async Task<IActionResult> GetUserRole(string accesstoken)
+        {
+            try
+            {
+                // Lấy AccessToken từ tiêu đề Authorization
+                var accessToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+                // Gọi hàm GetUserRoleFromAccessTokenAsync từ LoginService
+                var userRole = await _loginService.GetUserRoleFromAccessTokenAsync(accessToken);
+
+                if (userRole != null)
+                {
+                    return Ok(new { Role = userRole });
+                }
+                else
+                {
+                    return BadRequest("Role not found in AccessToken.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // _logger.LogError(ex, "An error occurred while getting user role.");
+                return StatusCode(500, "An error occurred while getting user role.");
+            }
         }
     }
 }

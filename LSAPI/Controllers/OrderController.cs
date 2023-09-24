@@ -116,5 +116,25 @@ namespace LSAPI.Controllers
             return Ok(rs);
         }
 
+        [HttpGet("totalPriceByShipperId")]
+        public async Task<ActionResult<TotalPriceResponse>> GetTotalPriceSumByShipperId(int shipperId)
+        {
+            var rs = await _orderService.GetTotalPriceSumByShipperId(shipperId);
+            return Ok(rs);
+        }
+
+        [HttpGet("CancelRateByShipperId")]
+        public async Task<ActionResult<TotalPriceResponse>> GetCancelRateByShipperId(int shipperId)
+        {
+            var rs = await _orderService.GetCancelRateByShipperId(shipperId);
+            return Ok(rs);
+        }
+
+        [HttpGet("ReceiveRateByShipperId")]
+        public async Task<ActionResult<TotalPriceResponse>> GetReceiveRateByShipperId(int shipperId)
+        {
+            var rs = await _orderService.GetReceiveRateByShipperId(shipperId);
+            return Ok(rs);
+        }
     }
 }

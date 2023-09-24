@@ -246,9 +246,9 @@ namespace LocalShipper.Service.Services.Implement
             return orderResponses;
         }
 
-        public async Task<List<OrderResponse>> GetOrderByShipperId(int shippperId)
+        public async Task<OrderListResponse> GetOrderByShipperId(int shipperId)
         {
-            var orders = await _unitOfWork.Repository<Order>().GetAll().Include(o => o.Store).Include(o => o.Batch).Where(f => f.ShipperId == shippperId).ToListAsync();
+            var orders = await _unitOfWork.Repository<Order>().GetAll().Include(o => o.Store).Include(o => o.Batch).Where(f => f.ShipperId == shipperId).ToListAsync();
             var orderResponses = new List<OrderResponse>();
             foreach (var order in orders)
             {
@@ -307,9 +307,15 @@ namespace LocalShipper.Service.Services.Implement
                 }
 
                 orderResponses.Add(orderResponse);
-
             }
-            return orderResponses;
+
+            var orderListResponse = new OrderListResponse
+            {
+                Orders = orderResponses,
+                OrderCount = orderResponses.Count
+            };
+
+            return orderListResponse;
         }
 
         public async Task<TotalPriceResponse> GetTotalPriceByOrderId(int orderId)
@@ -324,6 +330,44 @@ namespace LocalShipper.Service.Services.Implement
             };
             return totalPriceResponse;
         }
-        
+        public async Task<decimal> GetTotalPriceSumByShipperId(int shipperId)
+        {
+            var orders = await _unitOfWork.Repository<Order>().GetAll().Where(f => f.ShipperId == shipperId).ToListAsync();
+            decimal totalPriceSum = (decimal)orders.Sum(order => order.TotalPrice);
+            return totalPriceSum;
+        }
+
+
+        public async Task<decimal> GetCancelRateByShipperId(int shipperId)
+        {
+            var packagesWithCancelReason = await _unitOfWork.Repository<Order>().GetAll()
+                .Where(o => o.ShipperId == shipperId)
+                .SelectMany(o => o.Batch.Packages) // Lấy tất cả các gói hàng từ batch của từng đơn hàng
+                .Where(p => !string.IsNullOrEmpty(p.CancelReason)) // Lọc các gói hàng có lý do hủy
+                .ToListAsync();
+
+            int totalCancelReasonCount = packagesWithCancelReason.Count;
+
+            var allPackages = await _unitOfWork.Repository<Order>().GetAll()
+                .Where(o => o.ShipperId == shipperId)
+                .SelectMany(o => o.Batch.Packages)
+                .ToListAsync();
+
+            if (allPackages.Count == 0)
+            {
+                return 0;
+            }
+
+            decimal cancelRate = (decimal)totalCancelReasonCount / allPackages.Count * 100;
+
+            return cancelRate;
+        }
+
+        public async Task<decimal> GetReceiveRateByShipperId(int shipperId)
+        {
+            decimal cancelRate = await GetCancelRateByShipperId(shipperId);
+            decimal receiveRate = 100 - cancelRate;
+            return receiveRate;
+        }
     }
 }
