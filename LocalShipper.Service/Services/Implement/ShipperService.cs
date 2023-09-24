@@ -65,7 +65,7 @@ namespace LocalShipper.Service.Services.Implement
                     PhoneShipper = shipper.PhoneShipper,
                     TransportId = shipper.TransportId,
                     ZoneId = shipper.ZoneId,
-                    Status = (Service.Helpers.ShipperStatusEnum)shipper.Status
+                    Status = (ShipperStatusEnum)shipper.Status
 
                 };
             }
@@ -74,8 +74,6 @@ namespace LocalShipper.Service.Services.Implement
                 return null;
             }
         }
-
-
 
     }
 }

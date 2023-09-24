@@ -1,7 +1,7 @@
 ﻿using LocalShipper.Data.Models;
 using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
-using LocalShipper.Service.Services.Helpers;
+using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
 using Microsoft.AspNetCore.Authorization;

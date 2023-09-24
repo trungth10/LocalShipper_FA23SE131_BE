@@ -311,7 +311,19 @@ namespace LocalShipper.Service.Services.Implement
             }
             return orderResponses;
         }
-        
 
+        public async Task<TotalPriceResponse> GetTotalPriceByOrderId(int orderId)
+        {
+            var order = _unitOfWork.Repository<Order>().Find(x => x.Id == orderId);
+            var totalPriceResponse = new TotalPriceResponse
+            {
+                orderId = order.Id,
+                subTotalprice = order.SubtotalPrice,
+                distancePrice = order.DistancePrice,
+                totalPrice = order.TotalPrice
+            };
+            return totalPriceResponse;
+        }
+        
     }
 }

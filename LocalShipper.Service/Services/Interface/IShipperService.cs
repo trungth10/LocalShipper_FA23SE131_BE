@@ -13,5 +13,6 @@ namespace LocalShipper.Service.Services.Interface
 
         Task<ShipperResponse> UpdateShipperStatus(int shipperId, UpdateShipperStatusRequest request);
         Task<ShipperResponse> GetShipperById(int id);
+
     }
 }

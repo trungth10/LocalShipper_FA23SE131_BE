@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using System.IO;
 using System.Reflection;
 using System;
-using LocalShipper.Service.Services.Helpers;
+using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
 using LocalShipper.Data.UnitOfWork;
