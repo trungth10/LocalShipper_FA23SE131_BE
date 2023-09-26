@@ -318,18 +318,7 @@ namespace LocalShipper.Service.Services.Implement
             return orderListResponse;
         }
 
-        public async Task<TotalPriceResponse> GetTotalPriceByOrderId(int orderId)
-        {
-            var order = _unitOfWork.Repository<Order>().Find(x => x.Id == orderId);
-            var totalPriceResponse = new TotalPriceResponse
-            {
-                orderId = order.Id,
-                subTotalprice = order.SubtotalPrice,
-                distancePrice = order.DistancePrice,
-                totalPrice = order.TotalPrice
-            };
-            return totalPriceResponse;
-        }
+
         public async Task<decimal> GetTotalPriceSumByShipperId(int shipperId)
         {
             var orders = await _unitOfWork.Repository<Order>().GetAll().Where(f => f.ShipperId == shipperId).ToListAsync();
@@ -369,5 +358,60 @@ namespace LocalShipper.Service.Services.Implement
             decimal receiveRate = 100 - cancelRate;
             return receiveRate;
         }
+
+        public async Task<List<OrderResponse>> GetCompleteOrder(int shipperId)
+        {
+            var completeOrder = await _unitOfWork.Repository<Order>()
+                .GetAll().Where(o => o.ShipperId == shipperId
+                && o.CompleteTime != null).ToListAsync();
+            var orderResponses = completeOrder.Select(order => new OrderResponse
+            {
+                Id = order.Id,
+                storeId = order.StoreId,
+                batchId = order.BatchId,
+                shipperId = order.ShipperId,
+                status = order.Status,
+                trackingNumber = order.TrackingNumber,
+                createTime = order.CreateTime,
+                orderTime = order.OrderTime,
+                acceptTime = order.AcceptTime,
+                pickupTime = order.PickupTime,
+                completeTime = order.CompleteTime,
+                distancePrice = order.DistancePrice,
+                subTotalprice = order.SubtotalPrice,
+                totalPrice = order.TotalPrice,
+                other = order.Other,
+            }).ToList();
+
+            return orderResponses;
+        }public async Task<List<OrderResponse>> GetCancelOrder(int shipperId)
+        {
+            var cancelOrder = await _unitOfWork.Repository<Order>()
+                .GetAll().Where(o => o.ShipperId == shipperId
+                && o.CancelTime != null).ToListAsync();
+            var orderResponses = cancelOrder.Select(order => new OrderResponse
+            {
+                Id = order.Id,
+                storeId = order.StoreId,
+                batchId = order.BatchId,
+                shipperId = order.ShipperId,
+                status = order.Status,
+                trackingNumber = order.TrackingNumber,
+                createTime = order.CreateTime,
+                orderTime = order.OrderTime,
+                acceptTime = order.AcceptTime,
+                pickupTime = order.PickupTime,
+                cancelTime = order.CancelTime,
+                cancelReason = order.CancelReason,
+                distancePrice = order.DistancePrice,
+                subTotalprice = order.SubtotalPrice,
+                totalPrice = order.TotalPrice,
+                other = order.Other,
+            }).ToList();
+
+            return orderResponses;
+        }
+
+
     }
 }

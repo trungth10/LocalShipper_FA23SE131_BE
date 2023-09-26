@@ -17,11 +17,14 @@ namespace LocalShipper.Service.Services.Interface
         Task<OrderResponse> GetOrderById(int id);
         Task<List<OrderResponse>> GetOrdersByAssigning();
         Task<OrderListResponse> GetOrderByShipperId(int shipperId);
-        Task<TotalPriceResponse> GetTotalPriceByOrderId(int orderId);
+        
 
         Task<decimal> GetTotalPriceSumByShipperId(int shipperId);
 
         Task<decimal> GetCancelRateByShipperId(int shipperId);
         Task<decimal> GetReceiveRateByShipperId(int shipperId);
+
+        Task<List<OrderResponse>> GetCompleteOrder(int shipperId);
+        Task<List<OrderResponse>> GetCancelOrder(int shipperId);
     }
 }
