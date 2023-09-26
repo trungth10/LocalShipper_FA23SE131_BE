@@ -17,7 +17,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<OrderResponse> GetOrderById(int id);
         Task<List<OrderResponse>> GetOrdersByAssigning();
         Task<OrderListResponse> GetOrderByShipperId(int shipperId);
-        Task<TotalPriceResponse> GetTotalPriceByOrderId(int orderId);
 
         Task<decimal> GetTotalPriceSumByShipperId(int shipperId);
 
@@ -29,5 +28,8 @@ namespace LocalShipper.Service.Services.Interface
         Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCountInWeek(int shipperId, int month, int weekOfMonth, int year);
 
         Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCountInDay(int shipperId, int month, int day, int year);
+
+        Task<List<OrderResponse>> GetCompleteOrder(int shipperId);
+        Task<List<OrderResponse>> GetCancelOrder(int shipperId);
     }
 }

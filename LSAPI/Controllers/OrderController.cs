@@ -109,12 +109,7 @@ namespace LSAPI.Controllers
             return Ok(rs);
         }
 
-        [HttpGet("{orderId}/TotalPrice")]
-        public async Task<ActionResult<TotalPriceResponse>> GetTotalPriceByOrderId(int orderId)
-        {
-            var rs = await _orderService.GetTotalPriceByOrderId(orderId);
-            return Ok(rs);
-        }
+        
 
         [HttpGet("totalPriceByShipperId")]
         public async Task<ActionResult<TotalPriceResponse>> GetTotalPriceSumByShipperId(int shipperId)
@@ -157,5 +152,19 @@ namespace LSAPI.Controllers
             return Ok(result);
         }
 
+
+        [HttpGet("GetCompleteOrderByShipperId")]
+        public async Task<ActionResult<List<OrderResponse>>> GetCompleteOrder(int shipperId)
+        {
+            var orders = await _orderService.GetCompleteOrder(shipperId);
+            return Ok(orders);
+        }
+
+        [HttpGet("GetCancelOrderByShipperId")]
+        public async Task<ActionResult<List<OrderResponse>>> GetCancelOrder(int shipperId)
+        {
+            var orders = await _orderService.GetCancelOrder(shipperId);
+            return Ok(orders);
+        }
     }
 }
