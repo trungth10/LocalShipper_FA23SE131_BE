@@ -47,5 +47,21 @@ namespace LocalShipper.Service.Services.Implement
 
             return ratingResponse;
         }
+        public async Task<decimal> GetAverageRatingByShipperId(int shipperId)
+        {
+            var ratings = await _unitOfWork.Repository<Rating>()
+                .GetAll()
+                .Where(r => r.ShipperId == shipperId)
+                .ToListAsync();
+
+            if (ratings.Count == 0)
+            {
+               
+                return 0;
+            }
+
+            decimal averageRating =(decimal)ratings.Average(r => r.RatingValue);
+            return averageRating;
+        }
     }
 }

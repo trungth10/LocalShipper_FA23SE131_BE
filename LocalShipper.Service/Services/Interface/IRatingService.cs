@@ -10,5 +10,8 @@ namespace LocalShipper.Service.Services.Interface
     public interface IRatingService
     {
         Task<List<RatingResponse>> GetRatingByShipperId(int shipperId);
+        Task<decimal> GetAverageRatingByShipperId(int shipperId);
+
+       
     }
 }

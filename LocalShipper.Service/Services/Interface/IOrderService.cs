@@ -23,5 +23,11 @@ namespace LocalShipper.Service.Services.Interface
 
         Task<decimal> GetCancelRateByShipperId(int shipperId);
         Task<decimal> GetReceiveRateByShipperId(int shipperId);
+
+        Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCountInMonth(int shipperId,int month, int year);
+
+        Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCountInWeek(int shipperId, int month, int weekOfMonth, int year);
+
+        Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCountInDay(int shipperId, int month, int day, int year);
     }
 }
