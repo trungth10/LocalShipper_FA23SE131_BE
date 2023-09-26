@@ -340,34 +340,119 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<decimal> GetCancelRateByShipperId(int shipperId)
         {
-            var packagesWithCancelReason = await _unitOfWork.Repository<Order>().GetAll()
-                .Where(o => o.ShipperId == shipperId)
-                .SelectMany(o => o.Batch.Packages) // Lấy tất cả các gói hàng từ batch của từng đơn hàng
-                .Where(p => !string.IsNullOrEmpty(p.CancelReason)) // Lọc các gói hàng có lý do hủy
-                .ToListAsync();
+            var orders = await _unitOfWork.Repository<Order>().GetAll()
+                                                              .Where(o => o.ShipperId == shipperId)
+                                                              .ToListAsync();
 
-            int totalCancelReasonCount = packagesWithCancelReason.Count;
-
-            var allPackages = await _unitOfWork.Repository<Order>().GetAll()
-                .Where(o => o.ShipperId == shipperId)
-                .SelectMany(o => o.Batch.Packages)
-                .ToListAsync();
-
-            if (allPackages.Count == 0)
+            if (orders.Count == 0)
             {
                 return 0;
             }
 
-            decimal cancelRate = (decimal)totalCancelReasonCount / allPackages.Count * 100;
+            int totalCancelledOrders = orders.Count(o => o.CancelTime != null);
+            decimal cancelRate = (decimal)totalCancelledOrders / orders.Count * 100;
 
             return cancelRate;
         }
 
         public async Task<decimal> GetReceiveRateByShipperId(int shipperId)
         {
-            decimal cancelRate = await GetCancelRateByShipperId(shipperId);
-            decimal receiveRate = 100 - cancelRate;
+            var orders = await _unitOfWork.Repository<Order>().GetAll()
+                                                              .Where(o => o.ShipperId == shipperId)
+                                                              .ToListAsync();
+                
+            if (orders.Count == 0)
+            {
+                return 0;
+            }
+
+            int totalReceivedOrders = orders.Count(o => o.AcceptTime != null);
+            decimal receiveRate = (decimal)totalReceivedOrders / orders.Count * 100;
+
             return receiveRate;
+        }
+
+        public async Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCountInMonth(int shipperId, int month, int year)
+        {
+            var startDate = new DateTime(year, month, 1);
+            var endDate = startDate.AddMonths(1).AddDays(-1);
+
+            var ordersInMonth = await _unitOfWork.Repository<Order>().GetAll()
+                .Where(o => o.ShipperId == shipperId && o.CompleteTime >= startDate && o.CompleteTime <= endDate)
+                .ToListAsync();
+
+            decimal total = (decimal)ordersInMonth.Sum(o => o.TotalPrice);
+            int totalCount = ordersInMonth.Count;
+
+           
+            var result = new TotalPriceAndTotalResponse
+            {
+                TotalPrice = total,
+                TotalCount = totalCount
+            };
+
+            return result;
+        }
+
+        public async Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCountInWeek(int shipperId, int month, int weekOfMonth,int year)
+        {
+            if (weekOfMonth < 1 || weekOfMonth > 5)
+            {
+                throw new ArgumentException("Invalid week number in the month. It should be between 1 and 5.", nameof(weekOfMonth));
+            }
+
+            var startDate = new DateTime(year, month, 1);
+
+           
+            var firstDayOfWeek = startDate.AddDays((weekOfMonth - 1) * 7);
+
+           
+            var lastDayOfWeek = firstDayOfWeek.AddDays(6);
+
+            var ordersInWeek = await _unitOfWork.Repository<Order>().GetAll()
+                .Where(o => o.ShipperId == shipperId && o.CompleteTime >= firstDayOfWeek && o.CompleteTime <= lastDayOfWeek)
+                .ToListAsync();
+
+            decimal total = (decimal)ordersInWeek.Sum(o => o.TotalPrice);
+            int totalCount = ordersInWeek.Count;
+
+            var result = new TotalPriceAndTotalResponse
+            {
+                TotalPrice = total,
+                TotalCount = totalCount
+            };
+
+            return result;
+        }
+
+        public async Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCountInDay(int shipperId, int month, int day,int year)
+        {
+            
+            if (day < 1 || day > DateTime.DaysInMonth(year, month))
+            {
+                throw new ArgumentException("Invalid day in the month.", nameof(day));
+            }
+
+        
+            var startDate = new DateTime(year, month, 1);
+
+            
+            var specificDate = startDate.AddDays(day - 1);
+
+            var ordersInDay = await _unitOfWork.Repository<Order>().GetAll()
+                .Where(o => o.ShipperId == shipperId && o.CompleteTime >= specificDate && o.CompleteTime < specificDate.AddDays(1))
+                .ToListAsync();
+
+            decimal total = (decimal)ordersInDay.Sum(o => o.TotalPrice);
+            int totalCount = ordersInDay.Count;
+
+            var result = new TotalPriceAndTotalResponse
+            {
+                TotalPrice = total,
+                TotalCount = totalCount
+            };
+
+            return result;
         }
     }
 }

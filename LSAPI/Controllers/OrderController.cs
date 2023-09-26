@@ -136,5 +136,26 @@ namespace LSAPI.Controllers
             var rs = await _orderService.GetReceiveRateByShipperId(shipperId);
             return Ok(rs);
         }
+
+        [HttpGet("TotalPriceAndOrderCountInMonth")]
+        public async Task<ActionResult<(decimal TotalPrice, int TotalOrders)>> GetTotalPriceAndOrderCountInMonth(int shipperId,int month, int year)
+        {
+            var result = await _orderService.GetTotalPriceAndOrderCountInMonth(shipperId,month, year);
+            return Ok(result);
+        }
+
+        [HttpGet("TotalPriceAndOrderCountInWeek")]
+        public async Task<ActionResult<(decimal TotalPrice, int TotalOrders)>> GetTotalPriceAndOrderCountInWeek(int shipperId, int month, int weekOfMonth, int year)
+        {
+            var result = await _orderService.GetTotalPriceAndOrderCountInWeek(shipperId, month, weekOfMonth, year);
+            return Ok(result);
+        }
+        [HttpGet("TotalPriceAndOrderCountInDay")]
+        public async Task<ActionResult<(decimal TotalPrice, int TotalOrders)>> GetTotalPriceAndOrderCountInDay(int shipperId, int month, int day, int year)
+        {
+            var result = await _orderService.GetTotalPriceAndOrderCountInDay(shipperId, month, day, year);
+            return Ok(result);
+        }
+
     }
 }

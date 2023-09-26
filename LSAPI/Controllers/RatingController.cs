@@ -37,5 +37,25 @@ namespace LSAPI.Controllers
         
         
         }
+
+
+        [HttpGet("{shipperId}/AverageRating")]
+        public async Task<ActionResult<RatingResponse>> GetAverageRatingByShipperId(int shipperId)
+        {
+            try
+            {
+
+                var response = await _ratingService.GetAverageRatingByShipperId(shipperId);
+
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"xem rating thất bại: {ex.Message}");
+            }
+
+
+        }
     }
 }
