@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Data.Entity;
+
 using System.Text;
 using System.Threading.Tasks;
 using LocalShipper.Service.Helpers;
@@ -74,7 +74,23 @@ namespace LocalShipper.Service.Services.Implement
                 return null;
             }
         }
+        public async Task<List<ShipperResponse>> GetAll()
+        {
+            var shippers =await _unitOfWork.Repository<Shipper>().GetAll().ToListAsync();
 
+            var shipperResponses = shippers.Select(shipper => new ShipperResponse
+            {
+                Id = shipper.Id,
+                FirstName = shipper.FirstName,
+                LastName = shipper.LastName,
+                EmailShipper = shipper.EmailShipper,
+                PhoneShipper = shipper.PhoneShipper,
+                TransportId = shipper.TransportId,
+                ZoneId = shipper.ZoneId,
+                Status = (ShipperStatusEnum)shipper.Status
+            }).ToList();
+            return shipperResponses;
+        }
     }
 }
 

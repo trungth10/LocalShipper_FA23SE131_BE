@@ -47,5 +47,12 @@ namespace LSAPI.Controllers
             var rs = await _shipperService.GetShipperById(id);
             return Ok(rs);
         }
+
+        [HttpGet("all")]
+        public async Task<ActionResult<List<ShipperResponse>>> GetCancelOrder()
+        {
+            var rs = await _shipperService.GetAll();
+            return Ok(rs);
+        }
     }
 }
