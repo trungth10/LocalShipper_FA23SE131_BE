@@ -54,6 +54,15 @@ namespace LocalShipper.Service.Services.Implement
                     return new LoginResponse
                     {
                         Success = false,
+                        Message = "Tài khoản chưa xác thực"
+                    };
+                }
+
+                if (account.Active == false)
+                {
+                    return new LoginResponse
+                    {
+                        Success = false,
                         Message = "Invalid email or password."
                     };
                 }
