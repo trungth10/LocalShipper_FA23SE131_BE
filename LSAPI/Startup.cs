@@ -18,6 +18,7 @@ using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
 using LocalShipper.Data.UnitOfWork;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 
 namespace LSAPI
 {
@@ -32,6 +33,18 @@ namespace LSAPI
 
         public void ConfigureServices(IServiceCollection services)
         {
+
+            var emailConfig = new EmailConfiguration
+            {
+                From = "ht10102001@gmail.com", // Địa chỉ email của người gửi
+                SmtpServer = "smtp.gmail.com", // Địa chỉ máy chủ SMTP
+                Port = 587, // Cổng SMTP
+                UserName = "ht10102001@gmail.com", // Tên đăng nhập SMTP
+                Password = "sjwy zirr kdkx zbdg" // Mật khẩu SMTP
+            };
+
+            services.AddSingleton(emailConfig);
+            services.AddScoped<IEmailService, EmailService>();
 
 
             //services.AddAuthorization(options =>
@@ -108,10 +121,13 @@ namespace LSAPI
             services.AddScoped<IPackageService, PackageService>();
             services.AddScoped<IBrandService, BrandService>();
             services.AddScoped<IRatingService, RatingService>();
+            services.AddScoped<IAccountService, AccountService>();
 
             services.AddAutoMapper(typeof(Startup));
 
-
+            services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<LocalShipperCPContext>()
+    .AddDefaultTokenProviders();
             // Đăng ký LoginService
             services.AddScoped<LoginService>();
 
