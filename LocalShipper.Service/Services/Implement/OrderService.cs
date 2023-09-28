@@ -40,6 +40,7 @@ namespace LocalShipper.Service.Services.Implement
                     throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy đơn hàng", orderId.ToString());
                 }
 
+                order.Status = (int)OrderStatusEnum.ACCEPTED;
                 order.ShipperId = (int)request.shipperId;
                 order.AcceptTime = DateTime.Now;
 

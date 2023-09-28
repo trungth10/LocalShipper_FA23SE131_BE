@@ -12,7 +12,8 @@ namespace LSAPI.Mapper
         {
             CreateMap<Shipper, ShipperResponse>().ReverseMap();
             CreateMap<Order, OrderResponse>().ReverseMap();
-    
+            CreateMap<Zone, ZoneResponse>().ReverseMap();
+            CreateMap<TransportType, TransportTypeResponse>().ReverseMap();
         }
     }
 }

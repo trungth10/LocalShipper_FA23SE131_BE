@@ -122,6 +122,8 @@ namespace LSAPI
             services.AddScoped<IBrandService, BrandService>();
             services.AddScoped<IRatingService, RatingService>();
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IZoneService, ZoneService>();
+            services.AddScoped<ITransportTypeService, TransportTypeService>();
 
             services.AddAutoMapper(typeof(Startup));
 
