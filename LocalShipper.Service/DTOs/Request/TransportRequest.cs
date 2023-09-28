@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace LocalShipper.Service.DTOs.Request
 {
-    public class TransactionRequest
+    public class TransportRequest
     {
-        public int Id { get; set; }
-        public int OrderId { get; set; }
-
+        public int Id {  get; set; }
+        public string LicencePlate { get; set; }
     }
 }
