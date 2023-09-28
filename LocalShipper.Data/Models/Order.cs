@@ -34,5 +34,7 @@ namespace LocalShipper.Data.Models
         public virtual Shipper Shipper { get; set; }
         public virtual Store Store { get; set; }
         public virtual ICollection<Transaction> Transactions { get; set; }
+
+        
     }
 }
