@@ -58,5 +58,10 @@ namespace LocalShipper.Data.UnitOfWork
         }
 
         public Task<int> CommitAsync() => _context.SaveChangesAsync();
+
+        public LocalShipperCPContext GetDbContext()
+        {
+            return _context;
+        }
     }
 }

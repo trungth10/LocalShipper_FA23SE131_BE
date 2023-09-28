@@ -1,4 +1,6 @@
-﻿using LocalShipper.Data.Repository;
+﻿using LocalShipper.Data.Models;
+using LocalShipper.Data.Repository;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +17,8 @@ namespace LocalShipper.Data.UnitOfWork
         int Commit();
 
         Task<int> CommitAsync();
+
+        LocalShipperCPContext GetDbContext();
     }
 
 }
