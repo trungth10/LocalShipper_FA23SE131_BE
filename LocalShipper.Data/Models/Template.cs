@@ -16,6 +16,7 @@ namespace LocalShipper.Data.Models
         public string TemplateName { get; set; }
         public string ImageUrl { get; set; }
         public DateTime? CreateAt { get; set; }
+        public bool? Deleted { get; set; }
 
         public virtual ICollection<Store> Stores { get; set; }
     }

@@ -19,6 +19,7 @@ namespace LocalShipper.Data.Models
         public string BatchDescription { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdateAt { get; set; }
+        public int? Status { get; set; }
 
         public virtual Store Store { get; set; }
         public virtual ICollection<Order> Orders { get; set; }

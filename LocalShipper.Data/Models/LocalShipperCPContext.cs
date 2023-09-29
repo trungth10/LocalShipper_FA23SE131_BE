@@ -123,6 +123,8 @@ namespace LocalShipper.Data.Models
                     .HasColumnName("created_at")
                     .HasDefaultValueSql("(getdate())");
 
+                entity.Property(e => e.Status).HasColumnName("status");
+
                 entity.Property(e => e.StoreId).HasColumnName("storeId");
 
                 entity.Property(e => e.UpdateAt)
@@ -217,13 +219,13 @@ namespace LocalShipper.Data.Models
 
                 entity.Property(e => e.BatchId).HasColumnName("batchId");
 
-                entity.Property(e => e.CancelTime)
-                    .HasColumnType("datetime")
-                    .HasColumnName("cancel_time");
-
                 entity.Property(e => e.CancelReason)
                     .HasColumnType("text")
                     .HasColumnName("cancel_reason");
+
+                entity.Property(e => e.CancelTime)
+                    .HasColumnType("datetime")
+                    .HasColumnName("cancel_time");
 
                 entity.Property(e => e.CompleteTime)
                     .HasColumnType("datetime")
@@ -380,6 +382,8 @@ namespace LocalShipper.Data.Models
                     .HasColumnType("datetime")
                     .HasColumnName("createdAt")
                     .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.Deleted).HasColumnName("deleted");
             });
 
             modelBuilder.Entity<PackageType>(entity =>
@@ -534,7 +538,6 @@ namespace LocalShipper.Data.Models
                 entity.HasOne(d => d.Wallet)
                     .WithMany(p => p.Shippers)
                     .HasForeignKey(d => d.WalletId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Shipper_Wallet");
 
                 entity.HasOne(d => d.Zone)
@@ -630,6 +633,8 @@ namespace LocalShipper.Data.Models
                     .HasColumnName("create_at")
                     .HasDefaultValueSql("(getdate())");
 
+                entity.Property(e => e.Deleted).HasColumnName("deleted");
+
                 entity.Property(e => e.ImageUrl)
                     .HasMaxLength(255)
                     .HasColumnName("imageUrl");
@@ -690,6 +695,8 @@ namespace LocalShipper.Data.Models
                 entity.ToTable("Transport");
 
                 entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Active).HasColumnName("active");
 
                 entity.Property(e => e.LicencePlate)
                     .IsRequired()
