@@ -11,8 +11,14 @@ namespace LocalShipper.Service.Services.Interface
     public interface IShipperService
     {
 
+
+        Task<List<ShipperResponse>> GetShipper(int? id, string? firstName, string? email, string? phone, int? zoneId, int? status);
+        //Task<List<ShipperResponse>> GetListShipper(int? zoneId);
+        //Task<List<ShipperResponse>> GetAll();
         Task<ShipperResponse> UpdateShipperStatus(int shipperId, UpdateShipperStatusRequest request);
-        Task<ShipperResponse> GetShipperById(int id);
-        Task<List<ShipperResponse>> GetAll();
+        Task<ShipperResponse> RegisterShipperInformation(ShipperInformationRequest request);
+        Task<int> GetTotalShipperCount();
+        Task<ShipperResponse> UpdateShipper(int id, PutShipperRequest shipperRequest);
+        Task<MessageResponse> DeleteShipper(int id);
     }
 }

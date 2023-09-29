@@ -6,15 +6,13 @@ using System.Threading.Tasks;
 
 namespace LocalShipper.Service.DTOs.Request
 {
-    public class TransactionRequest
+    public class PutTransactionRequest
     {
-        public int Id { get; set; }
         public string TransactionMethod { get; set; }
         public int OrderId { get; set; }
         public int WalletId { get; set; }
         public decimal Amount { get; set; }
         public DateTime TransactionTime { get; set; }
         public string TransactionDescription { get; set; }
-
     }
 }
