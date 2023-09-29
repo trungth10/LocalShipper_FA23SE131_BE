@@ -92,25 +92,25 @@ namespace LSAPI
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(Roles.Admin, policy =>
-               {
-                   policy.RequireRole(Roles.Admin);
-               });
+                {
+                    policy.RequireRole(Roles.Admin);
+                });
                 options.AddPolicy(Roles.Staff, policy =>
-               {
-                   policy.RequireRole(Roles.Staff);
-               });
+                {
+                    policy.RequireRole(Roles.Staff);
+                });
                 options.AddPolicy(Roles.Store, policy =>
-               {
-                   policy.RequireRole(Roles.Store);
-               });
+                {
+                    policy.RequireRole(Roles.Store);
+                });
                 options.AddPolicy(Roles.Brand, policy =>
-               {
-                   policy.RequireRole(Roles.Brand);
-               });
+                {
+                    policy.RequireRole(Roles.Brand);
+                });
                 options.AddPolicy(Roles.Shipper, policy =>
-               {
-                   policy.RequireRole(Roles.Shipper);
-               });
+                {
+                    policy.RequireRole(Roles.Shipper);
+                });
             });
 
             services.AddScoped<IGenericRepository<Account>, GenericRepository<Account>>();
@@ -124,13 +124,13 @@ namespace LSAPI
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<ITransportService, TransportService>();
-            services.AddScoped<ITransportTypeService, TransportTypeService>();
-            services.AddScoped<IRoleService, RoleService>();
-            services.AddScoped<IHistoryService, HistoryService>();
             services.AddScoped<IPackageActionService, PackageActionService>();
             services.AddScoped<IPackageTypeService, PackageTypeService>();
             services.AddScoped<IStoreService, StoreService>();
             services.AddScoped<ITemplateService, TemplateService>();
+            services.AddScoped<ITransportTypeService, TransportTypeService>();
+            services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<IHistoryService, HistoryService>();
 
 
             services.AddAutoMapper(typeof(Startup));
