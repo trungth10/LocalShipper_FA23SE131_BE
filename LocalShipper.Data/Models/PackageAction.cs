@@ -15,6 +15,7 @@ namespace LocalShipper.Data.Models
         public int Id { get; set; }
         public string ActionType { get; set; }
         public DateTime? CreatedAt { get; set; }
+        public bool? Deleted { get; set; }
 
         public virtual ICollection<Package> Packages { get; set; }
     }
