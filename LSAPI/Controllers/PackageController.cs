@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 namespace LSAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    [Authorize(Roles = Roles.Shipper + "," + Roles.Store)]
+    [Route("api/packages")]
+    //[Authorize(Roles = Roles.Shipper + "," + Roles.Store)]
     public class PackageController : Controller
     {
         private readonly IPackageService _packageService;
@@ -20,10 +20,10 @@ namespace LSAPI.Controllers
             _packageService = packageService;
         }
         
-        [HttpGet("{batchId}")]
-        public async Task<ActionResult<List<PackageResponse>>> GetPackageByBatchId(int batchId)
+        [HttpGet()]
+        public async Task<ActionResult<List<PackageResponse>>> GetPackage(int batchId, int id, int status, int actionId, int typeId, string customerName)
         {
-            var package = await _packageService.GetPackageByBatchId(batchId);
+            var package = await _packageService.GetPackage(batchId, id, status, actionId, typeId, customerName);
             return Ok(package);
         }
 

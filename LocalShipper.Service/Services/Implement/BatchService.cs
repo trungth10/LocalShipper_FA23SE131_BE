@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.Configuration.Conventions;
 using LocalShipper.Data.Models;
 using LocalShipper.Data.UnitOfWork;
 using LocalShipper.Service.DTOs.Response;
@@ -27,22 +28,26 @@ namespace LocalShipper.Service.Services.Implement
         }
 
 
-        public async Task<BatchResponse> GetBatchById(int id)
+        public async Task<List<BatchResponse>> GetBatch(int? id, int? storeId, string? batchName)
         {
-           
-                var batch = await _unitOfWork.Repository<Batch>().GetAll().Where(f => f.Id == id).FirstOrDefaultAsync();
 
-                return new BatchResponse
-                {
-                    Id = batch.Id,
-                    StoreId = batch.StoreId,
-                    BatchName = batch.BatchName,
-                    BatchDescription = batch.BatchDescription,
-                    CreatedAt = batch.CreatedAt,
-                    UpdateAt = batch.UpdateAt,
-                };
-            }                  
-        
+            var batchs = await _unitOfWork.Repository<Batch>().GetAll()
+                                                              .Where(b => id == 0 || b.Id == id)
+                                                              .Where(b => storeId == 0 || b.StoreId == storeId)
+                                                              .Where(b => string.IsNullOrWhiteSpace(batchName) || b.BatchName.Contains(batchName))
+                                                              .ToListAsync();
+            var batchResponses = batchs.Select(batch => new BatchResponse
+            {
+                Id = batch.Id,
+                StoreId = batch.StoreId,
+                BatchName = batch.BatchName,
+                BatchDescription = batch.BatchDescription,
+                CreatedAt = batch.CreatedAt,
+                UpdateAt = batch.UpdateAt,
+            }).ToList();
+            return batchResponses;
+        }
+
     }
-    
+
 }

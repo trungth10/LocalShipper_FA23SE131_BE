@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace LocalShipper.Service.Services.Interface
 {
-    public interface IPackageService
+    public interface ITemplateService
     {
-        Task<List<PackageResponse>> GetPackage(int? batchId, int? id, int? status, int? actionId, int? typeId, string? customerName);
+        Task<List<TemplateResponse>> GetTemplate(int? id, string? templateName);
     }
 }

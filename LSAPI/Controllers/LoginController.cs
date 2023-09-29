@@ -34,7 +34,7 @@ namespace LSAPI.Controllers
             }
 
             var result = await _loginService.AuthenticateAsync(request.Email, request.Password);
-
+          
             dynamic dynamicResult = result;
 
             if (dynamicResult != null)
@@ -44,6 +44,7 @@ namespace LSAPI.Controllers
                     return Ok(new
                     {
                         AccessToken = dynamicResult.AccessToken,
+                        ShipperId = result.IdShipper,
                         UserName = result.UserName,
                         FullName = result.FullName,
                        

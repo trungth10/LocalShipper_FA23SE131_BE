@@ -24,10 +24,15 @@ namespace LocalShipper.Service.Services.Implement
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<PackageResponse>> GetPackageByBatchId(int batchId)
+        public async Task<List<PackageResponse>> GetPackage(int? batchId,int? id, int? status,int? actionId, int? typeId,string? customerName)
         {           
             var package = await _unitOfWork.Repository<Package>().GetAll()
-                .Where(f => f.BatchId == batchId)
+                .Where(f => f.BatchId == batchId || batchId == 0)
+                .Where(f => f.Id == id || id == 0)
+                .Where(f => f.Status == status || status == 0)
+                .Where(f => f.ActionId == actionId || actionId == 0)
+                .Where(f => typeId== id || typeId == 0)
+                .Where(f => string.IsNullOrWhiteSpace(customerName) ||f.CustomerName.Contains(customerName))
                 .ToListAsync();
 
             var packageResponses = package.Select(package => new PackageResponse

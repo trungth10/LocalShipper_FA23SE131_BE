@@ -13,6 +13,10 @@ namespace LSAPI.Mapper
         {
             CreateMap<Shipper, ShipperResponse>().ReverseMap();
             CreateMap<Order, OrderResponse>().ReverseMap();
+            CreateMap<PackageAction, PackageActionResponse>().ReverseMap();
+            CreateMap<PackageType, PackageTypeResponse>().ReverseMap();
+            CreateMap<Store, StoreResponse>().ReverseMap();
+            CreateMap<Template, TemplateResponse>().ReverseMap();
         }
     }
 }
