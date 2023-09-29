@@ -7,11 +7,12 @@ using LocalShipper.Service.Services.Interface;
 using LocalShipper.Service.Services.Implement;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
+using LocalShipper.Data.Models;
 
 namespace LSAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/shippers")]
     //[Authorize(Policy = "Shipper")]
     public class ShipperController : Controller
     {
@@ -28,31 +29,107 @@ namespace LSAPI.Controllers
         {
             try
             {
-               
-               // int agentId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+                // int agentId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
                 var response = await _shipperService.UpdateShipperStatus(shipperId, request);
 
-                
+
                 return Ok(response);
             }
             catch (Exception ex)
-            {              
+            {
                 return BadRequest($"Cập nhật trạng thái người giao hàng thất bại: {ex.Message}");
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ShipperResponse>> GetShipperById(int id)
+
+        [HttpGet()]
+        public async Task<ActionResult<List<TransactionResponse>>> GetShipper(int id, string firstName, string email, string phone, int zoneId, int status)
         {
-            var rs = await _shipperService.GetShipperById(id);
-            return Ok(rs);
+            try
+            {
+                var rs = await _shipperService.GetShipper(id, firstName, email, phone, zoneId, status);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Không tìm thấy shipper");
+            }
         }
 
-        [HttpGet("all")]
-        public async Task<ActionResult<List<ShipperResponse>>> GetCancelOrder()
+        //[HttpGet("shippers.json")]
+        //public async Task<ActionResult<List<ShipperResponse>>> GetAll(int? zoneId)
+        //{
+        //    try
+        //    {
+        //        var rs = await _shipperService.GetListShipper(zoneId);
+        //        return Ok(rs);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest($"Không tìm thấy shipper");
+        //    }
+        //}
+
+        [HttpGet("count.json")]
+        public async Task<ActionResult<ShipperResponse>> GetCountShipper()
         {
-            var rs = await _shipperService.GetAll();
-            return Ok(rs);
+            try
+            {
+
+                var rs = await _shipperService.GetTotalShipperCount();
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xem count thất bại: {ex.Message}");
+            }
+
+        }
+
+
+        [HttpPost("register-shipper-information")]
+        public async Task<ActionResult<ShipperResponse>> CreateShipper([FromBody] ShipperInformationRequest request)
+        {
+            try
+            {
+                var rs = await _shipperService.RegisterShipperInformation(request);
+                return Ok(rs);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpPut()]
+        public async Task<ActionResult<ShipperResponse>> UpdateShipper(int id, [FromBody] PutShipperRequest shipperRequest)
+        {
+            try
+            {
+
+                var response = await _shipperService.UpdateShipper(id, shipperRequest);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Cập nhật thông tin shipper thất bại: {ex.Message}");
+            }
+        }
+
+        [HttpDelete()]
+        public async Task<ActionResult<MessageResponse>> DeleteShipper(int id)
+        {
+            try
+            {
+
+                var response = await _shipperService.DeleteShipper(id);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xóa shipper thất bại: {ex.Message}");
+            }
         }
     }
 }

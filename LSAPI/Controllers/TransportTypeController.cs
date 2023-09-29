@@ -1,33 +1,32 @@
 ﻿using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
-using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System;
 
 namespace LSAPI.Controllers
 {
-    [Route("api/transports")]
+    [Route("api/transport-types")]
     [ApiController]
-    public class TransportController : ControllerBase
+    public class TransportTypeController : ControllerBase
     {
-
-        private readonly ITransportService _transportService;
-        public TransportController(ITransportService transportService)
+        private readonly ITransportTypeService _transportTypeService;
+        public TransportTypeController(ITransportTypeService transportTypeService)
         {
-            _transportService = transportService;
+            _transportTypeService = transportTypeService;
         }
 
 
+
         [HttpGet()]
-        public async Task<ActionResult<List<TransportResponse>>> GetTransport(int id, string licencePlate)
+        public async Task<ActionResult<List<TransportTypeResponse>>> GetTransportType(int id, string transportType)
         {
             try
             {
-                var rs = await _transportService.GetTransport(id, licencePlate);
+                var rs = await _transportTypeService.GetTransportType(id, transportType);
                 return Ok(rs);
             }
             catch (Exception ex)
@@ -36,27 +35,13 @@ namespace LSAPI.Controllers
             }
         }
 
-        //[HttpGet("transports.json")]
-        //public async Task<ActionResult<List<TransportResponse>>> GetAll(int? typeId, string? transportColor)
-        //{
-        //    try
-        //    {
-        //        var rs = await _transportService.GetListTransport(typeId, transportColor);
-        //        return Ok(rs);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest($"Không tìm thấy phương tiện");
-        //    }
-        //}
-
         [HttpGet("count.json")]
-        public async Task<ActionResult<TransportResponse>> GetCountTransport()
+        public async Task<ActionResult<TransportTypeResponse>> GetCountTransportType()
         {
             try
             {
 
-                var rs = await _transportService.GetTotalTransportCount();
+                var rs = await _transportTypeService.GetTotalTransportTypeCount();
                 return Ok(rs);
             }
             catch (Exception ex)
@@ -67,12 +52,12 @@ namespace LSAPI.Controllers
         }
 
 
-        [HttpPost("register-transport")]
-        public async Task<ActionResult<TransportResponse>> CreateTransport([FromBody] RegisterTransportRequest request)
+        [HttpPost("register-transport-type")]
+        public async Task<ActionResult<TransportTypeResponse>> CreateTransportType([FromBody] RegisterTransportTypeRequest request)
         {
             try
             {
-                var rs = await _transportService.CreateTransport(request);
+                var rs = await _transportTypeService.CreateTransportType(request);
                 return Ok(rs);
             }
             catch (Exception)
@@ -82,12 +67,12 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
-        public async Task<ActionResult<TransportResponse>> UpdateAccount(int id, [FromBody] PutTransportRequest request)
+        public async Task<ActionResult<TransportTypeResponse>> UpdateTransportType(int id, [FromBody] PutTransportTypeRequest request)
         {
             try
             {
 
-                var response = await _transportService.UpdateTransport(id, request);
+                var response = await _transportTypeService.UpdateTransportType(id, request);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -102,7 +87,7 @@ namespace LSAPI.Controllers
             try
             {
 
-                var response = await _transportService.DeleteTransport(id);
+                var response = await _transportTypeService.DeleteTransportType(id);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -112,3 +97,4 @@ namespace LSAPI.Controllers
         }
     }
 }
+

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LocalShipper.Data.Models;
 using LocalShipper.Data.UnitOfWork;
+using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
 using LocalShipper.Service.Exceptions;
 using LocalShipper.Service.Helpers;
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,68 +30,218 @@ namespace LocalShipper.Service.Services.Implement
 
         }
 
-
-        //Get Single
-        public async Task<TransportResponse> GetTransport(int id, string licencePlate)
+        //CREATE Transport
+        public async Task<TransportResponse> CreateTransport(RegisterTransportRequest request)
         {
+            var licencePlateExisted = _unitOfWork.Repository<Transport>().Find(x => x.LicencePlate == request.LicencePlate);
 
-            var transport = await _unitOfWork.Repository<Transport>().GetAll()
-                .Include(t => t.Type)
-                .Where(t => t.Id == id
-                || t.LicencePlate == licencePlate)
-                .FirstOrDefaultAsync();
+            if (licencePlateExisted != null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Biển số xe không tồn tại", request.LicencePlate.ToString());
+            }
+            Transport transport = new Transport
+            {
+                TypeId = request.TypeId,
+                LicencePlate = request.LicencePlate,
+                TransportColor = request.TransportColor,
+                TransportImage = request.TransportImage,
+                TransportRegistration = request.TransportRegistration,
+            };
+            await _unitOfWork.Repository<Transport>().InsertAsync(transport);
+            await _unitOfWork.CommitAsync();
 
-            var transportResponse = new TransportResponse
+            var createdTransportResponse = new TransportResponse
             {
                 Id = transport.Id,
                 TypeId = transport.TypeId,
                 LicencePlate = transport.LicencePlate,
                 TransportColor = transport.TransportColor,
                 TransportImage = transport.TransportImage,
-                TransportRegistration = transport.TransportRegistration
+                TransportRegistration = transport.TransportRegistration,
             };
+            return createdTransportResponse;
 
-            if (transport.Type != null)
+        }
+        //GET
+        public async Task<List<TransportResponse>> GetTransport(int? id, string? licencePlate)
+        {
+
+            var transports = await _unitOfWork.Repository<Transport>().GetAll()
+                                                              .Where(t => id == 0 || t.Id == id)
+                                                              .Where(t => string.IsNullOrWhiteSpace(licencePlate) || t.LicencePlate.Contains(licencePlate))
+                                                              .ToListAsync();
+            var transportResponses = transports.Select(transport => new TransportResponse
             {
-                transportResponse.TransportType = new TransportTypeResponse
-                {
-                    Id = transport.Type.Id,
-                    TransportType1 = transport.Type.TransportType1,
-                    CreateAt = transport.Type.CreateAt
-                };
-            }
-            return transportResponse;
+                Id = transport.Id,
+                TypeId = transport.TypeId,
+                LicencePlate = transport.LicencePlate,
+                TransportColor = transport.TransportColor,
+                TransportImage = transport.TransportImage,
+                TransportRegistration = transport.TransportRegistration,
+
+            }).ToList();
+            return transportResponses;
         }
 
 
-        //Get List
-        public async Task<List<TransportResponse>> GetListTransport(int? typeId = null, string? transportColor = null)
+
+        //GET Single
+        //public async Task<TransportResponse> GetTransport(int id, string licencePlate)
+        //{
+
+        //    var transports = await _unitOfWork.Repository<Transport>().GetAll()
+        //        .Include(t => t.Type)
+        //        .Where(t => t.Id == id
+        //        || t.LicencePlate == licencePlate)
+        //        .FirstOrDefaultAsync();
+
+        //    var transportResponse = new TransportResponse
+        //    {
+        //        Id = transports.Id,
+        //        TypeId = transports.TypeId,
+        //        LicencePlate = transports.LicencePlate,
+        //        TransportColor = transports.TransportColor,
+        //        TransportImage = transports.TransportImage,
+        //        TransportRegistration = transports.TransportRegistration
+        //    };
+
+        //    if (transports.Type != null)
+        //    {
+        //        transportResponse.TransportType = new TransportTypeResponse
+        //        {
+        //            Id = transports.Type.Id,
+        //            TransportType1 = transports.Type.TransportType1,
+        //            CreateAt = transports.Type.CreateAt
+        //        };
+        //    }
+        //    return transportResponse;
+        //}
+
+
+
+
+        //GET List
+        //public async Task<List<TransportResponse>> GetListTransport(int? typeId = null, string? transportColor = null)
+        //{
+        //    IQueryable<Transport> query = _unitOfWork.Repository<Transport>().GetAll();
+
+
+        //    if (typeId.HasValue)
+        //    {
+        //        query = query.Where(a => a.TypeId == typeId);
+        //    }
+        //    if (!string.IsNullOrEmpty(transportColor))
+        //    {
+        //        query = query.Where(a => a.TransportColor == transportColor);
+        //    }
+
+        //    var transports = await query.ToListAsync();
+
+        //    var transportsResponse = transports.Select(transports => new TransportResponse
+        //    {
+        //        Id = transports.Id,
+        //        TypeId = transports.TypeId,
+        //        LicencePlate = transports.LicencePlate,
+        //        TransportColor = transports.TransportColor,
+        //        TransportImage = transports.TransportImage,
+        //        TransportRegistration = transports.TransportRegistration,
+
+        //        TransportType = transports.Type != null ? new TransportTypeResponse
+        //        {
+        //            Id = transports.Type.Id,
+        //            TransportType1 = transports.Type.TransportType1,
+        //            CreateAt = transports.Type.CreateAt,
+
+        //        } : null
+
+        //    }).ToList();
+        //    return transportsResponse;
+        //}
+
+
+
+        //GET Count
+        public async Task<int> GetTotalTransportCount()
         {
-            IQueryable<Transport> query = _unitOfWork.Repository<Transport>().GetAll();
+            var count = await _unitOfWork.Repository<Transport>()
+                .GetAll()
+                .CountAsync();
+
+            return count;
+        }
+
+        //UPDATE Transport
+        public async Task<TransportResponse> UpdateTransport(int id, PutTransportRequest transportRequest)
+        {
 
 
-            if (typeId.HasValue)
+            var transport = await _unitOfWork.Repository<Transport>()
+                .GetAll()
+                .Include(o => o.Type)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (transport == null)
             {
-                query = query.Where(a => a.TypeId == typeId);
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy phương tiện", id.ToString());
             }
-            if (!string.IsNullOrEmpty(transportColor))
+
+            transport.TypeId = transportRequest.TypeId;
+            transport.LicencePlate = transportRequest.LicencePlate;
+            transport.TransportColor = transportRequest.TransportColor;
+            transport.TransportImage = transportRequest.TransportImage;
+            transport.TransportRegistration = transportRequest.TransportRegistration;
+            // Kiểm tra xem có phương tiện khác sử dụng LicencePlate mới không
+            var existingTransportWithSameLicencePlate = await _unitOfWork.Repository<Transport>()
+                .GetAll()
+                .FirstOrDefaultAsync(a => a.LicencePlate == transportRequest.LicencePlate && a.Id != id);
+
+            if (existingTransportWithSameLicencePlate != null)
             {
-                query = query.Where(a => a.TransportColor == transportColor);
+                throw new CrudException(HttpStatusCode.BadRequest, "Biển số xe đã tồn tại cho một phương tiện khác.", id.ToString());
             }
 
-            var transports = await query.ToListAsync();
+            await _unitOfWork.Repository<Transport>().Update(transport, id);
+            await _unitOfWork.CommitAsync();
 
-            var transportsResponse = transports.Select(transports => new TransportResponse
+            var updatedTransportResponse = new TransportResponse
             {
-                Id = transports.Id,
-                TypeId = transports.TypeId,
-                LicencePlate = transports.LicencePlate,
-                TransportColor = transports.TransportColor,
-                TransportImage = transports.TransportImage,
-                TransportRegistration = transports.TransportRegistration
-            }).ToList();
-            return transportsResponse;
+                Id = transport.Id,
+                TypeId = transportRequest.TypeId,
+                LicencePlate = transportRequest.LicencePlate,
+                TransportColor = transportRequest.TransportColor,
+                TransportImage = transportRequest.TransportImage,
+                TransportRegistration = transportRequest.TransportRegistration,
 
+                TransportType = transport.Type != null ? new TransportTypeResponse
+                {
+                    Id = transport.Type.Id,
+                    TransportType1 = transport.Type.TransportType1,
+                } : null
+            };
+
+            return updatedTransportResponse;
+        }
+
+        //DELETE Transport
+        public async Task<MessageResponse> DeleteTransport(int id)
+        {
+
+            var transport = await _unitOfWork.Repository<Transport>().GetAll()
+            .Include(o => o.Type)
+            .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (transport == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy phương tiện", id.ToString());
+            }
+
+            _unitOfWork.Repository<Transport>().Delete(transport);
+            await _unitOfWork.CommitAsync();
+
+            return new MessageResponse
+            {
+                Message = "Xóa phương tiện thành công",
+            };
         }
     }
 }

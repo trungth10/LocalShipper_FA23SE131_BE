@@ -1,4 +1,5 @@
-﻿using LocalShipper.Service.DTOs.Response;
+﻿using LocalShipper.Service.DTOs.Request;
+using LocalShipper.Service.DTOs.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,13 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface ITransportService
     {
-        Task<TransportResponse> GetTransport(int id, string licencePlate);
+        Task<List<TransportResponse>> GetTransport(int? id, string? licencePlate);
 
-        Task<List<TransportResponse>> GetListTransport(int? typeId, string? transportColor);
+        //Task<List<TransportResponse>> GetListTransport(int? typeId, string? transportColor);
+
+        Task<int> GetTotalTransportCount();
+        Task<TransportResponse> CreateTransport(RegisterTransportRequest request);
+        Task<TransportResponse> UpdateTransport(int id, PutTransportRequest transportRequest);
+        Task<MessageResponse> DeleteTransport(int id);
     }
 }
