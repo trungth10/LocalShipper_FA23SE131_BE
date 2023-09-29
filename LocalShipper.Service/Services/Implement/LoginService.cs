@@ -46,7 +46,7 @@ namespace LocalShipper.Service.Services.Implement
             {
                 var account = await _accountRepository
                     .GetAll()
-                    .Where(a => a.Email == email).Include(a => a.Role)
+                    .Where(a => a.Email == email).Include(a => a.Role).Include(p => p.Shippers)
                     .FirstOrDefaultAsync();
 
                 if (account == null)
@@ -68,7 +68,10 @@ namespace LocalShipper.Service.Services.Implement
                 }
 
                 if (password == account.Password)
+
+
                 {
+                    int? shipperId = account.Shippers?.FirstOrDefault()?.Id;
                     var claims = new List<Claim>
                 {
                 new Claim(ClaimTypes.Name, account.Email),
@@ -95,6 +98,7 @@ namespace LocalShipper.Service.Services.Implement
                     {
                         Success = true,
                         AccessToken = tokenString,
+                        IdShipper =(int) shipperId,
                         UserName = account.Email,
                         FullName = account.Fullname,
                         Role = account.Role.Name

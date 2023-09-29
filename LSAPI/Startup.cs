@@ -124,6 +124,10 @@ namespace LSAPI
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<ITransportService, TransportService>();
+            services.AddScoped<IPackageActionService, PackageActionService>();
+            services.AddScoped<IPackageTypeService, PackageTypeService>();
+            services.AddScoped<IStoreService, StoreService>();
+            services.AddScoped<ITemplateService, TemplateService>();
 
 
             services.AddAutoMapper(typeof(Startup));

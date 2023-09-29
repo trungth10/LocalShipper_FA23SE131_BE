@@ -9,6 +9,6 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IBatchService
     {
-        Task<BatchResponse> GetBatchById(int id);
+        Task<List<BatchResponse>> GetBatch(int? id, int? storeId, string? batchName);
     }
 }

@@ -67,6 +67,8 @@ namespace LocalShipper.Service.Services.Implement
             }
         }
 
+
+
         public async Task<BrandResponse> GetBrandByID(int id)
         {
             var brand = await _unitOfWork.Repository<Brand>().GetAll().Where(x => x.Id == id).FirstOrDefaultAsync();
