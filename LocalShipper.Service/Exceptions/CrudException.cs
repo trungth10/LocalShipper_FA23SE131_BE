@@ -17,5 +17,6 @@ namespace LocalShipper.Service.Exceptions
             Status = status;
             Error = error;
         }
+
     }
 }

@@ -7,6 +7,7 @@ using LocalShipper.Service.Exceptions;
 using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Interface;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,191 +27,134 @@ namespace LocalShipper.Service.Services.Implement
             _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
-        public async Task<BrandResponse> DeleteBrand(int id)
+       
+
+
+
+      
+
+        public async Task<List<BrandResponse>> GetBrands(int? id, string? brandName, string? brandDescripton, string? iconUrl, string? imageUrl, int? accountId)
         {
-            var account = _unitOfWork.Repository<Account>().GetAll().Where(x => x.Id == id && x.Active == true).ToList();
-            if (account.Count != 0)
-            {
-                throw new CrudException(HttpStatusCode.Conflict, "Brand has account active!!!", "");
-            }
-            else
-            {
-                var brand = _unitOfWork.Repository<Brand>().GetAll().Where(x => x.Id == id && x.Active == true).FirstOrDefault();
-                if (brand != null)
-                {
-                    brand.Active = false;
-                    try
-                    {
-                        await _unitOfWork.Repository<Brand>().Update(brand, id);
-                        await _unitOfWork.CommitAsync();
-                        return new BrandResponse
-                        {
-                            Id = brand.Id,
-                            BrandName = brand.BrandName,
-                            BrandDescription = brand.BrandDescription,
-                            CreatedAt = DateTime.Now,
-                            IconUrl = brand.IconUrl,
-                            ImageUrl = brand.ImageUrl,
-                            Active = brand.Active,
-                            AccountId = brand.AccountId
-                        };
-                    }
-                    catch (Exception e)
-                    {
-                        throw new CrudException(HttpStatusCode.BadRequest, "Delete Brand Error!!!", e.InnerException?.Message);
-                    }
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-
-
-
-        public async Task<BrandResponse> GetBrandByID(int id)
-        {
-            var brand = await _unitOfWork.Repository<Brand>().GetAll().Where(x => x.Id == id).FirstOrDefaultAsync();
-            if (brand != null)
-            {
-                return new BrandResponse
-                {
-                    Id = brand.Id,
-                    BrandName = brand.BrandName,
-                    IconUrl = brand.IconUrl,
-                    ImageUrl = brand.ImageUrl,
-                    Active = brand.Active,
-                    AccountId = brand.AccountId
-                };
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public async Task<List<BrandResponse>> GetBrands(BrandPagingRequest request)
-        {
-            List<BrandResponse> list = null;
-            try
-            {
-                List<Brand> brands = null;
-                if (request.AccountId != 0)
-                {
-                    brands = await _unitOfWork.Repository<Brand>()
-                           .GetAll()
-                               .Where(x => x.BrandName.ToLower()
-                           .Contains(request.KeySearch.ToLower())
-                           && x.Active == true && x.AccountId == request.AccountId).ToListAsync();
-                }
-                else
-                {
-                    brands = await _unitOfWork.Repository<Brand>()
-                           .GetAll()
-                    .Where(x => x.BrandName.ToLower()
-                    .Contains(request.KeySearch.ToLower())
-                           && x.Active == true).ToListAsync();
-                }
-                IEnumerable<BrandResponse> rs = brands.Select(x => new BrandResponse
-                {
-                    Id = x.Id,
-                    BrandName = x.BrandName,
-                    IconUrl = x.IconUrl,
-                    ImageUrl = x.ImageUrl,
-                    Active = x.Active,
-                    AccountId = x.AccountId
-                }).AsEnumerable();
-
-                list = PageHelper<BrandResponse>.Sorting((SortType.SortOrder)request.SortType, rs, request.ColName);
-                return list;
-            }
-            catch (Exception e)
-            {
-                throw new CrudException(HttpStatusCode.BadRequest, "Get Brands Error!!!", e.InnerException?.Message);
-            }
+            var brands = await _unitOfWork.Repository<Brand>().GetAll()
+                                                               .Where(b => id == 0 || b.Id == id)
+                                                               .Where(b => string.IsNullOrWhiteSpace(brandName) || b.BrandName.Contains(brandName))
+                                                               .Where(b => string.IsNullOrWhiteSpace(brandDescripton) || b.BrandDescription.Contains(brandDescripton))
+                                                               
+                                                               .Where(b => string.IsNullOrWhiteSpace(iconUrl) || b.IconUrl.Contains(iconUrl))
+                                                               .Where(b => string.IsNullOrWhiteSpace(imageUrl) || b.ImageUrl.Contains(imageUrl))
+                                                              
+                                                               .Where(b => accountId == 0 || b.AccountId == accountId)
+                                                              
+                                                               .ToListAsync();
+            var brandResponses = _mapper.Map<List<Brand>, List<BrandResponse>>(brands);
+            return brandResponses;
         }
 
         
-        public async Task<BrandResponse> PostBrand(PostBrandRequest model, int role)
+        public async Task<BrandResponse> PostBrand(BrandRequest request)
         {
-            Brand brand = new Brand
+          
+            var existingBrand = await _unitOfWork.Repository<Brand>().FindAsync(b => b.BrandName == request.BrandName);
+            if (existingBrand != null)
             {
-                BrandName = model.BrandName,
-                Active = true,
+                throw new CrudException(HttpStatusCode.BadRequest, "Brand đã tồn tại", request.BrandName);
+            }
+            var existingAccountId = await _unitOfWork.Repository<Brand>().FindAsync(b => b.AccountId == request.AccountId);
+            if (existingAccountId != null)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "AccountId đã tồn tại", request.AccountId.ToString());
+            }
 
-                AccountId = model.AccountId
+           
+            var newBrand = new Brand
+            {
+               BrandName= request.BrandName,
+               BrandDescription= request.BrandDescription,
+               CreatedAt= request.CreatedAt,
+               IconUrl= request.IconUrl,
+               ImageUrl= request.ImageUrl,
+               Active=request.Active,
+               AccountId= request.AccountId,
             };
-            brand.ImageUrl = model.ImageUrl ?? "";
-            brand.IconUrl = model.IconUrl ?? "";
-            brand.AccountId = model.AccountId > 0 ? model.AccountId : 0;
-            try
-            {
-                await _unitOfWork.Repository<Brand>().InsertAsync(brand);
-                await _unitOfWork.CommitAsync();
-                brand = await _unitOfWork.Repository<Brand>().GetAll().Where(x => x.Id == brand.Id).Include(x => x.Account).SingleOrDefaultAsync();
-                return new BrandResponse
-                {
-                    Id = brand.Id,
-                    BrandName = brand.BrandName,
-                    IconUrl = brand.IconUrl,
-                    ImageUrl = brand.ImageUrl,
-                    Active = brand.Active,
-                    AccountId = brand.AccountId
-                };
-            }
-            catch (Exception e)
-            {
-                throw new CrudException(HttpStatusCode.BadRequest, "Insert Brand Error!!!", e.InnerException?.Message);
-            }
+
+           
+            await _unitOfWork.Repository<Brand>().InsertAsync(newBrand);
+            await _unitOfWork.CommitAsync();
+
+          
+            var brandResponse = _mapper.Map<BrandResponse>(newBrand);
+            return brandResponse;
         }
 
-        public async Task<BrandResponse> PutBrand(int id, PostBrandRequest model)
+        public async Task<BrandResponse> UpdateBrand(int id, BrandRequest brandRequest)
         {
-            var brand = _unitOfWork.Repository<Brand>().GetAll().Where(x => x.Id == id && x.Active == true).FirstOrDefault();
-            if (brand != null)
+            var brand = await _unitOfWork.Repository<Brand>()
+                .GetAll()
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (brand == null)
             {
-                try
-                {
-                    brand.BrandName = model.BrandName;
-                    brand.AccountId = model.AccountId;
-                    if (String.IsNullOrEmpty(model.ImageUrl))
-                    {
-                        brand.ImageUrl = model.ImageUrl;
-                    }
-
-                    if (String.IsNullOrEmpty(model.IconUrl))
-                    {
-                        brand.IconUrl = model.IconUrl;
-                    }
-
-                    if (model.AccountId > 0)
-                    {
-                        brand.AccountId = model.AccountId;
-                    }
-
-                    await _unitOfWork.Repository<Brand>().Update(brand, id);
-                    await _unitOfWork.CommitAsync();
-                    return new BrandResponse
-                    {
-                        Id = brand.Id,
-                        BrandName = brand.BrandName,
-                        IconUrl = brand.IconUrl,
-                        ImageUrl = brand.ImageUrl,
-                        Active = brand.Active,
-                        AccountId = brand.AccountId
-                    };
-                }
-                catch (Exception e)
-                {
-                    throw new CrudException(HttpStatusCode.BadRequest, "Update Brand Error!!!", e.InnerException?.Message);
-                }
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy thương hiệu", id.ToString());
             }
-            else
+
+            brand.BrandName = brandRequest.BrandName;
+            brand.BrandDescription = brandRequest.BrandDescription;
+            brand.IconUrl = brandRequest.IconUrl;
+            brand.ImageUrl = brandRequest.ImageUrl;
+            brand.Active = brandRequest.Active;
+            brand.AccountId = brandRequest.AccountId;
+            brand.CreatedAt = DateTime.Now;
+           
+
+            await _unitOfWork.Repository<Brand>().Update(brand, id);
+            await _unitOfWork.CommitAsync();
+
+            var updatedBrandResponse = new BrandResponse
             {
-                return null;
-            }
+                Id = brand.Id,
+                BrandName = brand.BrandName,
+                BrandDescription = brand.BrandDescription,
+                IconUrl = brand.IconUrl,
+                ImageUrl = brand.ImageUrl,
+                Active = brand.Active,
+
+                AccountId = brand.AccountId,
+                CreatedAt = DateTime.Now,
+            
+            };
+
+            return updatedBrandResponse;
         }
+        public async Task<BrandResponse> DeleteBrand(int id)
+        {
+            var brand = await _unitOfWork.Repository<Brand>()
+                .GetAll()
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (brand == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy Brand", id.ToString());
+            }
+
+           
+            brand.Active =false;
+
+          
+            await _unitOfWork.Repository<Brand>().Update(brand, id);
+            await _unitOfWork.CommitAsync();
+
+          
+            var deletedBrandResponse = new BrandResponse
+            {
+                Id = brand.Id,
+                BrandName = brand.BrandName,
+                Active= brand.Active,
+             
+            };
+
+            return deletedBrandResponse;
+        }
+
     }
 }
 

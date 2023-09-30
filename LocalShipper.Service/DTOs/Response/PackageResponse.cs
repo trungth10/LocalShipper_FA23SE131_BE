@@ -25,6 +25,7 @@ namespace LocalShipper.Service.DTOs.Response
         public decimal PackagePrice { get; set; }
         public decimal SubtotalPrice { get; set; }
         public decimal DistancePrice { get; set; }
+        public decimal? TotalPrice { get; set; }
         public int ActionId { get; set; }
         public int? TypeId { get; set; }
     }
