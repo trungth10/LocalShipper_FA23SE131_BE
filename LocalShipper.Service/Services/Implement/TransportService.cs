@@ -69,15 +69,19 @@ namespace LocalShipper.Service.Services.Implement
                                                 string? transportImage, string? transportRegistration)
         {
 
-            var transports = await _unitOfWork.Repository<Transport>().GetAll()
+            var transports = await _unitOfWork.Repository<Transport>().GetAll().Include(t =>  t.Type)
                                                               .Where(t => id == 0 || t.Id == id)
                                                               .Where(t => id == 0 || t.TypeId == typeId)
                                                               .Where(t => string.IsNullOrWhiteSpace(licencePlate) || t.LicencePlate.Contains(licencePlate))
                                                               .Where(t => string.IsNullOrWhiteSpace(transportColor) || t.TransportColor.Contains(transportColor))
                                                               .Where(t => string.IsNullOrWhiteSpace(transportImage) || t.TransportImage.Contains(transportImage))
                                                               .Where(t => string.IsNullOrWhiteSpace(transportRegistration) || t.TransportRegistration.Contains(transportRegistration))
-                                                              
                                                               .ToListAsync();
+            if (transports == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Phương tiện không có hoặc không tồn tại", id.ToString());
+            }
+
             var transportResponses = transports.Select(transport => new TransportResponse
             {
                 Id = transport.Id,
@@ -87,7 +91,12 @@ namespace LocalShipper.Service.Services.Implement
                 TransportImage = transport.TransportImage,
                 TransportRegistration = transport.TransportRegistration,
                 Active= (bool)transport.Active,
-
+                TransportType = transport.Type != null ? new TransportTypeResponse
+                {
+                    Id = transport.Type.Id,
+                    TransportType1 = transport.Type.TransportType1,
+                    CreateAt = transport.Type.CreateAt
+                } : null
             }).ToList();
             return transportResponses;
         }
