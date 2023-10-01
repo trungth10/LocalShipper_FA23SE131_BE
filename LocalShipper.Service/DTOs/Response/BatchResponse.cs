@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LocalShipper.Data.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,5 +16,7 @@ namespace LocalShipper.Service.DTOs.Response
         public DateTime CreatedAt { get; set; }
         public DateTime UpdateAt { get; set; }
         public int? Status { get; set; }
+
+        public StoreResponse Store { get; set; }
     }
 }

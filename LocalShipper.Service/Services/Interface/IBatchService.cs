@@ -15,5 +15,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<BatchResponse> UpdateBatch(int id, BatchRequest batchRequest);
 
         Task<BatchResponse> DeleteBatch(int id);
+
+        Task<int> GetTotalBatchCount();
     }
 }

@@ -4,6 +4,7 @@ using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -23,23 +24,47 @@ namespace LSAPI.Controllers
         [HttpGet()]
         public async Task<ActionResult<List<BatchResponse>>> GetBatch(int id, int storeId, string batchName)
         {
-            var rs = await _batchService.GetBatch(id, storeId, batchName);
-            return Ok(rs);
+            try
+            {
+                var rs = await _batchService.GetBatch(id, storeId, batchName);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xem Batch thất bại: {ex.Message}");
+            }
+
         }
 
         [HttpPost()]
         public async Task<ActionResult<BatchResponse>> PostBatch(BatchRequest request)
         {
-            var rs = await _batchService.CreateBatch(request);
-            return Ok(rs);
+            try
+            {
+                var rs = await _batchService.CreateBatch(request);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"thêm Batch thất bại: {ex.Message}");
+            }
+
         }
 
 
         [HttpPut()]
         public async Task<ActionResult<BatchResponse>> PutBatch(int id, BatchRequest batchRequest)
         {
-            var rs = await _batchService.UpdateBatch(id, batchRequest);
-            return Ok(rs);
+            try
+            {
+                var rs = await _batchService.UpdateBatch(id, batchRequest);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"cập nhật Batch thất bại: {ex.Message}");
+            }
+
         }
 
 
@@ -51,8 +76,34 @@ namespace LSAPI.Controllers
         [HttpDelete()]
         public async Task<ActionResult<BatchResponse>> DeleteBatch(int id)
         {
-            var rs = await _batchService.DeleteBatch(id);
-            return Ok(rs);
+            try
+            {
+                var rs = await _batchService.DeleteBatch(id);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"xóa Batch thất bại: {ex.Message}");
+            }
+
+        }
+
+
+
+        [HttpGet("count")]
+        public async Task<ActionResult<BatchResponse>> GetCountBatch()
+        {
+            try
+            {
+
+                var rs = await _batchService.GetTotalBatchCount();
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xem count thất bại: {ex.Message}");
+            }
+
         }
     }
 }

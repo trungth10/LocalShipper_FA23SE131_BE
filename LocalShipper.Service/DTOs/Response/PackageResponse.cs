@@ -10,6 +10,7 @@ namespace LocalShipper.Service.DTOs.Response
     {
         public int Id { get; set; }
         public int BatchId { get; set; }
+        public BatchResponse Batch { get; set; }
         public int Capacity { get; set; }
         public double? PackageWeight { get; set; }
         public double? PackageWidth { get; set; }
@@ -27,6 +28,11 @@ namespace LocalShipper.Service.DTOs.Response
         public decimal DistancePrice { get; set; }
         public decimal? TotalPrice { get; set; }
         public int ActionId { get; set; }
+        public PackageActionResponse Action { get; set; }
         public int? TypeId { get; set; }
+
+        
+       
+        public PackageTypeResponse Type { get; set; }
     }
 }

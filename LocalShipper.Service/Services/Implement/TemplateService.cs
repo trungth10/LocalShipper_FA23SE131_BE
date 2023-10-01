@@ -120,6 +120,13 @@ namespace LocalShipper.Service.Services.Implement
                 Message = "Đã xóa",
             };
         }
+        public async Task<int> GetTotalTemplateCount()
+        {
+            var count = await _unitOfWork.Repository<Template>()
+                .GetAll()
+                .CountAsync();
 
+            return count;
+        }
     }
 }

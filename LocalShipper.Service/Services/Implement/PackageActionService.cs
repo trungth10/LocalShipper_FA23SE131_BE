@@ -111,7 +111,14 @@ namespace LocalShipper.Service.Services.Implement
                 Message = "Đã xóa",
             };
         }
+        public async Task<int> GetTotalPackageActionCount()
+        {
+            var count = await _unitOfWork.Repository<PackageAction>()
+                .GetAll()
+                .CountAsync();
 
+            return count;
+        }
 
     }
 }

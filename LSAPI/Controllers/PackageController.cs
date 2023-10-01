@@ -5,6 +5,7 @@ using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -20,31 +21,80 @@ namespace LSAPI.Controllers
         {
             _packageService = packageService;
         }
-        
+
         [HttpGet()]
         public async Task<ActionResult<List<PackageResponse>>> GetPackage(int batchId, int id, int status, int actionId, int typeId, string customerName, string customerAddress, string customerPhome, string custommerEmail, decimal totalPrice)
         {
-            var package = await _packageService.GetPackage(batchId, id, status, actionId, typeId, customerName, customerAddress, customerPhome, custommerEmail, totalPrice);
-            return Ok(package);
+            try
+            {
+                var package = await _packageService.GetPackage(batchId, id, status, actionId, typeId, customerName, customerAddress, customerPhome, custommerEmail, totalPrice);
+                return Ok(package);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xem Package thất bại: {ex.Message}");
+            }
+
         }
         [HttpPost()]
         public async Task<ActionResult<PackageResponse>> PostPackage(PackageRequest request)
         {
-            var rs = await _packageService.CreatePackage(request);
-            return Ok(rs);
+            try
+            {
+                var rs = await _packageService.CreatePackage(request);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"tạo Package thất bại: {ex.Message}");
+            }
+
         }
         [HttpPut()]
         public async Task<ActionResult<PackageResponse>> PutPackage(int id, PackageRequest packageRequest)
         {
-            var rs = await _packageService.UpdatePackage(id, packageRequest);
-            return Ok(rs);
+            try
+            {
+                var rs = await _packageService.UpdatePackage(id, packageRequest);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"update Package thất bại: {ex.Message}");
+            }
+
         }
 
         [HttpDelete()]
         public async Task<ActionResult<PackageResponse>> DeletePackage(int id)
         {
-            var rs = await _packageService.DeletePackage(id);
-            return Ok(rs);
+            try
+            {
+                var rs = await _packageService.DeletePackage(id);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"xóa Package thất bại: {ex.Message}");
+            }
+
+        }
+
+        [HttpGet("count")]
+        public async Task<ActionResult<PackageResponse>> GetCountPackage()
+        {
+            try
+            {
+
+                var rs = await _packageService.GetTotalPackageCount();
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xem count thất bại: {ex.Message}");
+            }
+
         }
     }
 }

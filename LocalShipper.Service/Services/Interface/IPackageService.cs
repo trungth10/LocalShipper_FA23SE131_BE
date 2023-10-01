@@ -15,5 +15,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<PackageResponse> UpdatePackage(int id, PackageRequest packageRequest);
 
         Task<MessageResponse> DeletePackage(int id);
+        Task<int> GetTotalPackageCount();
     }
 }
