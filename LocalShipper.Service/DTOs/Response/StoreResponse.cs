@@ -20,6 +20,7 @@ namespace LocalShipper.Service.DTOs.Response
         public int BrandId { get; set; }
         public int? TemplateId { get; set; }
         public int? ZoneId { get; set; }
+        public int WalletId { get; set; }
         public int AccountId { get; set; }
     }
 }

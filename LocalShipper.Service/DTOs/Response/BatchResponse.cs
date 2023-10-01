@@ -14,5 +14,6 @@ namespace LocalShipper.Service.DTOs.Response
         public string BatchDescription { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdateAt { get; set; }
+        public int? Status { get; set; }
     }
 }
