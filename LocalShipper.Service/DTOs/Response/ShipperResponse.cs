@@ -25,7 +25,7 @@ namespace LocalShipper.Service.DTOs.Response
         public OrderResponse Order { get; set; }
         public TransportResponse Transport { get; set; }
         public AccountResponse Account { get; set; }
-        //public WalletResponse Wallet { get; set; }
+        public WalletResponse Wallet { get; set; }
         public ZoneResponse Zone { get; set; }
         
     }

@@ -48,7 +48,7 @@ namespace LSAPI.Controllers
         //    }
         //}
 
-        [HttpGet("count.json")]
+        [HttpGet("count")]
         public async Task<ActionResult<TransactionResponse>> GetCountTransaction()
         {
             try

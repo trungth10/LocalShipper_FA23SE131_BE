@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography.Xml;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -54,8 +55,8 @@ namespace LocalShipper.Service.Services.Implement
             {
                 Id = transaction.Id,
                 TransactionMethod = transaction.TransactionMethod,
-                OrderId= transaction.OrderId,
-                WalletId= transaction.WalletId,
+                OrderId = transaction.OrderId,
+                WalletId = transaction.WalletId,
                 Amount = transaction.Amount,
                 TransactionTime = transaction.TransactionTime,
                 TransactionDescription = transaction.TransactionDescription,
@@ -71,6 +72,7 @@ namespace LocalShipper.Service.Services.Implement
         {
 
             var transactions = await _unitOfWork.Repository<Transaction>().GetAll()
+                                                              .Include(t => t.Order).Include(t => t.Wallet)
                                                               .Where(t => id == 0 || t.Id == id)
                                                               .Where(t => string.IsNullOrWhiteSpace(transactionMethod) || t.TransactionMethod.Contains(transactionMethod))
                                                               .Where(t => orderId == 0 || t.OrderId == orderId)
@@ -88,6 +90,33 @@ namespace LocalShipper.Service.Services.Implement
                 TransactionDescription = transaction.TransactionDescription,
                 CreatedAt = transaction.CreatedAt,
 
+                Order = transaction.Order != null ? new OrderResponse
+                {
+                    Id = transaction.Order.Id,
+                    status = transaction.Order.Status,
+                    storeId = transaction.Order.StoreId,
+                    batchId = transaction.Order.BatchId,
+                    shipperId = (int)transaction.Order.ShipperId,
+                    trackingNumber = transaction.Order.TrackingNumber,
+                    createTime = transaction.Order.CreateTime,
+                    orderTime = transaction.Order.OrderTime,
+                    acceptTime = transaction.Order.AcceptTime,
+                    pickupTime = transaction.Order.PickupTime,
+                    cancelTime = transaction.Order.CancelTime,
+                    cancelReason = transaction.Order.CancelReason,
+                    completeTime = transaction.Order.CompleteTime,
+                    distancePrice = transaction.Order.DistancePrice,
+                    subTotalprice = transaction.Order.SubtotalPrice,
+                    totalPrice = transaction.Order.TotalPrice,
+                    other = transaction.Order.Other,
+                } : null,
+                Wallet = transaction.Wallet != null ? new WalletResponse
+                {
+                    Id = transaction.Wallet.Id,
+                    Balance = transaction.Wallet.Balance,
+                    CreatedAt = transaction.Wallet.CreatedAt,
+                    UpdatedAt = transaction.Wallet.UpdatedAt,
+                } : null
             }).ToList();
             return transactionReponses;
         }
@@ -160,7 +189,7 @@ namespace LocalShipper.Service.Services.Implement
         {
             var transaction = await _unitOfWork.Repository<Transaction>()
                 .GetAll()
-                .Include(o => o.Order)
+                .Include(a => a.Order).Include(a => a.Wallet)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (transaction == null)
@@ -209,6 +238,13 @@ namespace LocalShipper.Service.Services.Implement
                     subTotalprice = transaction.Order.SubtotalPrice,
                     totalPrice = transaction.Order.TotalPrice,
                     other = transaction.Order.Other,
+                } : null,
+                Wallet = transaction.Wallet != null ? new WalletResponse
+                {
+                    Id = transaction.Wallet.Id,
+                    Balance = transaction.Wallet.Balance,
+                    CreatedAt = transaction.Wallet.CreatedAt,
+                    UpdatedAt = transaction.Wallet.UpdatedAt,
                 } : null
             };
 
@@ -220,7 +256,7 @@ namespace LocalShipper.Service.Services.Implement
         {
 
             var transaction = await _unitOfWork.Repository<Transaction>().GetAll()
-            .Include(o => o.Order)
+            .Include(a => a.Order).Include(a => a.Wallet)
             .FirstOrDefaultAsync(a => a.Id == id);
 
             if (transaction == null)

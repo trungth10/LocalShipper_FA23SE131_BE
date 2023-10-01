@@ -64,6 +64,7 @@ namespace LocalShipper.Service.Services.Implement
         {
 
             var histories = await _unitOfWork.Repository<History>().GetAll()
+            .Include(t => t.Store)
             .Where(t => id == 0 || t.Id == id)
             .Where(t => string.IsNullOrWhiteSpace(action) || t.Action.Contains(action))
             .Where(t => storeId == 0 || t.StoreId == storeId)
@@ -75,12 +76,30 @@ namespace LocalShipper.Service.Services.Implement
                 HistoryDescription = history.HistoryDescription,
                 StoreId = history.StoreId,
                 CreateAt = history.CreateAt,
+
+                Store = history.Store != null ? new StoreResponse
+                {
+                    Id = history.Store.Id,
+                    StoreName = history.Store.StoreName,
+                    StoreAddress = history.Store.StoreAddress,
+                    StorePhone = history.Store.StorePhone,
+                    StoreEmail = history.Store.StoreEmail,
+                    OpenTime = history.Store.OpenTime,
+                    CloseTime = history.Store.CloseTime,
+                    StoreDescription = history.Store.StoreDescription,
+                    Status = history.Store.Status,
+                    BrandId = history.Store.BrandId,
+                    TemplateId = history.Store.TemplateId,
+                    ZoneId = history.Store.ZoneId,
+                    WalletId = history.Store.WalletId,
+                    AccountId = history.Store.AccountId,
+                } : null
             }).ToList();
             return historyResponses;
         }
 
 
-        //GET History
+        //Count History
         public async Task<int> GetTotalHistoryCount()
         {
             var count = await _unitOfWork.Repository<History>()
@@ -94,14 +113,14 @@ namespace LocalShipper.Service.Services.Implement
         public async Task<HistoryResponse> UpdateHistory(int id, PutHistoryRequest historyRequest)
         {
             var history = await _unitOfWork.Repository<History>()
-                .GetAll()
+                .GetAll().Include(a => a.Store)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (history == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy lịch sử", id.ToString());
             }
-            
+
 
             history.Action = historyRequest.Action;
             history.HistoryDescription = historyRequest.HistoryDescription;
@@ -126,6 +145,23 @@ namespace LocalShipper.Service.Services.Implement
                 HistoryDescription = historyRequest.HistoryDescription,
                 StoreId = historyRequest.StoreId,
                 CreateAt = historyRequest.CreateAt,
+                Store = history.Store != null ? new StoreResponse
+                {
+                    Id = history.Store.Id,
+                    StoreName = history.Store.StoreName,
+                    StoreAddress = history.Store.StoreAddress,
+                    StorePhone = history.Store.StorePhone,
+                    StoreEmail = history.Store.StoreEmail,
+                    OpenTime = history.Store.OpenTime,
+                    CloseTime = history.Store.CloseTime,
+                    StoreDescription = history.Store.StoreDescription,
+                    Status = history.Store.Status,
+                    BrandId = history.Store.BrandId,
+                    TemplateId = history.Store.TemplateId,
+                    ZoneId = history.Store.ZoneId,
+                    WalletId = history.Store.WalletId,
+                    AccountId = history.Store.AccountId,
+                } : null
             };
 
             return updatedHistoryResponse;

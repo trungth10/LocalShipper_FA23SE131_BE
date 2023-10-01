@@ -46,7 +46,39 @@ namespace LocalShipper.Service.Services.Implement
                 RatingValue = rating.RatingValue,
                 Comment = rating.Comment,
                 RatingTime = rating.RatingTime,
-                NameStore = rating.ByStore.StoreName
+                NameStore = rating.ByStore.StoreName,
+                Shipper = rating.Shipper != null ? new ShipperResponse
+                {
+                    Id = rating.Shipper.Id,
+                    FirstName = rating.Shipper.FirstName,
+                    LastName = rating.Shipper.LastName,
+                    EmailShipper = rating.Shipper.EmailShipper,
+                    PhoneShipper = rating.Shipper.PhoneShipper,
+                    AddressShipper = rating.Shipper.AddressShipper,
+                    TransportId = rating.Shipper.TransportId,
+                    AccountId = rating.Shipper.AccountId,
+                    ZoneId = rating.Shipper.ZoneId,
+                    Status = (Helpers.ShipperStatusEnum)rating.Shipper.Status,
+                    Fcmtoken = rating.Shipper.Fcmtoken,
+                    WalletId = rating.Shipper.WalletId,
+                } : null,
+                Store = rating.ByStore != null ? new StoreResponse
+                {
+                    Id = rating.ByStore.Id,
+                    StoreName = rating.ByStore.StoreName,
+                    StoreAddress = rating.ByStore.StoreAddress,
+                    StorePhone = rating.ByStore.StorePhone,
+                    StoreEmail = rating.ByStore.StoreEmail,
+                    OpenTime = rating.ByStore.OpenTime,
+                    CloseTime = rating.ByStore.CloseTime,
+                    StoreDescription = rating.ByStore.StoreDescription,
+                    Status = rating.ByStore.Status,
+                    BrandId = rating.ByStore.BrandId,
+                    TemplateId = rating.ByStore.TemplateId,
+                    ZoneId = rating.ByStore.ZoneId,
+                    WalletId = rating.ByStore.WalletId,
+                    AccountId = rating.ByStore.AccountId,
+                } : null
             }).ToList();
 
             return ratingResponse;
@@ -113,7 +145,7 @@ namespace LocalShipper.Service.Services.Implement
         public async Task<List<RatingResponse>> GetRating(int? id, int? shipperId, int? ratingValue, int? byStoreId)
         {
 
-            var ratings = await _unitOfWork.Repository<Rating>().GetAll()
+            var ratings = await _unitOfWork.Repository<Rating>().GetAll().Include(t => t.Shipper).Include(t => t.ByStore)
                     .Where(t => id == 0 || t.Id == id)
                     .Where(t => shipperId == 0 || t.ShipperId == shipperId)
                     .Where(t => ratingValue == 0 || t.RatingValue == ratingValue)
@@ -127,7 +159,35 @@ namespace LocalShipper.Service.Services.Implement
                 Comment = rating.Comment,
                 ByStoreId = rating.ByStoreId,
                 RatingTime = rating.RatingTime,
-
+                Shipper = rating.Shipper != null ? new ShipperResponse
+                {
+                    Id = rating.Shipper.Id,
+                    FirstName = rating.Shipper.FirstName,
+                    LastName = rating.Shipper.LastName,
+                    EmailShipper = rating.Shipper.EmailShipper,
+                    PhoneShipper = rating.Shipper.PhoneShipper,
+                    AddressShipper = rating.Shipper.AddressShipper,
+                    TransportId = rating.Shipper.TransportId,
+                    AccountId = rating.Shipper.AccountId,
+                    ZoneId = rating.Shipper.ZoneId,
+                } : null,
+                Store = rating.ByStore != null ? new StoreResponse
+                {
+                    Id = rating.ByStore.Id,
+                    StoreName = rating.ByStore.StoreName,
+                    StoreAddress = rating.ByStore.StoreAddress,
+                    StorePhone = rating.ByStore.StorePhone,
+                    StoreEmail = rating.ByStore.StoreEmail,
+                    OpenTime = rating.ByStore.OpenTime,
+                    CloseTime = rating.ByStore.CloseTime,
+                    StoreDescription = rating.ByStore.StoreDescription,
+                    Status = rating.ByStore.Status,
+                    BrandId = rating.ByStore.BrandId,
+                    TemplateId = rating.ByStore.TemplateId,
+                    ZoneId = rating.ByStore.ZoneId,
+                    WalletId = rating.ByStore.WalletId,
+                    AccountId = rating.ByStore.AccountId,
+                } : null
             }).ToList();
             return ratingResponses;
         }
@@ -147,7 +207,7 @@ namespace LocalShipper.Service.Services.Implement
         {
             var rating = await _unitOfWork.Repository<Rating>()
                 .GetAll()
-                .Include(o => o.Shipper)
+                .Include(o => o.Shipper).Include(o => o.ByStore)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (rating == null)
@@ -189,6 +249,23 @@ namespace LocalShipper.Service.Services.Implement
                     TransportId = rating.Shipper.TransportId,
                     AccountId = rating.Shipper.AccountId,
                     ZoneId = rating.Shipper.ZoneId,
+                } : null,
+                Store = rating.ByStore != null ? new StoreResponse
+                {
+                    Id = rating.ByStore.Id,
+                    StoreName = rating.ByStore.StoreName,
+                    StoreAddress = rating.ByStore.StoreAddress,
+                    StorePhone = rating.ByStore.StorePhone,
+                    StoreEmail = rating.ByStore.StoreEmail,
+                    OpenTime = rating.ByStore.OpenTime,
+                    CloseTime = rating.ByStore.CloseTime,
+                    StoreDescription = rating.ByStore.StoreDescription,
+                    Status = rating.ByStore.Status,
+                    BrandId = rating.ByStore.BrandId,
+                    TemplateId = rating.ByStore.TemplateId,
+                    ZoneId = rating.ByStore.ZoneId,
+                    WalletId = rating.ByStore.WalletId,
+                    AccountId = rating.ByStore.AccountId,
                 } : null
             };
 

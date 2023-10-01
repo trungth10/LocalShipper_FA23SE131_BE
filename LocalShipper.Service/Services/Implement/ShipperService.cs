@@ -132,11 +132,14 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //GET
-        public async Task<List<ShipperResponse>> GetShipper(int? id, string? firstName, string? lastName, string? email, string? phone, 
+        public async Task<List<ShipperResponse>> GetShipper(int? id, string? firstName, string? lastName, string? email, string? phone,
             string? address, int? transportId, int? accountId, int? zoneId, int? status, string? fcmToken, int? walletId)
         {
 
-            var shippers = await _unitOfWork.Repository<Shipper>().GetAll()
+            var shippers = await _unitOfWork.Repository<Shipper>().GetAll().Include(t => t.Transport)
+                                                              .Include(t => t.Account)
+                                                              .Include(t => t.Zone)
+                                                              .Include(t => t.Wallet)
                                                               .Where(t => id == 0 || t.Id == id)
                                                               .Where(t => string.IsNullOrWhiteSpace(firstName) || t.FirstName.Contains(firstName))
                                                               .Where(t => string.IsNullOrWhiteSpace(lastName) || t.LastName.Contains(lastName))
@@ -164,7 +167,47 @@ namespace LocalShipper.Service.Services.Implement
                 Fcmtoken = shipper.Fcmtoken,
                 Status = (ShipperStatusEnum)shipper.Status,
                 WalletId = shipper.WalletId,
-
+                Transport = shipper.Transport != null ? new TransportResponse
+                {
+                    Id = shipper.Transport.Id,
+                    TypeId = shipper.Transport.TypeId,
+                    LicencePlate = shipper.Transport.LicencePlate,
+                    TransportColor = shipper.Transport.TransportColor,
+                    TransportImage = shipper.Transport.TransportImage,
+                    TransportRegistration = shipper.Transport.TransportRegistration,
+                    Active = (bool)shipper.Transport.Active,
+                } : null,
+                Account = shipper.Account != null ? new AccountResponse
+                {
+                    Id = shipper.Account.Id,
+                    Fullname = shipper.Account.Fullname,
+                    Phone = shipper.Account.Phone,
+                    Email = shipper.Account.Email,
+                    RoleId = shipper.Account.RoleId,
+                    Active = shipper.Account.Active,
+                    FcmToken = shipper.Account.FcmToken,
+                    CreateDate = shipper.Account.CreateDate,
+                    ImageUrl = shipper.Account.ImageUrl,
+                } : null,
+                Zone = shipper.Zone != null ? new ZoneResponse
+                {
+                    Id = shipper.Zone.Id,
+                    ZoneName = shipper.Zone.ZoneName,
+                    ZoneDescription = shipper.Zone.ZoneDescription,
+                    Latitude = shipper.Zone.Latitude,
+                    Longitude = shipper.Zone.Longitude,
+                    Radius = shipper.Zone.Radius,
+                    CreatedAt = shipper.Zone.CreatedAt,
+                    UpdateAt = shipper.Zone.UpdateAt,
+                    Active = shipper.Zone.Active,
+                } : null,
+                Wallet = shipper.Wallet != null ? new WalletResponse
+                {
+                    Id = shipper.Wallet.Id,
+                    Balance = shipper.Wallet.Balance,
+                    CreatedAt = shipper.Wallet.CreatedAt,
+                    UpdatedAt = shipper.Wallet.UpdatedAt,
+                } : null
             }).ToList();
             return shipperResponses;
         }
@@ -254,8 +297,10 @@ namespace LocalShipper.Service.Services.Implement
         public async Task<ShipperResponse> UpdateShipper(int id, PutShipperRequest shipperRequest)
         {
             var shipper = await _unitOfWork.Repository<Shipper>()
-                .GetAll()
-                .Include(o => o.Account)
+                .GetAll().Include(t => t.Transport)
+                         .Include(t => t.Zone)
+                         .Include(t => t.Wallet)
+                         .Include(o => o.Account)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (shipper == null)
@@ -340,6 +385,16 @@ namespace LocalShipper.Service.Services.Implement
                     WalletId = shipper.WalletId,
 
 
+                    Transport = shipper.Transport != null ? new TransportResponse
+                    {
+                        Id = shipper.Transport.Id,
+                        TypeId = shipper.Transport.TypeId,
+                        LicencePlate = shipper.Transport.LicencePlate,
+                        TransportColor = shipper.Transport.TransportColor,
+                        TransportImage = shipper.Transport.TransportImage,
+                        TransportRegistration = shipper.Transport.TransportRegistration,
+                        Active = (bool)shipper.Transport.Active,
+                    } : null,
                     Account = shipper.Account != null ? new AccountResponse
                     {
                         Id = shipper.Account.Id,
@@ -351,7 +406,25 @@ namespace LocalShipper.Service.Services.Implement
                         FcmToken = shipper.Account.FcmToken,
                         CreateDate = shipper.Account.CreateDate,
                         ImageUrl = shipper.Account.ImageUrl,
-                        Password = shipper.Account.Password,
+                    } : null,
+                    Zone = shipper.Zone != null ? new ZoneResponse
+                    {
+                        Id = shipper.Zone.Id,
+                        ZoneName = shipper.Zone.ZoneName,
+                        ZoneDescription = shipper.Zone.ZoneDescription,
+                        Latitude = shipper.Zone.Latitude,
+                        Longitude = shipper.Zone.Longitude,
+                        Radius = shipper.Zone.Radius,
+                        CreatedAt = shipper.Zone.CreatedAt,
+                        UpdateAt = shipper.Zone.UpdateAt,
+                        Active = shipper.Zone.Active,
+                    } : null,
+                    Wallet = shipper.Wallet != null ? new WalletResponse
+                    {
+                        Id = shipper.Wallet.Id,
+                        Balance = shipper.Wallet.Balance,
+                        CreatedAt = shipper.Wallet.CreatedAt,
+                        UpdatedAt = shipper.Wallet.UpdatedAt,
                     } : null
                 };
 
