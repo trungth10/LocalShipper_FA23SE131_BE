@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LocalShipper.Service.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,5 @@ namespace LocalShipper.Service.DTOs.Request
     {
         public int storeId { get; set; }
         public int batchId { get; set; }
-        public int shipperId { get; set; }
-        public string cancelReason { get; set; }
     }
 }

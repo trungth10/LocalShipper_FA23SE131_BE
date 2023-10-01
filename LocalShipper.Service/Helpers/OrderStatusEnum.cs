@@ -11,14 +11,13 @@ namespace LocalShipper.Service.Helpers
     public enum OrderStatusEnum
     {
         [Display(Name = "Chọn Shipper")]
-        IDLE = 0,
+        IDLE = 1,
         [Display(Name = "Public Order")]
-        ASSIGNING = 1,
-        ACCEPTED = 2,
-        CANCELLED = 3,
-        INPROCESS = 4,
-        FAILED = 5,
+        ASSIGNING = 2,
+        ACCEPTED = 3,
+        CANCELLED = 4,
+        INPROCESS = 5,       
         COMPLETED = 6,
-        RETURNED = 7,
+        DELETED = 7,
     }
 }

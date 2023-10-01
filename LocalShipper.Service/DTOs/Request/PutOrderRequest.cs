@@ -1,14 +1,14 @@
-﻿using System;
+﻿using LocalShipper.Service.DTOs.Response;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LocalShipper.Service.DTOs.Response
+namespace LocalShipper.Service.DTOs.Request
 {
-    public class OrderResponse
+    public class PutOrderRequest
     {
-        public int Id { get; set; }
         public int storeId { get; set; }
         public int batchId { get; set; }
         public int shipperId { get; set; }
@@ -25,8 +25,6 @@ namespace LocalShipper.Service.DTOs.Response
         public decimal? subTotalprice { get; set; }
         public decimal? totalPrice { get; set; }
         public string other { get; set; }
-        public StoreResponse Store { get; set; }
-        public BatchResponse Batches { get; set; }
-        public ShipperResponse Shipper { get; set; }
+        
     }
 }

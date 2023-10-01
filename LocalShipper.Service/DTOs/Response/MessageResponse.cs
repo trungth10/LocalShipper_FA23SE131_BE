@@ -8,6 +8,7 @@ namespace LocalShipper.Service.DTOs.Response
 {
     public class MessageResponse
     {
+        public int id { get; set; }
         public string Message { get; set; }
     }
 }

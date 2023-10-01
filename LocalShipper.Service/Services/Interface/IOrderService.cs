@@ -31,5 +31,13 @@ namespace LocalShipper.Service.Services.Interface
 
         Task<List<OrderResponse>> GetCompleteOrder(int shipperId);
         Task<List<OrderResponse>> GetCancelOrder(int shipperId);
+
+        Task<List<OrderResponse>> GetOrder(int? id, int? status, int? storeId, int? batchId, int? shipperId,
+            string? tracking_number, string? cancle_reason, decimal? distance_price,
+            decimal? subtotal_price, decimal? totalPrice, string? other);
+        Task<int> GetTotalOrderCount(int? storeId, int? shipperId);
+        Task<MessageResponse> CreateOrder(OrderRequest request);
+        Task<OrderResponse> UpdateOrder(int id, PutOrderRequest orderRequest);
+        Task<OrderResponse> DeleteOrder(int id);
     }
 }

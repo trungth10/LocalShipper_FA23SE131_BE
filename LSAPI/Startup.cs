@@ -131,6 +131,9 @@ namespace LSAPI
             services.AddScoped<ITransportTypeService, TransportTypeService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IHistoryService, HistoryService>();
+            services.AddScoped<IWalletService, WalletService>();
+            services.AddScoped<IWalletTransactionService, WalletTransactionService>();
+            services.AddScoped<IPaymentService, PaymentService>();
 
             services.AddAutoMapper(typeof(Startup));
 
@@ -145,6 +148,7 @@ namespace LSAPI
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "LSAPI", Version = "v1" });
+     
 
                 // Thêm khai báo bảo mật Bearer
                 var securitySchema = new OpenApiSecurityScheme
