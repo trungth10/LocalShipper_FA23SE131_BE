@@ -29,12 +29,11 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<AccountResponse>> GetSingleAccount(int id, string phone, string email)
+        public async Task<ActionResult<AccountResponse>> GetAccount(int id, string phone, string email, int role, string fcm_token)
         {
             try
             {
-
-                var rs = await _accountService.GetAccount(id, phone, email);
+                var rs = await _accountService.GetAccount(id, phone, email, role, fcm_token);
                 return Ok(rs);
             }
             catch (Exception ex)
@@ -44,23 +43,9 @@ namespace LSAPI.Controllers
             
         }
 
-        [HttpGet("accounts.json")]
-        public async Task<ActionResult<List<AccountResponse>>> GetListAccount(int? roleId, bool? active, DateTime? createDate)
-        {
-            try
-            {
+        
 
-                var rs = await _accountService.GetListAccount(roleId, active, createDate);
-                return Ok(rs);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Xem tài khoản thất bại: {ex.Message}");
-            }
-
-        }
-
-        [HttpGet("count.json")]
+        [HttpGet("count")]
         public async Task<ActionResult<AccountResponse>> GetCountAccount()
         {
             try
@@ -106,8 +91,8 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpDelete()]
-        public async Task<ActionResult<MessageResponse>> DeleteAccount(int id)
+        [HttpPut("delete-account")]
+        public async Task<ActionResult<AccountResponse>> DeleteAccount(int id)
         {
             try
             {
@@ -120,6 +105,8 @@ namespace LSAPI.Controllers
                 return BadRequest($"Xóa đơn hàng thất bại: {ex.Message}");
             }
         }
+
+
 
         [HttpPost("verify-otp")]
         public async Task<ActionResult> VerifyOTP(string email, string otp)

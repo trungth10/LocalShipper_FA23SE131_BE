@@ -194,7 +194,7 @@ namespace LocalShipper.Service.Services.Implement
                     status = transaction.Order.Status,
                     storeId = transaction.Order.StoreId,
                     batchId = transaction.Order.BatchId,
-                    shipperId = transaction.Order.ShipperId,
+                    shipperId = (int)transaction.Order.ShipperId,
                     trackingNumber = transaction.Order.TrackingNumber,
                     createTime = transaction.Order.CreateTime,
                     orderTime = transaction.Order.OrderTime,

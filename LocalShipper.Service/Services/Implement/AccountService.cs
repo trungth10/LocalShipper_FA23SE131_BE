@@ -144,71 +144,25 @@ namespace LocalShipper.Service.Services.Implement
             return false;
         }
 
-        //GET Single
-        public async Task<AccountResponse> GetAccount(int id, string phone, string email)
+        //Get Account  
+        public async Task<List<AccountResponse>> GetAccount(int? id, string? phone, string? email, int? role, string? fcm_token)
         {
-            var accounts = await _unitOfWork.Repository<Account>()
-                .GetAll()
-                .Include(o => o.Role)
-                .FirstOrDefaultAsync(a => a.Id == id || a.Phone == phone || a.Email == email);
-            if (accounts == null)
-            {
-                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy tài khoản", accounts.ToString());
-            }
-                var accountResponse = new AccountResponse
-                {
-                   Id = accounts.Id,
-                   Fullname = accounts.Fullname,
-                   Phone = accounts.Phone,
-                   Email = accounts.Email,
-                   RoleId = accounts.RoleId,
-                   Active = accounts.Active,
-                   FcmToken = accounts.FcmToken,
-                   CreateDate = accounts.CreateDate,
-                   ImageUrl = accounts.ImageUrl,
-                   Password = accounts.Password,
-                };
-
-                if (accounts.Role != null)
-                {
-                    accountResponse.Role = new RoleResponse
-                    {
-                        Id = accounts.Role.Id,
-                        Name = accounts.Role.Name,
-                    };
-                }                                               
-            return accountResponse;
-        }
-
-        //GET List
-        public async Task<List<AccountResponse>> GetListAccount(int? roleId = null, bool? active = null, DateTime? createDate = null)
-        {
-            IQueryable<Account> query = _unitOfWork.Repository<Account>().GetAll().Include(o => o.Role);
-
-            if (roleId.HasValue)
-            {
-                query = query.Where(a => a.RoleId == roleId);
-            }
-
-            if (active.HasValue)
-            {
-                query = query.Where(a => a.Active == active);
-            }
-
-            if (createDate.HasValue)
-            {
-                query = query.Where(a => a.CreateDate.Date == createDate);
-            }
-
-            var accounts = await query.ToListAsync();
-
             
-            if (accounts.Count == 0)
+            var accoutns = await _unitOfWork.Repository<Account>().GetAll()
+                                                              .Include(o => o.Role)
+                                                              .Where(a => id == 0 || a.Id == id)
+                                                              .Where(a => string.IsNullOrWhiteSpace(phone) || a.Phone.Contains(phone))
+                                                              .Where(a => string.IsNullOrWhiteSpace(email) || a.Email.Contains(email))
+                                                              .Where(a => role == 0 || a.RoleId == role)
+                                                              .Where(a => string.IsNullOrWhiteSpace(fcm_token) || a.FcmToken.Contains(fcm_token))
+                                                              .ToListAsync();
+
+            if (accoutns == null)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy tài khoản", accounts.ToString());
+                throw new CrudException(HttpStatusCode.NotFound, "Tài khoản không có hoặc không tồn tại", id.ToString());
             }
 
-            var accountResponses = accounts.Select(account => new AccountResponse
+            var accountResponses = accoutns.Select(account => new AccountResponse
             {
                 Id = account.Id,
                 Fullname = account.Fullname,
@@ -226,9 +180,9 @@ namespace LocalShipper.Service.Services.Implement
                     Name = account.Role.Name,
                 } : null
             }).ToList();
-
             return accountResponses;
         }
+         
 
         //GET Count
         public async Task<int> GetTotalAccountCount()
@@ -243,27 +197,34 @@ namespace LocalShipper.Service.Services.Implement
         //UPDATE Account
         public async Task<AccountResponse> UpdateAccount(int id, AccountRequest accountRequest)
         {
-            var account = await _unitOfWork.Repository<Account>()
+            var accounts = await _unitOfWork.Repository<Account>()
                 .GetAll()
                 .Include(o => o.Role)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (account == null)
+            if (accounts == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy tài khoản", id.ToString());
             }
 
-                account.Fullname = accountRequest.FullName;
-                account.Email = accountRequest.Email;                     
-                account.Phone = accountRequest.Phone;            
-                account.Password = accountRequest.Password;        
-                account.RoleId = accountRequest.RoleId;           
-                account.ImageUrl = accountRequest.ImageUrl;                
-                account.FcmToken = accountRequest.Fcm_token;  
-                account.Active = accountRequest.Active;
+                accounts.Fullname = accountRequest.FullName;
+                accounts.Email = accountRequest.Email;                     
+                accounts.Phone = accountRequest.Phone;            
+                accounts.Password = accountRequest.Password;        
+                accounts.RoleId = (int)accountRequest.RoleId;           
+                accounts.ImageUrl = accountRequest.ImageUrl;                
+                accounts.FcmToken = accountRequest.Fcm_token;  
+                accounts.Active = accountRequest.Active;
 
-            await _unitOfWork.Repository<Account>().Update(account, id);
+            await _unitOfWork.Repository<Account>().Update(accounts, id);
             await _unitOfWork.CommitAsync();
+
+            var account = await _unitOfWork.Repository<Account>()
+                 .GetAll()
+                 .Include(o => o.Role)
+                 .FirstOrDefaultAsync(a => a.Id == id);
+
+
 
             var updatedAccountResponse = new AccountResponse
             {
@@ -288,25 +249,49 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //DELETE Account
-        public async Task<MessageResponse> DeleteAccount(int id)
+        public async Task<AccountResponse> DeleteAccount(int id)
         {
-            
-                var account = await _unitOfWork.Repository<Account>().GetAll()
-                .Include(o => o.Role)
-                .FirstOrDefaultAsync(a => a.Id == id);
 
-                if (account == null)
-                {
-                    throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy tài khoản", id.ToString());
-                }          
+            var account = await _unitOfWork.Repository<Account>()
+            .GetAll()
+            .Include(o => o.Role)
+            .FirstOrDefaultAsync(a => a.Id == id);
 
-                _unitOfWork.Repository<Account>().Delete(account);
-                await _unitOfWork.CommitAsync();
-
-            return new MessageResponse
+            if (account == null)
             {
-                Message = "Xóa tài khoản thành công",
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy tài khoản", id.ToString());
+            }
+
+            if (account.Active == false)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Tài khoản đã bị xóa rồi", id.ToString());
+            }
+
+            account.Active = false;
+
+            await _unitOfWork.Repository<Account>().Update(account, id);
+            await _unitOfWork.CommitAsync();
+
+            var accountResponse = new AccountResponse
+            {
+                Id = account.Id,
+                Fullname = account.Fullname,
+                Phone = account.Phone,
+                Email = account.Email,
+                RoleId = account.RoleId,
+                Active = account.Active,
+                FcmToken = account.FcmToken,
+                CreateDate = account.CreateDate,
+                ImageUrl = account.ImageUrl,
+                Password = account.Password,
+                Role = account.Role != null ? new RoleResponse
+                {
+                    Id = account.Role.Id,
+                    Name = account.Role.Name,
+                } : null
             };
+
+            return accountResponse;
         }
 
         

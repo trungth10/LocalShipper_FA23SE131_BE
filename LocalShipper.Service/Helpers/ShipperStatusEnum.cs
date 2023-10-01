@@ -11,10 +11,10 @@ namespace LocalShipper.Service.Helpers
     public enum ShipperStatusEnum
     {
         [Display(Name = "Ngoại tuyến")]
-        Offline =  0,
+        Offline =  1,
         [Display(Name = "Trực tuyến")]
-        Online = 1,
+        Online = 2,
         [Display(Name = "Đang giao hàng")]
-        Delivering = 2,
+        Delivering = 3,
     }
 }

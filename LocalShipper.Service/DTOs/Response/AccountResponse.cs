@@ -13,9 +13,9 @@ namespace LocalShipper.Service.DTOs.Response
         public string Phone { get; set; }
         public string Email { get; set; }
         public int RoleId { get; set; }
-        public bool? Active { get; set; }
+        public bool? Active { get; set; } = null;
         public string FcmToken { get; set; }
-        public DateTime CreateDate { get; set; }
+        public DateTime? CreateDate { get; set; } = null;
         public string ImageUrl { get; set; }
         public string Password { get; set; }
         public RoleResponse Role { get; set; }
