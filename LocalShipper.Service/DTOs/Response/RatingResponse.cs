@@ -13,9 +13,11 @@ namespace LocalShipper.Service.DTOs.Response
         public string ShipperName { get; set; }
         public int RatingValue { get; set; }
         public string Comment { get; set; }
-        //public int ByStoreId { get; set; }
+        public int ByStoreId { get; set; }
         public DateTime? RatingTime { get; set; }
         public string NameStore { get; set; }
+
+        public ShipperResponse Shipper { get; set; }
 
     }
 }

@@ -23,11 +23,12 @@ namespace LSAPI.Controllers
 
 
         [HttpGet()]
-        public async Task<ActionResult<List<TransportResponse>>> GetTransport(int id, string licencePlate)
+        public async Task<ActionResult<List<TransportResponse>>> GetTransport(int id, int typeId, string licencePlate, string transportColor,
+                                                    string transportImage, string transportRegistration)
         {
             try
             {
-                var rs = await _transportService.GetTransport(id, licencePlate);
+                var rs = await _transportService.GetTransport(id, typeId, licencePlate, transportColor, transportImage, transportRegistration);
                 return Ok(rs);
             }
             catch (Exception ex)

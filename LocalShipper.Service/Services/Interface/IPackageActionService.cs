@@ -1,4 +1,5 @@
-﻿using LocalShipper.Service.DTOs.Response;
+﻿using LocalShipper.Service.DTOs.Request;
+using LocalShipper.Service.DTOs.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,9 @@ namespace LocalShipper.Service.Services.Interface
     public interface IPackageActionService
     {
         Task<List<PackageActionResponse>> GetPackageAction(int? id, string? actionType);
+        Task<PackageActionResponse> CreatePackageAction(PackageActionRequest request);
+        Task<PackageActionResponse> UpdatePackageAction(int id, PackageActionRequest packageActionRequest);
+        Task<MessageResponse> DeletePackageAction(int id);
 
     }
 }

@@ -44,11 +44,13 @@ namespace LSAPI.Controllers
 
 
         [HttpGet()]
-        public async Task<ActionResult<List<TransactionResponse>>> GetShipper(int id, string firstName, string email, string phone, int zoneId, int status)
+        public async Task<ActionResult<List<TransactionResponse>>> GetShipper(int id, string firstName, string lastName,
+                                            string email, string phone,
+                                            string address, int transportId, int accountId, int zoneId, int status, string fcmToken, int walletId)
         {
             try
             {
-                var rs = await _shipperService.GetShipper(id, firstName, email, phone, zoneId, status);
+                var rs = await _shipperService.GetShipper(id, firstName, lastName, email, phone, address, transportId, accountId, zoneId, status, fcmToken, walletId);
                 return Ok(rs);
             }
             catch (Exception ex)

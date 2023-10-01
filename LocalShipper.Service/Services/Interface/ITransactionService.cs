@@ -10,7 +10,7 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface ITransactionService
     {
-        Task<List<TransactionResponse>> GetTransaction(int? id, string? transactionMethod, int? orderId, int? walletId);
+        Task<List<TransactionResponse>> GetTransaction(int? id, string? transactionMethod, int? orderId, int? walletId, decimal? amount);
 
         //Task<List<TransactionResponse>> GetListTransaction(int? walletId, string? transactionMethod);
 

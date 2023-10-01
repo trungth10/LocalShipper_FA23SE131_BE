@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace LocalShipper.Service.DTOs.Request
 {
-    public class RegisterTransportTypeRequest
+    public class PackageTypeRequest
     {
-        public string TransportType1 { get; set; }
-        public DateTime CreateAt { get; set; }
-
+        public string PackageType { get; set; } 
+        public DateTime? CreateAt { get; set; }
     }
 }
