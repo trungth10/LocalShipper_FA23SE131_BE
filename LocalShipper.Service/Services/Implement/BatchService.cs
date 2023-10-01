@@ -8,6 +8,7 @@ using LocalShipper.Service.Exceptions;
 using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Interface;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,14 +30,14 @@ namespace LocalShipper.Service.Services.Implement
         }
 
 
+
         public async Task<List<BatchResponse>> GetBatch(int? id, int? storeId, string? batchName)
         {
 
-            var batchs = await _unitOfWork.Repository<Batch>().GetAll()
+            var batchs = await _unitOfWork.Repository<Batch>().GetAll().Include(b => b.Store)
                                                               .Where(b => id == 0 || b.Id == id)
                                                               .Where(b => storeId == 0 || b.StoreId == storeId)
                                                               .Where(b => string.IsNullOrWhiteSpace(batchName) || b.BatchName.Contains(batchName))
-                                                              
                                                               .ToListAsync();
             var batchResponses = batchs.Select(batch => new BatchResponse
             {
@@ -46,10 +47,31 @@ namespace LocalShipper.Service.Services.Implement
                 BatchDescription = batch.BatchDescription,
                 CreatedAt = batch.CreatedAt,
                 UpdateAt = batch.UpdateAt,
-                Status= batch.Status,
+                Status = batch.Status,
+                Store = batch.Store != null ? new StoreResponse
+                {
+                    Id = batch.Store.Id,
+                    StoreName = batch.Store.StoreName,
+                    StoreAddress = batch.Store.StoreAddress,
+                    StorePhone = batch.Store.StorePhone,
+                    StoreEmail = batch.Store.StoreEmail,
+                    OpenTime = batch.Store.OpenTime,
+                    CloseTime = batch.Store.CloseTime,
+                    StoreDescription = batch.Store.StoreDescription,
+                    Status = batch.Store.Status,
+                    BrandId = batch.Store.BrandId,
+                    TemplateId = batch.Store.TemplateId,
+                    ZoneId = batch.Store.ZoneId,
+                    WalletId = batch.Store.WalletId,
+                    AccountId = batch.Store.AccountId
+
+                } : null,
+
+
             }).ToList();
             return batchResponses;
         }
+
         public async Task<BatchResponse> CreateBatch(BatchRequest request)
         {
             var existingBatch = await _unitOfWork.Repository<Batch>().FindAsync(b => b.BatchName == request.BatchName);
@@ -58,7 +80,7 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.BadRequest, "Batch đã tồn tại", request.BatchName);
             }
 
-          
+
             var newBatch = new Batch
             {
                 StoreId = request.StoreId,
@@ -66,14 +88,14 @@ namespace LocalShipper.Service.Services.Implement
                 BatchDescription = request.BatchDescription,
                 CreatedAt = DateTime.Now,
                 UpdateAt = DateTime.Now,
-                Status= request.Status,
+                Status = request.Status,
             };
 
-            
+
             await _unitOfWork.Repository<Batch>().InsertAsync(newBatch);
             await _unitOfWork.CommitAsync();
 
-            
+
             var batchResponse = _mapper.Map<BatchResponse>(newBatch);
             return batchResponse;
         }
@@ -92,7 +114,7 @@ namespace LocalShipper.Service.Services.Implement
             batch.BatchDescription = batchRequest.BatchDescription;
             batch.Status = batchRequest.Status;
             batch.UpdateAt = DateTime.Now;
-          
+
 
             await _unitOfWork.Repository<Batch>().Update(batch, id);
             await _unitOfWork.CommitAsync();
@@ -105,7 +127,24 @@ namespace LocalShipper.Service.Services.Implement
                 BatchDescription = batch.BatchDescription,
                 CreatedAt = batch.CreatedAt,
                 UpdateAt = batch.UpdateAt,
-               
+                Store = batch.Store != null ? new StoreResponse
+                {
+                    Id = batch.Store.Id,
+                    StoreName = batch.Store.StoreName,
+                    StoreAddress = batch.Store.StoreAddress,
+                    StorePhone = batch.Store.StorePhone,
+                    StoreEmail = batch.Store.StoreEmail,
+                    OpenTime = batch.Store.OpenTime,
+                    CloseTime = batch.Store.CloseTime,
+                    StoreDescription = batch.Store.StoreDescription,
+                    Status = batch.Store.Status,
+                    BrandId = batch.Store.BrandId,
+                    TemplateId = batch.Store.TemplateId,
+                    ZoneId = batch.Store.ZoneId,
+                    WalletId = batch.Store.WalletId,
+                    AccountId = batch.Store.AccountId
+
+                } : null,
             };
 
             return updatedBatchResponse;
@@ -122,7 +161,7 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy batch", id.ToString());
             }
 
-           
+
             batch.Status = (int)StatusOfBatch.DELETE;
 
             await _unitOfWork.Repository<Batch>().Update(batch, id);
@@ -136,13 +175,20 @@ namespace LocalShipper.Service.Services.Implement
                 BatchDescription = batch.BatchDescription,
                 CreatedAt = batch.CreatedAt,
                 UpdateAt = batch.UpdateAt,
-               
+
             };
 
             return deletedBatchResponse;
         }
 
+        public async Task<int> GetTotalBatchCount()
+        {
+            var count = await _unitOfWork.Repository<Batch>()
+                .GetAll()
+                .CountAsync();
 
+            return count;
+        }
     }
 
 }

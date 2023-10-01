@@ -90,5 +90,15 @@ namespace LocalShipper.Service.Services.Implement
             return updatedPackageTypeResponse;
         }
 
+
+        public async Task<int> GetTotalPackageTypeCount()
+        {
+            var count = await _unitOfWork.Repository<PackageType>()
+                .GetAll()
+                .CountAsync();
+
+            return count;
+        }
+
     }
 }

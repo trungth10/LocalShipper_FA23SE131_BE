@@ -13,5 +13,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<List<PackageTypeResponse>> GetPackageType(int? id, string? packageType);
         Task<PackageTypeResponse> CreatePackageType(PackageTypeRequest request);
         Task<PackageTypeResponse> UpdatePackageType(int id, PackageTypeRequest packageTypeRequest);
+
+        Task<int> GetTotalPackageTypeCount();
     }
 }

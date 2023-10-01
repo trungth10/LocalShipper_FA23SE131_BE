@@ -30,7 +30,7 @@ namespace LocalShipper.Service.Services.Implement
         public async Task<List<StoreResponse>> GetStore(int? id, string? storeName, int? status, int? brandId, int? zoneId, int? walletId, int? accountId)
         {
 
-            var stores = await _unitOfWork.Repository<Store>().GetAll()
+            var stores = await _unitOfWork.Repository<Store>().GetAll().Include(b => b.Wallet).Include(b => b.Account).Include(b => b.Zone).Include(b => b.Template).Include(b => b.Brand)
                                                               .Where(b => id == 0 || b.Id == id)
                                                               .Where(b => status ==0 || b.Status == status)
                                                               .Where(b => brandId ==0 || b.BrandId == brandId)
@@ -94,7 +94,7 @@ namespace LocalShipper.Service.Services.Implement
         public async Task<StoreResponse> UpdateStore(int id, StoreRequest storeRequest)
         {
             var store = await _unitOfWork.Repository<Store>()
-                .GetAll()
+                .GetAll().Include(b => b.Wallet).Include(b => b.Account).Include(b => b.Zone).Include(b => b.Template).Include(b => b.Brand)
                 .FirstOrDefaultAsync(s => s.Id == id);
 
             if (store == null)
@@ -122,26 +122,26 @@ namespace LocalShipper.Service.Services.Implement
             await _unitOfWork.Repository<Store>().Update(store, id);
             await _unitOfWork.CommitAsync();
 
-            var updatedStoreResponse = new StoreResponse
-            {
-                Id = store.Id,
-                StoreName = store.StoreName,
-                StoreAddress = store.StoreAddress,
-                StorePhone = store.StorePhone,
-                StoreEmail = store.StoreEmail,
-                OpenTime = store.OpenTime,
-                CloseTime = store.CloseTime,
-                StoreDescription = store.StoreDescription,
-                Status = store.Status,
-                BrandId = store.BrandId,
-                TemplateId = store.TemplateId,
-                ZoneId = store.ZoneId,
-                WalletId = store.WalletId,
-                AccountId= store.AccountId,
-                
-              
-            };
+            //var updatedStoreResponse = new StoreResponse
+            //{
+            //    Id = store.Id,
+            //    StoreName = store.StoreName,
+            //    StoreAddress = store.StoreAddress,
+            //    StorePhone = store.StorePhone,
+            //    StoreEmail = store.StoreEmail,
+            //    OpenTime = store.OpenTime,
+            //    CloseTime = store.CloseTime,
+            //    StoreDescription = store.StoreDescription,
+            //    Status = store.Status,
+            //    BrandId = store.BrandId,
+            //    TemplateId = store.TemplateId,
+            //    ZoneId = store.ZoneId,
+            //    WalletId = store.WalletId,
+            //    AccountId= store.AccountId,
 
+
+            //};
+            var updatedStoreResponse = _mapper.Map<StoreResponse>(store);
             return updatedStoreResponse;
         }
         public async Task<MessageResponse> DeleteStore(int id)
@@ -167,7 +167,14 @@ namespace LocalShipper.Service.Services.Implement
                 Message = "Đã xóa",
             };
         }
+        public async Task<int> GetTotalStoreCount()
+        {
+            var count = await _unitOfWork.Repository<Store>()
+                .GetAll()
+                .CountAsync();
 
+            return count;
+        }
     }
 }
 

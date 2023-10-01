@@ -14,6 +14,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<PackageActionResponse> CreatePackageAction(PackageActionRequest request);
         Task<PackageActionResponse> UpdatePackageAction(int id, PackageActionRequest packageActionRequest);
         Task<MessageResponse> DeletePackageAction(int id);
+        Task<int> GetTotalPackageActionCount();
 
     }
 }

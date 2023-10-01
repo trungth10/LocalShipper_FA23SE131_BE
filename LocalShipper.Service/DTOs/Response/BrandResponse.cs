@@ -16,5 +16,6 @@ namespace LocalShipper.Service.DTOs.Response
         public string ImageUrl { get; set; }
         public bool? Active { get; set; }
         public int AccountId { get; set; }
+        public AccountResponse Account { get; set; }
     }
 }

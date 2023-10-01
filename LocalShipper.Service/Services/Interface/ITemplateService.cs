@@ -15,5 +15,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<TemplateResponse> UpdateTemplate(int id, TemplateRequest templateRequest);
 
         Task<MessageResponse> DeleteTemplate(int id);
+        Task<int> GetTotalTemplateCount();
     }
 }

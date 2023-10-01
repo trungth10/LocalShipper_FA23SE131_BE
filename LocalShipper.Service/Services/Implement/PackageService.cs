@@ -13,6 +13,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using static Org.BouncyCastle.Asn1.Cmp.Challenge;
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -29,7 +30,7 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<List<PackageResponse>> GetPackage(int? batchId,int? id, int? status,int? actionId, int? typeId,string? customerName,string? customerAddress, string? customerPhome, string? custommerEmail,decimal? totalPrice)
         {           
-            var packages = await _unitOfWork.Repository<Package>().GetAll()
+            var packages = await _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch)
                 .Where(f => f.BatchId == batchId || batchId == 0)
                 .Where(f => f.Id == id || id == 0)
                 .Where(f => f.Status == status || status == 0)
@@ -38,28 +39,28 @@ namespace LocalShipper.Service.Services.Implement
                 .Where(f => string.IsNullOrWhiteSpace(customerName) ||f.CustomerName.Contains(customerName))
                 .ToListAsync();
 
-            var packageResponses = packages.Select(package => new PackageResponse
-            {
-                Id = package.Id,
-                BatchId = package.BatchId,
-                Capacity= package.Capacity,
-                PackageWeight = package.PackageWeight,
-                PackageWidth= package.PackageWidth,
-                PackageHeight= package.PackageHeight,
-                PackageLength= package.PackageLength,
-                Status= package.Status,
-                CustomerAddress= package.CustomerAddress,
-                CustomerName= package.CustomerName,
-                CustomerEmail= package.CustomerEmail,
-                CancelReason= package.CancelReason,
-                SubtotalPrice= package.SubtotalPrice,
-                DistancePrice= package.DistancePrice,
-                TotalPrice = package.TotalPrice,
-                ActionId= package.ActionId,
-                TypeId= package.TypeId,
-                
-            }).ToList();
+            //var packageResponses = packages.Select(package => new PackageResponse
+            //{
+            //    Id = package.Id,
+            //    BatchId = package.BatchId,
+            //    Capacity= package.Capacity,
+            //    PackageWeight = package.PackageWeight,
+            //    PackageWidth= package.PackageWidth,
+            //    PackageHeight= package.PackageHeight,
+            //    PackageLength= package.PackageLength,
+            //    Status= package.Status,
+            //    CustomerAddress= package.CustomerAddress,
+            //    CustomerName= package.CustomerName,
+            //    CustomerEmail= package.CustomerEmail,
+            //    CancelReason= package.CancelReason,
+            //    SubtotalPrice= package.SubtotalPrice,
+            //    DistancePrice= package.DistancePrice,
+            //    TotalPrice = package.TotalPrice,
+            //    ActionId= package.ActionId,
+            //    TypeId= package.TypeId,
 
+            //}).ToList();
+            var packageResponses = _mapper.Map<List<Package>, List<PackageResponse>>(packages);
             return packageResponses;
         }
 
@@ -68,12 +69,12 @@ namespace LocalShipper.Service.Services.Implement
             decimal distancePrice = 0;
             if (request.DistancePrice == 3)
             {
-                distancePrice = 3*18;
+                distancePrice = 18;
 
             }
             else if (request.DistancePrice > 3)
             {
-                distancePrice = 3*18 + (request.DistancePrice - 3) * 4;
+                distancePrice = 18 + (request.DistancePrice - 3) * 4;
             }
           
             var newPackage = new Package
@@ -110,7 +111,7 @@ namespace LocalShipper.Service.Services.Implement
         public async Task<PackageResponse> UpdatePackage(int id, PackageRequest packageRequest)
         {
             var package = await _unitOfWork.Repository<Package>()
-                .GetAll()
+                .GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (package == null)
@@ -139,39 +140,39 @@ namespace LocalShipper.Service.Services.Implement
             await _unitOfWork.Repository<Package>().Update(package, id);
             await _unitOfWork.CommitAsync();
 
-            var updatedPackageResponse = new PackageResponse
-            {
-                Id = package.Id,
-                BatchId = package.BatchId,
-                Capacity = package.Capacity,
-                PackageWeight = package.PackageWeight,
-                PackageWidth = package.PackageWidth,
-                PackageHeight = package.PackageHeight,
-                PackageLength = package.PackageLength,
-                Status = package.Status,
-                CustomerAddress = package.CustomerAddress,
-                CustomerPhone = package.CustomerPhone,
-                CustomerName = package.CustomerName,
-                CustomerEmail = package.CustomerEmail,
-                DistancePrice = package.DistancePrice,
-                SubtotalPrice = package.SubtotalPrice,
-                TotalPrice = package.TotalPrice,
-                ActionId = package.ActionId,
-                TypeId = package.TypeId
+            //var updatedPackageResponse = new PackageResponse
+            //{
+            //    Id = package.Id,
+            //    BatchId = package.BatchId,
+            //    Capacity = package.Capacity,
+            //    PackageWeight = package.PackageWeight,
+            //    PackageWidth = package.PackageWidth,
+            //    PackageHeight = package.PackageHeight,
+            //    PackageLength = package.PackageLength,
+            //    Status = package.Status,
+            //    CustomerAddress = package.CustomerAddress,
+            //    CustomerPhone = package.CustomerPhone,
+            //    CustomerName = package.CustomerName,
+            //    CustomerEmail = package.CustomerEmail,
+            //    DistancePrice = package.DistancePrice,
+            //    SubtotalPrice = package.SubtotalPrice,
+            //    TotalPrice = package.TotalPrice,
+            //    ActionId = package.ActionId,
+            //    TypeId = package.TypeId
               
-            };
-
+            //};
+            var updatedPackageResponse = _mapper.Map<PackageResponse>(package);
             return updatedPackageResponse;
         }
         private decimal CalculateTotalPrice(decimal distancePrice)
         {
             if (distancePrice == 3)
             {
-                return 3*18;
+                return 18;
             }
             else if (distancePrice > 3)
             {
-                return 3*18 + (distancePrice - 3) * 4;
+                return 18 + (distancePrice - 3) * 4;
             }
             else
             {
@@ -196,6 +197,13 @@ namespace LocalShipper.Service.Services.Implement
                 Message = "Xóa gói hàng thành công",
             };
         }
+        public async Task<int> GetTotalPackageCount()
+        {
+            var count = await _unitOfWork.Repository<Package>()
+                .GetAll()
+                .CountAsync();
 
+            return count;
+        }
     }
 }

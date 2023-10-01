@@ -10,10 +10,11 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IBrandService
     {
-        Task<List<BrandResponse>> GetBrands(int? id, string? brandName, string? brandDescripton, string? iconUrl, string? imageUrl, int? accountId);
+        Task<List<BrandResponse>> GetBrands(int? id, string? brandName, string? iconUrl, string? imageUrl, int? accountId);
         Task<BrandResponse> PostBrand(BrandRequest request);
         Task<BrandResponse> UpdateBrand(int id, BrandRequest brandRequest);
         Task<BrandResponse> DeleteBrand(int id);
+        Task<int> GetTotalBrandCount();
 
 
     }

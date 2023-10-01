@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LocalShipper.Service.DTOs.Request;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,9 +19,14 @@ namespace LocalShipper.Service.DTOs.Response
         public string StoreDescription { get; set; }
         public int? Status { get; set; }
         public int BrandId { get; set; }
+        public BrandResponse Brand { get; set; }
         public int? TemplateId { get; set; }
+        public TemplateResponse Template { get; set; }
         public int? ZoneId { get; set; }
+        public ZoneResponse Zone { get; set; }
         public int WalletId { get; set; }
+        public WalletResponse Wallet { get; set; }
         public int AccountId { get; set; }
+        public AccountResponse Account { get; set; }
     }
 }

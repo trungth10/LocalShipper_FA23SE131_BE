@@ -14,5 +14,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<StoreResponse> CreateStore(StoreRequest request);
         Task<StoreResponse> UpdateStore(int id, StoreRequest storeRequest);
         Task<MessageResponse> DeleteStore(int id);
+        Task<int> GetTotalStoreCount();
     }
 }
