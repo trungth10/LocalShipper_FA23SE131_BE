@@ -17,6 +17,6 @@ namespace LocalShipper.Service.DTOs.Response
         public string TransactionDescription { get; set; }
         public DateTime? CreatedAt { get; set; }
         public OrderResponse Order { get; set; }
-        //public WalletResponse Wallet { get; set; }
+        public WalletResponse Wallet { get; set; }
     }
 }

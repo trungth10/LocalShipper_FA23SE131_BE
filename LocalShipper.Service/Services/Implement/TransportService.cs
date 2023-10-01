@@ -69,7 +69,7 @@ namespace LocalShipper.Service.Services.Implement
                                                 string? transportImage, string? transportRegistration)
         {
 
-            var transports = await _unitOfWork.Repository<Transport>().GetAll().Include(t =>  t.Type)
+            var transports = await _unitOfWork.Repository<Transport>().GetAll().Include(t => t.Type)
                                                               .Where(t => id == 0 || t.Id == id)
                                                               .Where(t => id == 0 || t.TypeId == typeId)
                                                               .Where(t => string.IsNullOrWhiteSpace(licencePlate) || t.LicencePlate.Contains(licencePlate))
@@ -90,7 +90,7 @@ namespace LocalShipper.Service.Services.Implement
                 TransportColor = transport.TransportColor,
                 TransportImage = transport.TransportImage,
                 TransportRegistration = transport.TransportRegistration,
-                Active= (bool)transport.Active,
+                Active = (bool)transport.Active,
                 TransportType = transport.Type != null ? new TransportTypeResponse
                 {
                     Id = transport.Type.Id,
@@ -194,8 +194,8 @@ namespace LocalShipper.Service.Services.Implement
 
 
             var transport = await _unitOfWork.Repository<Transport>()
-                .GetAll()
-                .Include(o => o.Type)
+                .GetAll().Include(a => a.Type)
+                .Include(a => a.Type)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (transport == null)
@@ -243,27 +243,47 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //DELETE Transport
-        public async Task<MessageResponse> DeleteTransport(int id)
+        public async Task<TransportResponse> DeleteTransport(int id)
         {
 
-            var transport = await _unitOfWork.Repository<Transport>().GetAll()
-            .Include(o => o.Type)
-            .FirstOrDefaultAsync(a => a.Id == id);
+            var transport = await _unitOfWork.Repository<Transport>()
+             .GetAll()
+             .Include(a => a.Type)
+             .FirstOrDefaultAsync(a => a.Id == id);
 
             if (transport == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy phương tiện", id.ToString());
             }
 
-            transport.Active = false; // Đặt giá trị Active thành false
-
-
-            await _unitOfWork.CommitAsync(); // Lưu thay đổi vào cơ sở dữ liệu
-
-            return new MessageResponse
+            if (transport.Active == false)
             {
-                Message = "Vô hiệu hóa phương tiện thành công",
+                throw new CrudException(HttpStatusCode.NotFound, "Phương tiện đã bị xóa rồi", id.ToString());
+            }
+
+            transport.Active = false;
+
+            await _unitOfWork.Repository<Transport>().Update(transport, id);
+            await _unitOfWork.CommitAsync();
+
+            var transportResponse = new TransportResponse
+            {
+                Id = transport.Id,
+                TypeId = transport.TypeId,
+                LicencePlate = transport.LicencePlate,
+                TransportColor = transport.TransportColor,
+                TransportImage = transport.TransportImage,
+                TransportRegistration = transport.TransportRegistration,
+                Active = (bool)transport.Active,
+
+                TransportType = transport.Type != null ? new TransportTypeResponse
+                {
+                    Id = transport.Type.Id,
+                    TransportType1 = transport.Type.TransportType1,
+                } : null
             };
+
+            return transportResponse;
         }
     }
 }

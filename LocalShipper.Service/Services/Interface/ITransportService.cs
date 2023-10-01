@@ -18,6 +18,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<int> GetTotalTransportCount();
         Task<TransportResponse> CreateTransport(RegisterTransportRequest request);
         Task<TransportResponse> UpdateTransport(int id, PutTransportRequest transportRequest);
-        Task<MessageResponse> DeleteTransport(int id);
+        Task<TransportResponse> DeleteTransport(int id);
     }
 }

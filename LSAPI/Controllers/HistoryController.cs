@@ -33,7 +33,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpGet("count.json")]
+        [HttpGet("count")]
         public async Task<ActionResult<HistoryResponse>> GetCountHistory()
         {
             try

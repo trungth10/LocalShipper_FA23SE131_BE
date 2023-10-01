@@ -18,6 +18,7 @@ namespace LocalShipper.Service.DTOs.Response
         public string NameStore { get; set; }
 
         public ShipperResponse Shipper { get; set; }
+        public StoreResponse Store { get; set; }
 
     }
 }

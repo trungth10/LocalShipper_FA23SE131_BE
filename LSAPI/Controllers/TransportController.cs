@@ -51,7 +51,7 @@ namespace LSAPI.Controllers
         //    }
         //}
 
-        [HttpGet("count.json")]
+        [HttpGet("count")]
         public async Task<ActionResult<TransportResponse>> GetCountTransport()
         {
             try
@@ -98,7 +98,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
-        public async Task<ActionResult<MessageResponse>> DeleteAccount(int id)
+        public async Task<ActionResult<TransportResponse>> DeleteAccount(int id)
         {
             try
             {
