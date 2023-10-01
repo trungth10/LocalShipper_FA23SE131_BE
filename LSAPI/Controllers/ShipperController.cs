@@ -24,7 +24,7 @@ namespace LSAPI.Controllers
             _shipperService = shipperService;
         }
 
-        [HttpPut("{shipperId:int}/status")]
+       /* [HttpPut("{shipperId:int}/status")]
         public async Task<ActionResult<ShipperResponse>> UpdateShipperStatus(int shipperId, [FromBody] UpdateShipperStatusRequest request)
         {
             try
@@ -40,7 +40,7 @@ namespace LSAPI.Controllers
             {
                 return BadRequest($"Cập nhật trạng thái người giao hàng thất bại: {ex.Message}");
             }
-        }
+        }*/
 
 
         [HttpGet()]

@@ -134,6 +134,7 @@ namespace LSAPI
             services.AddScoped<IWalletService, WalletService>();
             services.AddScoped<IWalletTransactionService, WalletTransactionService>();
             services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IZoneService, ZoneService>();
 
             services.AddAutoMapper(typeof(Startup));
 

@@ -91,7 +91,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpPut("delete-account")]
+        [HttpDelete("")]
         public async Task<ActionResult<AccountResponse>> DeleteAccount(int id)
         {
             try

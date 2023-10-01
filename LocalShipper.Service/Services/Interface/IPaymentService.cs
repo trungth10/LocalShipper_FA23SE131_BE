@@ -1,4 +1,5 @@
-﻿using LocalShipper.Service.DTOs.Response;
+﻿using LocalShipper.Service.DTOs.Request;
+using LocalShipper.Service.DTOs.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +13,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<List<PaymentResponse>> GetPayment(int? id, string? paymentMethod, int? status, string? paymentCode
             , string? paymentImage, int? packageId);
         Task<int> GetTotalPaymentCount();
+        Task<PaymentResponse> CreatePayment(PaymentRequest request);
     }
 }

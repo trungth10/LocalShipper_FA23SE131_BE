@@ -4,6 +4,7 @@ using LocalShipper.Service.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
+using LocalShipper.Service.DTOs.Request;
 
 namespace LSAPI.Controllers
 {
@@ -47,6 +48,20 @@ namespace LSAPI.Controllers
                 return BadRequest($"Xem count thất bại: {ex.Message}");
             }
 
+        }
+
+        [HttpPost()]
+        public async Task<ActionResult<PaymentResponse>> CreatePayment([FromBody] PaymentRequest request)
+        {
+            try
+            {
+                var rs = await _paymentService.CreatePayment(request);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Tạo thất bại: {ex.Message}");
+            }
         }
     }
 }

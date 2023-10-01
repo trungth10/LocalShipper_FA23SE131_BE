@@ -21,7 +21,7 @@ namespace LSAPI.Controllers
         }
        
 
-        [HttpGet("{shipperId}")]
+        /*[HttpGet("{shipperId}")]
         public async Task<ActionResult<RatingResponse>> GetRatingByShipperId(int shipperId)
         {
             try
@@ -56,7 +56,7 @@ namespace LSAPI.Controllers
             {
                 return BadRequest($"xem rating thất bại: {ex.Message}");
             }
-        }
+        }*/
 
 
         [HttpGet()]

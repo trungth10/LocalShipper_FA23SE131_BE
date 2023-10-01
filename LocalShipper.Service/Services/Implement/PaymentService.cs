@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using LocalShipper.Data.Models;
 using LocalShipper.Data.UnitOfWork;
+using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
 using LocalShipper.Service.Exceptions;
+using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -85,6 +87,83 @@ namespace LocalShipper.Service.Services.Implement
                 .CountAsync();
 
             return count;
+        }
+
+        //CREATE Payment
+        public async Task<PaymentResponse> CreatePayment(PaymentRequest request)
+        {
+            string paymentCode = GenerateRandomPaymentCode();
+
+            var paymentCheck = await _unitOfWork.Repository<Payment>().GetAll()
+                                                                 .Where(a => a.PackageId == request.PackageId)
+                                                                 .ToListAsync();
+            if(paymentCheck != null)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Sản phẩm đã được thanh toán rồi", request.PackageId.ToString());
+            }
+
+            Payment payment = new Payment
+            {
+                PaymentMethod = request.PaymentMethod,
+                Status = (int)PaymentStatusEnum.ACTIVE,
+                PaymentCode = paymentCode,
+                PaymentImage = request.PaymentImage,
+                PackageId = request.PackageId,
+            };
+            await _unitOfWork.Repository<Payment>().InsertAsync(payment);
+            await _unitOfWork.CommitAsync();
+
+
+            var paymentResponse = new PaymentResponse
+            {
+                Id = payment.Id,
+                PaymentMethod = payment.PaymentMethod,
+                PaymentDate = payment.PaymentDate,
+                Status = payment.Status,
+                PaymentCode= payment.PaymentCode,
+                PaymentImage= payment.PaymentImage,
+                PackageId = payment.PackageId,
+                Package = payment.Package != null ? new PackageResponse
+                {
+                    Id = payment.Package.Id,
+                    BatchId = payment.Package.BatchId,
+                    Capacity = payment.Package.Capacity,
+                    PackageWeight = payment.Package.PackageWeight,
+                    PackageWidth = payment.Package.PackageWidth,
+                    PackageHeight = payment.Package.PackageHeight,
+                    PackageLength = payment.Package.PackageLength,
+                    Status = payment.Package.Status,
+                    CustomerAddress = payment.Package.CustomerAddress,
+                    CustomerName = payment.Package.CustomerName,
+                    CustomerEmail = payment.Package.CustomerEmail,
+                    CancelReason = payment.Package.CancelReason,
+                    SubtotalPrice = payment.Package.SubtotalPrice,
+                    DistancePrice = payment.Package.DistancePrice,
+                    ActionId = payment.Package.ActionId,
+                    TypeId = payment.Package.TypeId,
+                } : null
+
+            };
+            return paymentResponse;
+        }
+
+        private string GenerateRandomPaymentCode()
+        {
+            string allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+            int length = 7;
+
+            Random random = new Random();
+
+            char[] trackingNumber = new char[length];
+            for (int i = 0; i < length; i++)
+            {
+                trackingNumber[i] = allowedChars[random.Next(0, allowedChars.Length)];
+            }
+
+            string generatedTrackingNumber = new string(trackingNumber);
+
+            return generatedTrackingNumber;
         }
     }
 }

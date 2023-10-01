@@ -10,7 +10,6 @@ namespace LocalShipper.Service.DTOs.Request
     public class PaymentRequest
     {
         public string PaymentMethod { get; set; }
-        public PaymentStatusEnum Status { get; set; }
         public string PaymentImage { get; set; }
         public int PackageId { get; set; }
     }

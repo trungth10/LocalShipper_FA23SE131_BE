@@ -86,7 +86,7 @@ namespace LSAPI.Controllers
             }
 
         }
-        [HttpPut("delete-order")]
+        [HttpDelete()]
         public async Task<ActionResult<MessageResponse>> DeleteOrder(int id)
         {
             try

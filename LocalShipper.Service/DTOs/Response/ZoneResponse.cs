@@ -1,11 +1,10 @@
-﻿using LocalShipper.Service.DTOs.Response;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LocalShipper.Service.DTOs.Request
+namespace LocalShipper.Service.DTOs.Response
 {
     public class ZoneResponse
     {

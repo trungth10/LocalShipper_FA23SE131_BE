@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace LocalShipper.Service.DTOs.Request
 {
-    internal class ZoneRequest
+    public class ZoneRequest
     {
+        public string ZoneName { get; set; }
+        public string ZoneDescription { get; set; }
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
+        public decimal? Radius { get; set; }
     }
 }
