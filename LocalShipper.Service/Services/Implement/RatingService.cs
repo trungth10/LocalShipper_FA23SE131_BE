@@ -12,6 +12,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.NetworkInformation;
+using LocalShipper.Service.DTOs.Request;
+using LocalShipper.Service.Exceptions;
+using System.Net;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -63,5 +67,156 @@ namespace LocalShipper.Service.Services.Implement
             decimal averageRating =(decimal)ratings.Average(r => r.RatingValue);
             return averageRating;
         }
+
+
+
+        //CREATE Rating
+        public async Task<RatingResponse> CreateRating(RegisterRatingRequest request)
+        {
+            if (request.RatingValue < 1 || request.RatingValue > 5)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Đánh giá thất bại. Vui lòng nhập lại từ 1 đến 5.", ToString());
+            }
+            var shipperExisted = _unitOfWork.Repository<Rating>().Find(x => x.ShipperId == request.ShipperId);
+
+            if (shipperExisted != null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Shipper Id không tồn tại", request.ShipperId.ToString());
+            }
+
+            Rating rating = new Rating
+            {
+                ShipperId = request.ShipperId,
+                RatingValue = request.RatingValue,
+                Comment = request.Comment,
+                ByStoreId = request.ByStoreId,
+                RatingTime = request.RatingTime
+            };
+            
+            await _unitOfWork.Repository<Rating>().InsertAsync(rating);
+            await _unitOfWork.CommitAsync();
+
+            var createdRatingResponse = new RatingResponse
+            {
+                Id = rating.Id,
+                ShipperId = rating.ShipperId,
+                RatingValue = rating.RatingValue,
+                Comment = rating.Comment,
+                ByStoreId = rating.ByStoreId,
+                RatingTime = rating.RatingTime,
+            };
+            return createdRatingResponse;
+
+        }
+
+        //GET 
+        public async Task<List<RatingResponse>> GetRating(int? id, int? shipperId, int? ratingValue, int? byStoreId)
+        {
+
+            var ratings = await _unitOfWork.Repository<Rating>().GetAll()
+                    .Where(t => id == 0 || t.Id == id)
+                    .Where(t => shipperId == 0 || t.ShipperId == shipperId)
+                    .Where(t => ratingValue == 0 || t.RatingValue == ratingValue)
+                    .Where(t => byStoreId == 0 || t.ByStoreId == byStoreId)
+                    .ToListAsync();
+            var ratingResponses = ratings.Select(rating => new RatingResponse
+            {
+                Id = rating.Id,
+                ShipperId = rating.ShipperId,
+                RatingValue = rating.RatingValue,
+                Comment = rating.Comment,
+                ByStoreId = rating.ByStoreId,
+                RatingTime = rating.RatingTime,
+
+            }).ToList();
+            return ratingResponses;
+        }
+
+        //GET Count
+        public async Task<int> GetTotalRatingCount()
+        {
+            var count = await _unitOfWork.Repository<Rating>()
+                .GetAll()
+                .CountAsync();
+
+            return count;
+        }
+
+        //UPDATE Rating
+        public async Task<RatingResponse> UpdateRating(int id, PutRatingRequest ratingRequest)
+        {
+            var rating = await _unitOfWork.Repository<Rating>()
+                .GetAll()
+                .Include(o => o.Shipper)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (rating == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy đánh giá", id.ToString());
+            }
+            if (ratingRequest.RatingValue < 1 || ratingRequest.RatingValue > 5)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Đánh giá không hợp lệ. Vui lòng nhập lại từ 1 đến 5.", ToString());
+            }
+            rating.ShipperId = ratingRequest.ShipperId;
+            rating.RatingValue = ratingRequest.RatingValue;
+            rating.Comment = ratingRequest.Comment;
+            rating.ByStoreId = ratingRequest.ByStoreId;
+            rating.RatingTime = ratingRequest.RatingTime;
+
+
+
+            await _unitOfWork.Repository<Rating>().Update(rating, id);
+            await _unitOfWork.CommitAsync();
+
+            var updatedRatingResponse = new RatingResponse
+            {
+                Id = rating.Id,
+                ShipperId = rating.ShipperId,
+                RatingValue = rating.RatingValue,
+                Comment = rating.Comment,
+                ByStoreId = rating.ByStoreId,
+                RatingTime = rating.RatingTime,
+
+                Shipper = rating.Shipper != null ? new ShipperResponse
+                {
+                    Id = rating.Shipper.Id,
+                    FirstName = rating.Shipper.FirstName,
+                    LastName = rating.Shipper.LastName,
+                    EmailShipper = rating.Shipper.EmailShipper,
+                    PhoneShipper = rating.Shipper.PhoneShipper,
+                    AddressShipper = rating.Shipper.AddressShipper,
+                    TransportId = rating.Shipper.TransportId,
+                    AccountId = rating.Shipper.AccountId,
+                    ZoneId = rating.Shipper.ZoneId,
+                } : null
+            };
+
+            return updatedRatingResponse;
+        }
+
+        //DELETE Rating
+        public async Task<MessageResponse> DeleteRating(int id)
+        {
+
+            var rating = await _unitOfWork.Repository<Rating>().GetAll()
+            .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (rating == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy đánh giá", id.ToString());
+            }
+
+            _unitOfWork.Repository<Rating>().Delete(rating);
+            await _unitOfWork.CommitAsync();
+
+            return new MessageResponse
+            {
+                Message = "Xóa đánh giá thành công",
+            };
+        }
     }
 }
+
+
+

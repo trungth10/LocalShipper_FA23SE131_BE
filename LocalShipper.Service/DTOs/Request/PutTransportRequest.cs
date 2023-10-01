@@ -13,6 +13,7 @@ namespace LocalShipper.Service.DTOs.Request
         public string TransportColor { get; set; }
         public string TransportImage { get; set; }
         public string TransportRegistration { get; set; }
+        public bool Active { get; set; }
 
     }
 }

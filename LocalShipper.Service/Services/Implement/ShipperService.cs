@@ -132,16 +132,23 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //GET
-        public async Task<List<ShipperResponse>> GetShipper(int? id, string? firstName, string? email, string? phone, int? zoneId, int? status)
+        public async Task<List<ShipperResponse>> GetShipper(int? id, string? firstName, string? lastName, string? email, string? phone, 
+            string? address, int? transportId, int? accountId, int? zoneId, int? status, string? fcmToken, int? walletId)
         {
 
             var shippers = await _unitOfWork.Repository<Shipper>().GetAll()
                                                               .Where(t => id == 0 || t.Id == id)
                                                               .Where(t => string.IsNullOrWhiteSpace(firstName) || t.FirstName.Contains(firstName))
+                                                              .Where(t => string.IsNullOrWhiteSpace(lastName) || t.LastName.Contains(lastName))
                                                               .Where(t => string.IsNullOrWhiteSpace(email) || t.EmailShipper.Contains(email))
                                                               .Where(t => string.IsNullOrWhiteSpace(phone) || t.PhoneShipper.Contains(phone))
+                                                              .Where(t => string.IsNullOrWhiteSpace(address) || t.AddressShipper.Contains(address))
+                                                              .Where(t => transportId == 0 || t.TransportId == transportId)
+                                                              .Where(t => accountId == 0 || t.AccountId == accountId)
                                                               .Where(t => zoneId == 0 || t.ZoneId == zoneId)
                                                               .Where(t => status == 0 || t.Status == status)
+                                                              .Where(t => string.IsNullOrWhiteSpace(fcmToken) || t.Fcmtoken.Contains(fcmToken))
+                                                              .Where(t => walletId == 0 || t.WalletId == walletId)
                                                               .ToListAsync();
             var shipperResponses = shippers.Select(shipper => new ShipperResponse
             {

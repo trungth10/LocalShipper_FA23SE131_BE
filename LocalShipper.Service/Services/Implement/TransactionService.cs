@@ -66,7 +66,8 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //GET 
-        public async Task<List<TransactionResponse>> GetTransaction(int? id, string? transactionMethod, int? orderId, int? walletId)
+        public async Task<List<TransactionResponse>> GetTransaction(int? id, string? transactionMethod,
+            int? orderId, int? walletId, decimal? amount)
         {
 
             var transactions = await _unitOfWork.Repository<Transaction>().GetAll()
@@ -74,6 +75,7 @@ namespace LocalShipper.Service.Services.Implement
                                                               .Where(t => string.IsNullOrWhiteSpace(transactionMethod) || t.TransactionMethod.Contains(transactionMethod))
                                                               .Where(t => orderId == 0 || t.OrderId == orderId)
                                                               .Where(t => walletId == 0 || t.WalletId == walletId)
+                                                              .Where(t => amount == 0 || t.Amount == amount)
                                                               .ToListAsync();
             var transactionReponses = transactions.Select(transaction => new TransactionResponse
             {

@@ -21,11 +21,11 @@ namespace LSAPI.Controllers
             _transactionService = transactionService;
         }
         [HttpGet()]
-        public async Task<ActionResult<List<TransactionResponse>>> GetTransaction(int id, string transactionMethod, int orderId, int walletId)
+        public async Task<ActionResult<List<TransactionResponse>>> GetTransaction(int id, string transactionMethod, int orderId, int walletId, decimal amount)
         {
             try
             {
-                var rs = await _transactionService.GetTransaction(id, transactionMethod, orderId, walletId);
+                var rs = await _transactionService.GetTransaction(id, transactionMethod, orderId, walletId, amount);
                 return Ok(rs);
             }
             catch (Exception ex)
