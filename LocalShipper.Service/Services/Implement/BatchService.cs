@@ -15,6 +15,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using static Org.BouncyCastle.Asn1.Cmp.Challenge;
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -102,7 +103,7 @@ namespace LocalShipper.Service.Services.Implement
         public async Task<BatchResponse> UpdateBatch(int id, BatchRequest batchRequest)
         {
             var batch = await _unitOfWork.Repository<Batch>()
-                .GetAll()
+                .GetAll().Include(b => b.Store)
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (batch == null)
@@ -127,6 +128,7 @@ namespace LocalShipper.Service.Services.Implement
                 BatchDescription = batch.BatchDescription,
                 CreatedAt = batch.CreatedAt,
                 UpdateAt = batch.UpdateAt,
+                Status= batch.Status,
                 Store = batch.Store != null ? new StoreResponse
                 {
                     Id = batch.Store.Id,
@@ -153,7 +155,7 @@ namespace LocalShipper.Service.Services.Implement
         public async Task<BatchResponse> DeleteBatch(int id)
         {
             var batch = await _unitOfWork.Repository<Batch>()
-                .GetAll()
+                .GetAll().Include(b => b.Store)
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (batch == null)
@@ -167,17 +169,17 @@ namespace LocalShipper.Service.Services.Implement
             await _unitOfWork.Repository<Batch>().Update(batch, id);
             await _unitOfWork.CommitAsync();
 
-            var deletedBatchResponse = new BatchResponse
-            {
-                Id = batch.Id,
-                StoreId = batch.StoreId,
-                BatchName = batch.BatchName,
-                BatchDescription = batch.BatchDescription,
-                CreatedAt = batch.CreatedAt,
-                UpdateAt = batch.UpdateAt,
-
-            };
-
+            //var deletedBatchResponse = new BatchResponse
+            //{
+            //    Id = batch.Id,
+            //    StoreId = batch.StoreId,
+            //    BatchName = batch.BatchName,
+            //    BatchDescription = batch.BatchDescription,
+            //    CreatedAt = batch.CreatedAt,
+            //    UpdateAt = batch.UpdateAt,
+            //    Status = batch.Status
+            //};
+            var deletedBatchResponse = _mapper.Map<BatchResponse>(batch);
             return deletedBatchResponse;
         }
 
