@@ -21,6 +21,7 @@ namespace LocalShipper.Data.Models
         public decimal? Radius { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdateAt { get; set; }
+        public bool? Active { get; set; }
 
         public virtual ICollection<Shipper> Shippers { get; set; }
         public virtual ICollection<Store> Stores { get; set; }

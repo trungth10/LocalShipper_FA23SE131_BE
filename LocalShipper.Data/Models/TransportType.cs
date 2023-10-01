@@ -14,7 +14,7 @@ namespace LocalShipper.Data.Models
 
         public int Id { get; set; }
         public string TransportType1 { get; set; }
-        public DateTime? CreateAt { get; set; }
+        public DateTime CreateAt { get; set; }
 
         public virtual ICollection<Transport> Transports { get; set; }
     }
