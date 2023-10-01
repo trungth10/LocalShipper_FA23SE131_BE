@@ -46,6 +46,7 @@ namespace LocalShipper.Service.Services.Implement
                 TransportColor = request.TransportColor,
                 TransportImage = request.TransportImage,
                 TransportRegistration = request.TransportRegistration,
+                Active = request.Active
             };
             await _unitOfWork.Repository<Transport>().InsertAsync(transport);
             await _unitOfWork.CommitAsync();
@@ -58,17 +59,24 @@ namespace LocalShipper.Service.Services.Implement
                 TransportColor = transport.TransportColor,
                 TransportImage = transport.TransportImage,
                 TransportRegistration = transport.TransportRegistration,
+                Active = (bool)transport.Active,
             };
             return createdTransportResponse;
 
         }
         //GET
-        public async Task<List<TransportResponse>> GetTransport(int? id, string? licencePlate)
+        public async Task<List<TransportResponse>> GetTransport(int? id, int? typeId, string? licencePlate, string? transportColor,
+                                                string? transportImage, string? transportRegistration)
         {
 
             var transports = await _unitOfWork.Repository<Transport>().GetAll()
                                                               .Where(t => id == 0 || t.Id == id)
+                                                              .Where(t => id == 0 || t.TypeId == typeId)
                                                               .Where(t => string.IsNullOrWhiteSpace(licencePlate) || t.LicencePlate.Contains(licencePlate))
+                                                              .Where(t => string.IsNullOrWhiteSpace(transportColor) || t.TransportColor.Contains(transportColor))
+                                                              .Where(t => string.IsNullOrWhiteSpace(transportImage) || t.TransportImage.Contains(transportImage))
+                                                              .Where(t => string.IsNullOrWhiteSpace(transportRegistration) || t.TransportRegistration.Contains(transportRegistration))
+                                                              
                                                               .ToListAsync();
             var transportResponses = transports.Select(transport => new TransportResponse
             {
@@ -78,6 +86,7 @@ namespace LocalShipper.Service.Services.Implement
                 TransportColor = transport.TransportColor,
                 TransportImage = transport.TransportImage,
                 TransportRegistration = transport.TransportRegistration,
+                Active= (bool)transport.Active,
 
             }).ToList();
             return transportResponses;
@@ -190,6 +199,7 @@ namespace LocalShipper.Service.Services.Implement
             transport.TransportColor = transportRequest.TransportColor;
             transport.TransportImage = transportRequest.TransportImage;
             transport.TransportRegistration = transportRequest.TransportRegistration;
+            transport.Active = transportRequest.Active;
             // Kiểm tra xem có phương tiện khác sử dụng LicencePlate mới không
             var existingTransportWithSameLicencePlate = await _unitOfWork.Repository<Transport>()
                 .GetAll()
@@ -211,6 +221,7 @@ namespace LocalShipper.Service.Services.Implement
                 TransportColor = transportRequest.TransportColor,
                 TransportImage = transportRequest.TransportImage,
                 TransportRegistration = transportRequest.TransportRegistration,
+                Active = transportRequest.Active,
 
                 TransportType = transport.Type != null ? new TransportTypeResponse
                 {
@@ -235,12 +246,14 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy phương tiện", id.ToString());
             }
 
-            _unitOfWork.Repository<Transport>().Delete(transport);
-            await _unitOfWork.CommitAsync();
+            transport.Active = false; // Đặt giá trị Active thành false
+
+
+            await _unitOfWork.CommitAsync(); // Lưu thay đổi vào cơ sở dữ liệu
 
             return new MessageResponse
             {
-                Message = "Xóa phương tiện thành công",
+                Message = "Vô hiệu hóa phương tiện thành công",
             };
         }
     }

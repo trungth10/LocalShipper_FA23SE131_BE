@@ -12,7 +12,8 @@ namespace LocalShipper.Service.Services.Interface
     {
 
 
-        Task<List<ShipperResponse>> GetShipper(int? id, string? firstName, string? email, string? phone, int? zoneId, int? status);
+        Task<List<ShipperResponse>> GetShipper(int? id, string? firstName, string? lastName, string? email, string? phone, 
+            string? address, int? transportId, int? accountId, int? zoneId, int? status, string? fcmToken, int? walletId);
         //Task<List<ShipperResponse>> GetListShipper(int? zoneId);
         //Task<List<ShipperResponse>> GetAll();
         Task<ShipperResponse> UpdateShipperStatus(int shipperId, UpdateShipperStatusRequest request);

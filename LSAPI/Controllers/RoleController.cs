@@ -79,19 +79,19 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpDelete()]
-        public async Task<ActionResult<MessageResponse>> DeleteRole(int id)
-        {
-            try
-            {
+        //[HttpDelete()]
+        //public async Task<ActionResult<MessageResponse>> DeleteRole(int id)
+        //{
+        //    try
+        //    {
 
-                var response = await _roleService.DeleteRole(id);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Xóa role thất bại: {ex.Message}");
-            }
-        }
+        //        var response = await _roleService.DeleteRole(id);
+        //        return Ok(response);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest($"Xóa role thất bại: {ex.Message}");
+        //    }
+        //}
     }
 }

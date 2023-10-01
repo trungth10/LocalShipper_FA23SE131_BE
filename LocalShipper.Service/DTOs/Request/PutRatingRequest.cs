@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace LocalShipper.Service.DTOs.Request
 {
-    public class RatingRequest
+    public class PutRatingRequest
     {
-        public int Id { get; set; }
         public int ShipperId { get; set; }
         public int RatingValue { get; set; }
         public string Comment { get; set; }

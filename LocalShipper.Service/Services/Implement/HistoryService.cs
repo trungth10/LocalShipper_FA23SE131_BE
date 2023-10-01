@@ -65,7 +65,7 @@ namespace LocalShipper.Service.Services.Implement
 
             var histories = await _unitOfWork.Repository<History>().GetAll()
             .Where(t => id == 0 || t.Id == id)
-            .Where(r => string.IsNullOrWhiteSpace(action) || r.Action.Contains(action))
+            .Where(t => string.IsNullOrWhiteSpace(action) || t.Action.Contains(action))
             .Where(t => storeId == 0 || t.StoreId == storeId)
             .ToListAsync();
             var historyResponses = histories.Select(history => new HistoryResponse

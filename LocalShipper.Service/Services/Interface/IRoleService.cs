@@ -15,6 +15,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<int> GetTotalRoleCount();
         Task<RoleResponse> CreateRole(RegisterRoleRequest request);
         Task<RoleResponse> UpdateRole(int id, PutRoleRequest roleRequest);
-        Task<MessageResponse> DeleteRole(int id);
+        //Task<MessageResponse> DeleteRole(int id);
     }
 }

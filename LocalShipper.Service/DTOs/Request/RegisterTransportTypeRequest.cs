@@ -9,7 +9,7 @@ namespace LocalShipper.Service.DTOs.Request
     public class RegisterTransportTypeRequest
     {
         public string TransportType1 { get; set; }
-        public DateTime? CreateAt { get; set; }
+        public DateTime CreateAt { get; set; }
 
     }
 }

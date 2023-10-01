@@ -1,4 +1,5 @@
-﻿using LocalShipper.Service.DTOs.Response;
+﻿using LocalShipper.Service.DTOs.Request;
+using LocalShipper.Service.DTOs.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,13 @@ namespace LocalShipper.Service.Services.Interface
     {
         Task<List<RatingResponse>> GetRatingByShipperId(int shipperId);
         Task<decimal> GetAverageRatingByShipperId(int shipperId);
+        Task<List<RatingResponse>> GetRating(int? id, int? shipperId, int? ratingValue, int? byStoreId);
 
-       
+
+        Task<int> GetTotalRatingCount();
+        Task<RatingResponse> CreateRating(RegisterRatingRequest request);
+        Task<RatingResponse> UpdateRating(int id, PutRatingRequest ratingRequest);
+        Task<MessageResponse> DeleteRating(int id);
+
     }
 }

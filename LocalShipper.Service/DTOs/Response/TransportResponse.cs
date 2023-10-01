@@ -14,7 +14,7 @@ namespace LocalShipper.Service.DTOs.Response
         public string TransportColor { get; set; }
         public string TransportImage { get; set; }
         public string TransportRegistration { get; set; }
-
+        public bool Active { get; set; }
         public TransportTypeResponse TransportType { get; set; }
     }
 }

@@ -109,25 +109,25 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //DELETE Role
-        public async Task<MessageResponse> DeleteRole(int id)
-        {
+        //public async Task<MessageResponse> DeleteRole(int id)
+        //{
 
-            var role = await _unitOfWork.Repository<Role>().GetAll()
-            .FirstOrDefaultAsync(a => a.Id == id);
+        //    var role = await _unitOfWork.Repository<Role>().GetAll()
+        //    .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (role == null)
-            {
-                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy role", id.ToString());
-            }
+        //    if (role == null)
+        //    {
+        //        throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy role", id.ToString());
+        //    }
 
-            _unitOfWork.Repository<Role>().Delete(role);
-            await _unitOfWork.CommitAsync();
+        //    _unitOfWork.Repository<Role>().Delete(role);
+        //    await _unitOfWork.CommitAsync();
 
-            return new MessageResponse
-            {
-                Message = "Xóa role thành công",
-            };
-        }
+        //    return new MessageResponse
+        //    {
+        //        Message = "Xóa role thành công",
+        //    };
+        //}
     }
 }
 
