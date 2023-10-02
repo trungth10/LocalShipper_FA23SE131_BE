@@ -25,7 +25,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCountInDay(int shipperId, int month, int day, int year);
 
         Task<List<OrderResponse>> GetOrder(int? id, int? status, int? storeId, int? batchId, int? shipperId,
-            string? tracking_number, string? cancle_reason, decimal? distance_price,
+            string? tracking_number, string? cancel_reason, decimal? distance_price,
             decimal? subtotal_price, decimal? totalPrice, string? other);
         Task<int> GetTotalOrderCount(int? storeId, int? shipperId);
         Task<MessageResponse> CreateOrder(OrderRequest request);

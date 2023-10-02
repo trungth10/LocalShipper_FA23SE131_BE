@@ -9,7 +9,7 @@ namespace LocalShipper.Service.DTOs.Response
     public class PackageResponse
     {
         public int Id { get; set; }
-        public int BatchId { get; set; }
+        public int? BatchId { get; set; }
         public BatchResponse Batch { get; set; }
         public int Capacity { get; set; }
         public double? PackageWeight { get; set; }

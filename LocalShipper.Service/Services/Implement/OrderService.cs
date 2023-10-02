@@ -63,27 +63,33 @@ namespace LocalShipper.Service.Services.Implement
 
                 if (status == OrderStatusEnum.ACCEPTED && string.IsNullOrWhiteSpace(cancelReason))
                 {
+                    order.Status = (int)status;
                     order.ShipperId = shipperId;
                     order.AcceptTime = DateTime.Now;
                 }
 
-                if (status == OrderStatusEnum.INPROCESS && string.IsNullOrWhiteSpace(cancelReason))
-                {                   
+
+                if (status == OrderStatusEnum.INPROCESS || string.IsNullOrWhiteSpace(cancelReason))
+                {
+                    order.Status = (int)status;
                     order.PickupTime = DateTime.Now;
                 }
 
                 if (status == OrderStatusEnum.COMPLETED && string.IsNullOrWhiteSpace(cancelReason))
                 {
+                    order.Status = (int)status;
                     order.CompleteTime = DateTime.Now;
                 }
 
                 if (status == OrderStatusEnum.COMPLETED && string.IsNullOrWhiteSpace(cancelReason))
                 {
+                    order.Status = (int)status;
                     order.CompleteTime = DateTime.Now;
                 }
 
                 if (status == OrderStatusEnum.CANCELLED)
                 {
+                    order.Status = (int)status;
                     order.CancelTime = DateTime.Now;
                     order.CancelReason = cancelReason;
                 }
@@ -223,7 +229,7 @@ namespace LocalShipper.Service.Services.Implement
 
         //GET Order
         public async Task<List<OrderResponse>> GetOrder(int? id, int? status, int? storeId, int? batchId, int? shipperId, 
-            string? tracking_number, string? cancle_reason,decimal? distance_price, 
+            string? tracking_number, string? cancel_reason,decimal? distance_price, 
             decimal? subtotal_price, decimal? totalPrice, string? other )
         {
 
@@ -237,7 +243,7 @@ namespace LocalShipper.Service.Services.Implement
                                                               .Where(a => batchId == 0 || a.BatchId == batchId)
                                                               .Where(a => shipperId == 0 || a.ShipperId == shipperId)
                                                               .Where(a => string.IsNullOrWhiteSpace(tracking_number) || a.TrackingNumber.Contains(tracking_number))
-                                                              .Where(a => string.IsNullOrWhiteSpace(cancle_reason) || a.CancelReason.Contains(cancle_reason))
+                                                              .Where(a => string.IsNullOrWhiteSpace(cancel_reason) || a.CancelReason.Contains(cancel_reason))
                                                               .Where(a => distance_price == 0 || a.DistancePrice == distance_price)
                                                               .Where(a => subtotal_price == 0 || a.SubtotalPrice == subtotal_price)
                                                               .Where(a => totalPrice == 0 || a.TotalPrice == totalPrice)
@@ -253,7 +259,7 @@ namespace LocalShipper.Service.Services.Implement
                 Id = order.Id,
                 storeId = order.StoreId,
                 batchId = order.BatchId,
-                shipperId = (int)order.ShipperId,
+                shipperId = order.ShipperId == null ? null: (int)order.ShipperId,
                 status = order.Status,
                 trackingNumber = order.TrackingNumber,
                 createTime = order.CreateTime,

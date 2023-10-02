@@ -11,7 +11,7 @@ namespace LocalShipper.Service.DTOs.Response
         public int Id { get; set; }
         public int storeId { get; set; }
         public int batchId { get; set; }
-        public int shipperId { get; set; }
+        public int? shipperId { get; set; }
         public int status { get; set; }
         public string trackingNumber { get; set; }
         public DateTime? createTime { get; set; }
