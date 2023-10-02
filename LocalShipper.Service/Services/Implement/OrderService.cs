@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,71 +32,64 @@ namespace LocalShipper.Service.Services.Implement
         }
 
 
-
-
-        public async Task<OrderResponse> UpdateShipperInOrder(int orderId, OrderRequest request)
+        //SHIPPER -> ORDER
+        public async Task<OrderResponse> ShipperToStatusOrder(int id, int shipperId, string? cancleReason, OrderStatusEnum status )
         {
             try
             {
-                var order = _unitOfWork.Repository<Order>().Find(x => x.Id == orderId);
-                //var shipper = _unitOfWork.Repository<Shipper>().Find(x => x.Id == shipperId);
+                var order = await _unitOfWork.Repository<Order>()
+                 .GetAll()                                                
+                 .FirstOrDefaultAsync(a => a.Id == id || string.IsNullOrWhiteSpace(cancleReason));
 
-                if (order == null)
+                var shipper = await _unitOfWork.Repository<Shipper>()
+                 .GetAll()
+                 .FirstOrDefaultAsync(a => a.Id == shipperId);
+
+                if (shipper == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy đơn hàng", orderId.ToString());
+                    throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy Shipper", order.ToString());
                 }
 
-               // order.ShipperId = request.shipperId;
-                order.AcceptTime = DateTime.Now;
-
-                await _unitOfWork.Repository<Order>().Update(order, orderId);
-                await _unitOfWork.CommitAsync();
-
-
-                //return _mapper.Map<Shipper, OrderResponse>(order);
-                return new OrderResponse
+                if (shipper.Status == (int)ShipperStatusEnum.Offline)
                 {
-                    Id = order.Id,
-                    storeId = order.StoreId,
-                    batchId = order.BatchId,
-                    shipperId = (int)order.ShipperId,
-                    status = order.Status,
-                    trackingNumber = order.TrackingNumber,
-                    createTime = order.CreateTime,
-                    orderTime = order.OrderTime,
-                    acceptTime = order.AcceptTime,
-                    pickupTime = order.PickupTime,
-                    cancelTime = order.CancelTime,
-                    cancelReason = order.CancelReason,
-                    completeTime = order.CompleteTime,
-                    distancePrice = order.DistancePrice,
-                    subTotalprice = order.SubtotalPrice,
-                    totalPrice = order.TotalPrice,
-                    other = order.Other,
-
-                };
-            }
-            catch (Exception ex)
-            {
-                throw new CrudException(HttpStatusCode.BadRequest, "Cập nhật shipper đơn hàng thất bại", ex.InnerException?.Message);
-            }
-        }
-
-        public async Task<OrderResponse> CompleteOrder(int orderId, UpdateOrderStatusRequest request)
-        {
-            try
-            {
-                var order = _unitOfWork.Repository<Order>().Find(x => x.Id == orderId);
+                    throw new CrudException(HttpStatusCode.NotFound, "Shipper đang ngoại tuyến", order.ToString());
+                }
 
                 if (order == null)
                 {
                     throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy đơn hàng", order.ToString());
                 }
 
-                order.Status = (int)OrderStatusEnum.COMPLETED;
-                order.CompleteTime = DateTime.Now;
+                //Shipper thao tác Order
 
-                await _unitOfWork.Repository<Order>().Update(order, orderId);
+                if (status == OrderStatusEnum.ACCEPTED || string.IsNullOrWhiteSpace(cancleReason))
+                {
+                    order.ShipperId = shipperId;
+                    order.AcceptTime = DateTime.Now;
+                }
+
+                if (status == OrderStatusEnum.INPROCESS || string.IsNullOrWhiteSpace(cancleReason))
+                {                   
+                    order.PickupTime = DateTime.Now;
+                }
+
+                if (status == OrderStatusEnum.COMPLETED || string.IsNullOrWhiteSpace(cancleReason))
+                {
+                    order.CompleteTime = DateTime.Now;
+                }
+
+                if (status == OrderStatusEnum.COMPLETED || string.IsNullOrWhiteSpace(cancleReason))
+                {
+                    order.CompleteTime = DateTime.Now;
+                }
+
+                if (status == OrderStatusEnum.CANCELLED)
+                {
+                    order.CancelTime = DateTime.Now;
+                    order.CancelReason = cancleReason;
+                }
+
+                await _unitOfWork.Repository<Order>().Update(order, id);
                 await _unitOfWork.CommitAsync();
 
 
@@ -103,226 +97,9 @@ namespace LocalShipper.Service.Services.Implement
             }
             catch (Exception ex)
             {
-                throw new CrudException(HttpStatusCode.BadRequest, "Hoàn tất đơn hàng thất bại", ex.InnerException?.Message);
+                throw new CrudException(HttpStatusCode.BadRequest, " Thao tác thất bại", ex.InnerException?.Message);
             }
         }
-
-        public async Task<OrderResponse> PickupProduct(int orderId, UpdateOrderStatusRequest request)
-        {
-            try
-            {
-                var order = _unitOfWork.Repository<Order>().Find(x => x.Id == orderId);
-
-                if (order == null)
-                {
-                    throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy đơn hàng", order.ToString());
-                }
-
-                order.Status = (int)OrderStatusEnum.INPROCESS;
-                order.PickupTime = DateTime.Now;
-
-                await _unitOfWork.Repository<Order>().Update(order, orderId);
-                await _unitOfWork.CommitAsync();
-
-
-                return _mapper.Map<Order, OrderResponse>(order);
-            }
-            catch (Exception ex)
-            {
-                throw new CrudException(HttpStatusCode.BadRequest, "Nhận đơn hàng thất bại", ex.InnerException?.Message);
-            }
-        }
-
-        public async Task<OrderResponse> CancelOrder(int orderId, UpdateOrderStatusRequest request)
-        {
-            try
-            {
-                var order = _unitOfWork.Repository<Order>().Find(x => x.Id == orderId);
-
-                if (order == null)
-                {
-                    throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy đơn hàng", order.ToString());
-                }
-
-                order.Status = (int)OrderStatusEnum.CANCELLED;
-                order.CancelTime = DateTime.Now;
-                order.CancelReason = request.cancelReason;
-
-                await _unitOfWork.Repository<Order>().Update(order, orderId);
-                await _unitOfWork.CommitAsync();
-
-
-                return _mapper.Map<Order, OrderResponse>(order);
-            }
-            catch (Exception ex)
-            {
-                throw new CrudException(HttpStatusCode.BadRequest, "Hủy đơn hàng thất bại", ex.InnerException?.Message);
-            }
-        }
-
-        public async Task<OrderResponse> GetOrderById(int id)
-        {
-            var order = await _unitOfWork.Repository<Order>().GetAll().Include(o => o.Store).Include(o => o.Batch).Where(f => f.Id == id).FirstOrDefaultAsync();
-            var orderResponse = new OrderResponse
-            {
-                Id = order.Id,
-                storeId = order.StoreId,
-                batchId = order.BatchId,
-                shipperId = (int)order.ShipperId,
-                status = order.Status,
-                trackingNumber = order.TrackingNumber,
-                createTime = order.CreateTime,
-                orderTime = order.OrderTime,
-                acceptTime = order.AcceptTime,
-                pickupTime = order.PickupTime,
-                cancelTime = order.CancelTime,
-                cancelReason = order.CancelReason,
-                completeTime = order.CompleteTime,
-                distancePrice = order.DistancePrice,
-                subTotalprice = order.SubtotalPrice,
-                totalPrice = order.TotalPrice,
-                other = order.Other,
-            };
-
-            if (order.Batch != null)
-            {
-                orderResponse.Batches = new BatchResponse
-                {
-                    Id = order.Batch.Id,
-                    StoreId = order.Batch.StoreId,
-                    BatchName = order.Batch.BatchName,
-                    BatchDescription = order.Batch.BatchDescription,
-                    CreatedAt = order.Batch.CreatedAt,
-                    UpdateAt = order.Batch.UpdateAt,
-                };
-            }
-
-            if (order.Store != null)
-            {
-                orderResponse.Store = new StoreResponse
-                {
-                    Id = order.StoreId,
-                    StoreName = order.Store.StoreName,
-                    StoreAddress = order.Store.StoreAddress,
-                    StorePhone = order.Store.StorePhone,
-                    StoreEmail = order.Store.StoreEmail,
-                    OpenTime = order.Store.OpenTime,
-                    CloseTime = order.Store.CloseTime,
-                    StoreDescription = order.Store.StoreDescription,
-                    Status = order.Store.Status,
-                    BrandId = order.Store.BrandId,
-                    TemplateId = order.Store.TemplateId,
-                    ZoneId = order.Store.ZoneId,
-                    AccountId = order.Store.AccountId,
-                };
-            }
-
-            return orderResponse;
-        }
-
-        public async Task<List<OrderResponse>> GetOrdersByAssigning()
-        {
-            var status = (int)OrderStatusEnum.ASSIGNING;
-            var orders = await _unitOfWork.Repository<Order>().GetAll()
-                .Where(f => f.Status == status)
-                .ToListAsync();
-
-            var orderResponses = orders.Select(order => new OrderResponse
-            {
-                Id = order.Id,
-                storeId = order.StoreId,
-                batchId = order.BatchId,
-                shipperId = (int)order.ShipperId,
-                status = order.Status,
-                trackingNumber = order.TrackingNumber,
-                createTime = order.CreateTime,
-                orderTime = order.OrderTime,
-                acceptTime = order.AcceptTime,
-                pickupTime = order.PickupTime,
-                cancelTime = order.CancelTime,
-                cancelReason = order.CancelReason,
-                completeTime = order.CompleteTime,
-                distancePrice = order.DistancePrice,
-                subTotalprice = order.SubtotalPrice,
-                totalPrice = order.TotalPrice,
-                other = order.Other,
-            }).ToList();
-
-            return orderResponses;
-        }
-
-        public async Task<OrderListResponse> GetOrderByShipperId(int shipperId)
-        {
-            var orders = await _unitOfWork.Repository<Order>().GetAll().Include(o => o.Store).Include(o => o.Batch).Where(f => f.ShipperId == shipperId).ToListAsync();
-            var orderResponses = new List<OrderResponse>();
-            foreach (var order in orders)
-            {
-                var orderResponse = new OrderResponse
-                {
-                    Id = order.Id,
-                    storeId = order.StoreId,
-                    batchId = order.BatchId,
-                    shipperId = (int)order.ShipperId,
-                    status = order.Status,
-                    trackingNumber = order.TrackingNumber,
-                    createTime = order.CreateTime,
-                    orderTime = order.OrderTime,
-                    acceptTime = order.AcceptTime,
-                    pickupTime = order.PickupTime,
-                    cancelTime = order.CancelTime,
-                    cancelReason = order.CancelReason,
-                    completeTime = order.CompleteTime,
-                    distancePrice = order.DistancePrice,
-                    subTotalprice = order.SubtotalPrice,
-                    totalPrice = order.TotalPrice,
-                    other = order.Other,
-                };
-
-                if (order.Batch != null)
-                {
-                    orderResponse.Batches = new BatchResponse
-                    {
-                        Id = order.Batch.Id,
-                        StoreId = order.Batch.StoreId,
-                        BatchName = order.Batch.BatchName,
-                        BatchDescription = order.Batch.BatchDescription,
-                        CreatedAt = order.Batch.CreatedAt,
-                        UpdateAt = order.Batch.UpdateAt,
-                    };
-                }
-
-                if (order.Store != null)
-                {
-                    orderResponse.Store = new StoreResponse
-                    {
-                        Id = order.StoreId,
-                        StoreName = order.Store.StoreName,
-                        StoreAddress = order.Store.StoreAddress,
-                        StorePhone = order.Store.StorePhone,
-                        StoreEmail = order.Store.StoreEmail,
-                        OpenTime = order.Store.OpenTime,
-                        CloseTime = order.Store.CloseTime,
-                        StoreDescription = order.Store.StoreDescription,
-                        Status = order.Store.Status,
-                        BrandId = order.Store.BrandId,
-                        TemplateId = order.Store.TemplateId,
-                        ZoneId = order.Store.ZoneId,
-                        AccountId = order.Store.AccountId,
-                    };
-                }
-
-                orderResponses.Add(orderResponse);
-            }
-
-            var orderListResponse = new OrderListResponse
-            {
-                Orders = orderResponses,
-                OrderCount = orderResponses.Count
-            };
-
-            return orderListResponse;
-        }
-
         
         public async Task<decimal> GetTotalPriceSumByShipperId(int shipperId)
         {
@@ -330,7 +107,6 @@ namespace LocalShipper.Service.Services.Implement
             decimal totalPriceSum = (decimal)orders.Sum(order => order.TotalPrice);
             return totalPriceSum;
         }
-
 
         public async Task<decimal> GetCancelRateByShipperId(int shipperId)
         {
@@ -450,59 +226,6 @@ namespace LocalShipper.Service.Services.Implement
         }
 
 
-        public async Task<List<OrderResponse>> GetCompleteOrder(int shipperId)
-        {
-            var completeOrder = await _unitOfWork.Repository<Order>()
-                .GetAll().Where(o => o.ShipperId == shipperId
-                && o.CompleteTime != null).ToListAsync();
-            var orderResponses = completeOrder.Select(order => new OrderResponse
-            {
-                Id = order.Id,
-                storeId = order.StoreId,
-                batchId = order.BatchId,
-                shipperId = (int)order.ShipperId,
-                status = order.Status,
-                trackingNumber = order.TrackingNumber,
-                createTime = order.CreateTime,
-                orderTime = order.OrderTime,
-                acceptTime = order.AcceptTime,
-                pickupTime = order.PickupTime,
-                completeTime = order.CompleteTime,
-                distancePrice = order.DistancePrice,
-                subTotalprice = order.SubtotalPrice,
-                totalPrice = order.TotalPrice,
-                other = order.Other,
-            }).ToList();
-
-            return orderResponses;
-        }
-        public async Task<List<OrderResponse>> GetCancelOrder(int shipperId)
-        {
-            var cancelOrder = await _unitOfWork.Repository<Order>()
-                .GetAll().Where(o => o.ShipperId == shipperId
-                && o.CancelTime != null).ToListAsync();
-            var orderResponses = cancelOrder.Select(order => new OrderResponse
-            {
-                Id = order.Id,
-                storeId = order.StoreId,
-                batchId = order.BatchId,
-                shipperId = (int)order.ShipperId,
-                status = order.Status,
-                trackingNumber = order.TrackingNumber,
-                createTime = order.CreateTime,
-                orderTime = order.OrderTime,
-                acceptTime = order.AcceptTime,
-                pickupTime = order.PickupTime,
-                cancelTime = order.CancelTime,
-                cancelReason = order.CancelReason,
-                distancePrice = order.DistancePrice,
-                subTotalprice = order.SubtotalPrice,
-                totalPrice = order.TotalPrice,
-                other = order.Other,
-            }).ToList();
-
-            return orderResponses;
-        }
 
         //GET Order
         public async Task<List<OrderResponse>> GetOrder(int? id, int? status, int? storeId, int? batchId, int? shipperId, 

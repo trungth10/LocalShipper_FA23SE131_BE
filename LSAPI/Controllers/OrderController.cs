@@ -7,11 +7,13 @@ using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
+using LocalShipper.Service.Helpers;
 
 namespace LSAPI.Controllers
 {
     [ApiController]
-    [Route("api/orders")]
+    
+
     //[Authorize(Policy = "Shipper")]
     public class OrderController : Controller
     {
@@ -21,7 +23,8 @@ namespace LSAPI.Controllers
             _orderService = orderService;
         }
 
-        [HttpGet()]
+       
+        [HttpGet("api/orders")]
         public async Task<ActionResult<OrderResponse>> GetOrder(int id, int status, int storeId, int batchId, int shipperId,
             string tracking_number, string cancle_reason, decimal distance_price,
             decimal subtotal_price, decimal totalPrice, string other)
@@ -40,7 +43,8 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpGet("count")]
+        
+        [HttpGet("api/orders/count")]
         public async Task<ActionResult<OrderResponse>> GetCountOrder(int storeId, int shipperId)
         {
             try
@@ -56,7 +60,8 @@ namespace LSAPI.Controllers
 
         }
 
-        [HttpPost()]
+    
+        [HttpPost("api/orders")]
         public async Task<ActionResult<MessageResponse>> CreateOrder(OrderRequest request)
         {
             try
@@ -72,7 +77,8 @@ namespace LSAPI.Controllers
 
         }
 
-        [HttpPut()]
+        
+        [HttpPut("api/orders")]
         public async Task<ActionResult<MessageResponse>> UpdateOrder(int id, PutOrderRequest orderRequest)
         {
             try
@@ -86,7 +92,9 @@ namespace LSAPI.Controllers
             }
 
         }
-        [HttpDelete()]
+
+        
+        [HttpDelete("api/orders")]
         public async Task<ActionResult<MessageResponse>> DeleteOrder(int id)
         {
             try
@@ -102,98 +110,23 @@ namespace LSAPI.Controllers
         }
 
 
+        [HttpPut("shipper/api/orders")]
+        public async Task<ActionResult<MessageResponse>> ShipperToStatusOrder(int id, int shipperId, OrderStatusEnum status)
+        {
+            try
+            {
+                var rs = await _orderService.ShipperToStatusOrder(id, shipperId, status);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Cập nhật đơn hàng thất bại: {ex.Message}");
+            }
+        }
 
 
-        /* [HttpPut("{orderId:int}/ShipperAcpOrder")]
-         public async Task<ActionResult<OrderResponse>> UpdateShipperInOrder(int orderId, [FromBody] OrderRequest request)
-         {
-             try
-             {
 
-                 var response = await _orderService.UpdateShipperInOrder(orderId, request);
-
-
-                 return Ok(response);
-             }
-             catch (Exception ex)
-             {
-                 return BadRequest($"Cập nhật người giao hàng trong hóa đơn thất bại: {ex.Message}");
-             }
-         }
-
-         [HttpPut("{orderId:int}/CompleteOrder")]
-         public async Task<ActionResult<OrderResponse>> CompleteOrder(int orderId, [FromBody] UpdateOrderStatusRequest request)
-         {
-             try
-             {
-
-                 var response = await _orderService.CompleteOrder(orderId, request);
-
-
-                 return Ok(response);
-             }
-             catch (Exception ex)
-             {
-                 return BadRequest($"Cập nhật hoàn thành đơn hàng thất bại: {ex.Message}");
-             }
-         }
-
-         [HttpPut("{orderId:int}/PickupProduct")]
-         public async Task<ActionResult<OrderResponse>> PickupProduct(int orderId, [FromBody] UpdateOrderStatusRequest request)
-         {
-             try
-             {
-
-                 var response = await _orderService.PickupProduct(orderId, request);
-
-
-                 return Ok(response);
-             }
-             catch (Exception ex)
-             {
-                 return BadRequest($"Nhận đơn hàng thất bại: {ex.Message}");
-             }
-         }
-
-         [HttpPut("{orderId:int}/CancelOrder")]
-         public async Task<ActionResult<OrderResponse>> CancelOrder(int orderId, [FromBody] UpdateOrderStatusRequest request)
-         {
-             try
-             {
-
-                 var response = await _orderService.CancelOrder(orderId, request);
-
-
-                 return Ok(response);
-             }
-             catch (Exception ex)
-             {
-                 return BadRequest($"Hủy đơn hàng thất bại: {ex.Message}");
-             }
-         }
-
-         [HttpGet("{id}")]
-         public async Task<ActionResult<OrderResponse>> GetOrderById(int id)
-         {
-             var rs = await _orderService.GetOrderById(id);
-             return Ok(rs);
-         }
-
-         [HttpGet("Assigning")]
-         public async Task<ActionResult<List<OrderResponse>>> GetOrdersByAssigning()
-         {
-             var orders = await _orderService.GetOrdersByAssigning();
-             return Ok(orders);
-         }
-
-         [HttpGet("shipper/{shipperId}")]
-         public async Task<ActionResult<List<OrderResponse>>> GetOrderByShipperId(int shipperId)
-         {
-             var rs = await _orderService.GetOrderByShipperId(shipperId);
-             return Ok(rs);
-         }
-
-
+        /* 
 
          [HttpGet("totalPriceByShipperId")]
          public async Task<ActionResult<TotalPriceResponse>> GetTotalPriceSumByShipperId(int shipperId)
