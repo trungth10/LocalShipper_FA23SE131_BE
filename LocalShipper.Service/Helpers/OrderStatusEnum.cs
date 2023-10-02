@@ -14,10 +14,12 @@ namespace LocalShipper.Service.Helpers
         IDLE = 1,
         [Display(Name = "Public Order")]
         ASSIGNING = 2,
-        ACCEPTED = 3,
-        CANCELLED = 4,
-        INPROCESS = 5,       
-        COMPLETED = 6,
-        DELETED = 7,
+        [Display(Name = "Đợi Shipper Accept")]
+        WAITING = 3,
+        ACCEPTED = 4,
+        CANCELLED = 5,
+        INPROCESS = 6,       
+        COMPLETED = 7,
+        DELETED = 8,
     }
 }
