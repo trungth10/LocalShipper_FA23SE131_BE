@@ -59,7 +59,7 @@ namespace LocalShipper.Service.Services.Implement
                 Package = payment.Package != null ? new PackageResponse
                 {
                     Id = payment.Package.Id,
-                    BatchId = payment.Package.BatchId,
+                    BatchId = (int)payment.Package.BatchId,
                     Capacity = payment.Package.Capacity,
                     PackageWeight = payment.Package.PackageWeight,
                     PackageWidth = payment.Package.PackageWidth,
@@ -126,7 +126,7 @@ namespace LocalShipper.Service.Services.Implement
                 Package = payment.Package != null ? new PackageResponse
                 {
                     Id = payment.Package.Id,
-                    BatchId = payment.Package.BatchId,
+                    BatchId = (int)payment.Package.BatchId,
                     Capacity = payment.Package.Capacity,
                     PackageWeight = payment.Package.PackageWeight,
                     PackageWidth = payment.Package.PackageWidth,
@@ -212,7 +212,7 @@ namespace LocalShipper.Service.Services.Implement
                 Package = payment.Package != null ? new PackageResponse
                 {
                     Id = payment.Package.Id,
-                    BatchId = payment.Package.BatchId,
+                    BatchId = (int)payment.Package.BatchId,
                     Capacity = payment.Package.Capacity,
                     PackageWeight = payment.Package.PackageWeight,
                     PackageWidth = payment.Package.PackageWidth,
