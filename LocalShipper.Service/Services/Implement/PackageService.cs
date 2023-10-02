@@ -64,7 +64,7 @@ namespace LocalShipper.Service.Services.Implement
             return packageResponses;
         }
 
-        public async Task<PackageResponse> CreatePackage(PackageRequest request)
+        public async Task<PackageResponse> CreatePackage(PackageRequestForCreate request)
         {
             decimal distancePrice = 0;
             if (request.DistancePrice == 3)
@@ -79,18 +79,16 @@ namespace LocalShipper.Service.Services.Implement
           
             var newPackage = new Package
             {
-
-                BatchId = request.BatchId,
                 Capacity = request.Capacity,
                 PackageWeight = request.PackageWeight,
                 PackageWidth = request.PackageWidth,
                 PackageHeight = request.PackageHeight,
                 PackageLength = request.PackageLength,
-                Status = request.Status ?? 0,
+                Status =(int)PackageStatusEnum.IDLE,
                 CustomerAddress = request.CustomerAddress,
                 CustomerPhone = request.CustomerPhone,
                 CustomerName = request.CustomerName,
-                CustomerEmail = request.CustomerEmail,
+                CustomerEmail = request.CustomerEmail,  
                 DistancePrice = distancePrice,
                 SubtotalPrice = request.SubtotalPrice,
                 TotalPrice = distancePrice+ request.SubtotalPrice,

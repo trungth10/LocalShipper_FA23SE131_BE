@@ -13,7 +13,7 @@ namespace LSAPI.Controllers
 {
 
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/logins")]
     public class LoginController : ControllerBase
     {
         private readonly LoginService _loginService;
@@ -59,7 +59,7 @@ namespace LSAPI.Controllers
             return BadRequest("Invalid result.");
         }
 
-        [HttpGet("AccesstokenToRole")]
+        [HttpGet("accesstoken-to-role")]
         public async Task<IActionResult> GetUserRole(string accesstoken)
         {
             try

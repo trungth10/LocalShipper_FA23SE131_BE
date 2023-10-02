@@ -225,6 +225,64 @@ namespace LocalShipper.Service.Services.Implement
             return result;
         }
 
+        public async Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCount(int shipperId, int? month, int? year, int? day)
+        {
+            DateTime startDate;
+            DateTime endDate;
+
+            if (month.HasValue && (month < 1 || month > 12))
+            {
+                throw new ArgumentException("Invalid month.", nameof(month));
+            }
+
+            if (day.HasValue && (day < 1 || day > 31)) // Bạn có thể điều chỉnh giới hạn trên cho số ngày trong tháng
+            {
+                throw new ArgumentException("Invalid day.", nameof(day));
+            }
+
+            if (year.HasValue)
+            {
+                if (!month.HasValue)
+                {
+                    throw new ArgumentException("Month is required when year is provided.", nameof(month));
+                }
+
+                startDate = new DateTime(year.Value, month.Value, 1);
+                endDate = startDate.AddMonths(1).AddDays(-1);
+
+                if (day.HasValue)
+                {
+                    startDate = startDate.AddDays(day.Value - 1);
+                    endDate = startDate.AddDays(1);
+                }
+            }
+            else
+            {
+                // Handle case where year is null (you can choose to throw an exception or handle it differently)
+                // For now, we assume that if year is null, we will consider all years.
+                startDate = new DateTime(1, 1, 1);
+                endDate = new DateTime(9999, 12, 31);
+            }
+          
+               
+
+
+            var ordersInRange = await _unitOfWork.Repository<Order>().GetAll()
+                .Where(o => o.ShipperId == shipperId && o.CompleteTime >= startDate && o.CompleteTime <= endDate )
+                .ToListAsync();
+
+            decimal total = (decimal)ordersInRange.Sum(o => o.TotalPrice);
+            int totalCount = ordersInRange.Count;
+
+            var result = new TotalPriceAndTotalResponse
+            {
+                TotalPrice = total,
+                TotalCount = totalCount
+            };
+
+            return result;
+        }
+
 
 
         //GET Order

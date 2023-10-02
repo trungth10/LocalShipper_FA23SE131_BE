@@ -124,7 +124,25 @@ namespace LSAPI.Controllers
             }
         }
 
+        [HttpGet("api/orders/total-price-order-count")]
+        public async Task<ActionResult<TotalPriceResponse>> GetTotalPriceSumByShipperId(int shipperId, int? month, int? year, int? day)
+        {
+            try
+            {
+                if (!year.HasValue || !month.HasValue)
+                {
+                    return BadRequest("Year and month are required.");
+                }
 
+                var rs = await _orderService.GetTotalPriceAndOrderCount(shipperId, month, year, day);
+                return Ok(rs);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
 
         /* 
 

@@ -31,5 +31,9 @@ namespace LocalShipper.Service.Services.Interface
         Task<MessageResponse> CreateOrder(OrderRequest request);
         Task<OrderResponse> UpdateOrder(int id, PutOrderRequest orderRequest);
         Task<OrderResponse> DeleteOrder(int id);
+
+
+
+        Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCount(int shipperId, int? month, int? year, int? day);
     }
 }
