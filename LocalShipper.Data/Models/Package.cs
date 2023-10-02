@@ -13,7 +13,7 @@ namespace LocalShipper.Data.Models
         }
 
         public int Id { get; set; }
-        public int BatchId { get; set; }
+        public int? BatchId { get; set; }
         public int Capacity { get; set; }
         public double? PackageWeight { get; set; }
         public double? PackageWidth { get; set; }

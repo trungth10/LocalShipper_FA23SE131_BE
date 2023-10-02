@@ -35,11 +35,10 @@ namespace LocalShipper.Service.Services.Implement
         //SHIPPER -> ORDER
         public async Task<OrderResponse> ShipperToStatusOrder(int id, int shipperId, string? cancelReason, OrderStatusEnum status )
         {
-            try
-            {
+           
                 var order = await _unitOfWork.Repository<Order>()
                  .GetAll()                                                
-                 .FirstOrDefaultAsync(a => a.Id == id || string.IsNullOrWhiteSpace(cancelReason));
+                 .FirstOrDefaultAsync(a => a.Id == id && string.IsNullOrWhiteSpace(cancelReason));
 
                 var shipper = await _unitOfWork.Repository<Shipper>()
                  .GetAll()
@@ -62,23 +61,23 @@ namespace LocalShipper.Service.Services.Implement
 
                 //Shipper thao tác Order
 
-                if (status == OrderStatusEnum.ACCEPTED || string.IsNullOrWhiteSpace(cancelReason))
+                if (status == OrderStatusEnum.ACCEPTED && string.IsNullOrWhiteSpace(cancelReason))
                 {
                     order.ShipperId = shipperId;
                     order.AcceptTime = DateTime.Now;
                 }
 
-                if (status == OrderStatusEnum.INPROCESS || string.IsNullOrWhiteSpace(cancelReason))
+                if (status == OrderStatusEnum.INPROCESS && string.IsNullOrWhiteSpace(cancelReason))
                 {                   
                     order.PickupTime = DateTime.Now;
                 }
 
-                if (status == OrderStatusEnum.COMPLETED || string.IsNullOrWhiteSpace(cancelReason))
+                if (status == OrderStatusEnum.COMPLETED && string.IsNullOrWhiteSpace(cancelReason))
                 {
                     order.CompleteTime = DateTime.Now;
                 }
 
-                if (status == OrderStatusEnum.COMPLETED || string.IsNullOrWhiteSpace(cancelReason))
+                if (status == OrderStatusEnum.COMPLETED && string.IsNullOrWhiteSpace(cancelReason))
                 {
                     order.CompleteTime = DateTime.Now;
                 }
@@ -93,12 +92,7 @@ namespace LocalShipper.Service.Services.Implement
                 await _unitOfWork.CommitAsync();
 
 
-                return _mapper.Map<Order, OrderResponse>(order);
-            }
-            catch (Exception ex)
-            {
-                throw new CrudException(HttpStatusCode.BadRequest, " Thao tác thất bại", ex.InnerException?.Message);
-            }
+                return _mapper.Map<Order, OrderResponse>(order);         
         }
         
         public async Task<decimal> GetTotalPriceSumByShipperId(int shipperId)
