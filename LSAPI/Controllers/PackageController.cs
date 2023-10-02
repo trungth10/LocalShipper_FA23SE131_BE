@@ -38,7 +38,7 @@ namespace LSAPI.Controllers
 
         }
         [HttpPost()]
-        public async Task<ActionResult<PackageResponse>> PostPackage(PackageRequest request)
+        public async Task<ActionResult<PackageResponse>> PostPackage(PackageRequestForCreate request)
         {
             try
             {

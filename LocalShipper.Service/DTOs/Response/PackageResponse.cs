@@ -9,7 +9,7 @@ namespace LocalShipper.Service.DTOs.Response
     public class PackageResponse
     {
         public int Id { get; set; }
-        public int BatchId { get; set; }
+        public int? BatchId { get; set; }
         public BatchResponse Batch { get; set; }
         public int Capacity { get; set; }
         public double? PackageWeight { get; set; }
@@ -23,7 +23,7 @@ namespace LocalShipper.Service.DTOs.Response
         public string CustomerEmail { get; set; }
         public string CancelReason { get; set; }
         public int PaymentId { get; set; }
-        public decimal PackagePrice { get; set; }
+       
         public decimal SubtotalPrice { get; set; }
         public decimal DistancePrice { get; set; }
         public decimal? TotalPrice { get; set; }
