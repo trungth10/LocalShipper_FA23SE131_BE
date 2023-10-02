@@ -16,7 +16,7 @@ namespace LocalShipper.Data.Models
         public int Status { get; set; }
         public int StoreId { get; set; }
         public int BatchId { get; set; }
-        public int ShipperId { get; set; }
+        public int? ShipperId { get; set; }
         public string TrackingNumber { get; set; }
         public DateTime? CreateTime { get; set; }
         public DateTime? OrderTime { get; set; }

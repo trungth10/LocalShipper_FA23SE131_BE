@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
 
 #nullable disable
 
@@ -42,8 +44,11 @@ namespace LocalShipper.Data.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=DESKTOP-JH5P1P8;Database=LocalShipperCP;User=sa;Password=12345;");
+                var builder = new ConfigurationBuilder()
+                                  .SetBasePath(Directory.GetCurrentDirectory())
+                                  .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                IConfigurationRoot configuration = builder.Build();
+                optionsBuilder.UseSqlServer(configuration.GetConnectionString("DBLocalShipper"));
             }
         }
 
@@ -104,7 +109,7 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.BatchDescription)
-                    .HasColumnType("text")
+                    .HasMaxLength(255)
                     .HasColumnName("batch_description");
 
                 entity.Property(e => e.BatchName)
@@ -189,7 +194,7 @@ namespace LocalShipper.Data.Models
                     .HasDefaultValueSql("(getdate())");
 
                 entity.Property(e => e.HistoryDescription)
-                    .HasColumnType("text")
+                    .HasMaxLength(255)
                     .HasColumnName("history_description");
 
                 entity.Property(e => e.StoreId).HasColumnName("storeId");
@@ -214,7 +219,7 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.BatchId).HasColumnName("batchId");
 
                 entity.Property(e => e.CancelReason)
-                    .HasColumnType("text")
+                    .HasMaxLength(255)
                     .HasColumnName("cancel_reason");
 
                 entity.Property(e => e.CancelTime)
@@ -239,7 +244,7 @@ namespace LocalShipper.Data.Models
                     .HasColumnName("order_time");
 
                 entity.Property(e => e.Other)
-                    .HasColumnType("text")
+                    .HasMaxLength(255)
                     .HasColumnName("other");
 
                 entity.Property(e => e.PickupTime)
@@ -274,7 +279,6 @@ namespace LocalShipper.Data.Models
                 entity.HasOne(d => d.Shipper)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.ShipperId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Order_Shipper");
 
                 entity.HasOne(d => d.Store)
@@ -438,7 +442,7 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.ByStoreId).HasColumnName("by_storeId");
 
                 entity.Property(e => e.Comment)
-                    .HasColumnType("text")
+                    .HasMaxLength(255)
                     .HasColumnName("comment");
 
                 entity.Property(e => e.RatingTime)
@@ -561,7 +565,7 @@ namespace LocalShipper.Data.Models
                     .HasColumnName("store_address");
 
                 entity.Property(e => e.StoreDescription)
-                    .HasColumnType("text")
+                    .HasMaxLength(255)
                     .HasColumnName("store_description");
 
                 entity.Property(e => e.StoreEmail)
@@ -654,7 +658,7 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.OrderId).HasColumnName("orderId");
 
                 entity.Property(e => e.TransactionDescription)
-                    .HasColumnType("text")
+                    .HasMaxLength(255)
                     .HasColumnName("transaction_description");
 
                 entity.Property(e => e.TransactionMethod)
@@ -831,7 +835,7 @@ namespace LocalShipper.Data.Models
                     .HasDefaultValueSql("(getdate())");
 
                 entity.Property(e => e.ZoneDescription)
-                    .HasColumnType("text")
+                    .HasMaxLength(255)
                     .HasColumnName("zone_description");
 
                 entity.Property(e => e.ZoneName)

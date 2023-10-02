@@ -11,7 +11,7 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IOrderService
     {
-        Task<OrderResponse> ShipperToStatusOrder(int id, int shipperId, OrderStatusEnum status);
+        Task<OrderResponse> ShipperToStatusOrder(int id, int shipperId, string? cancelReason, OrderStatusEnum status);
 
         Task<decimal> GetTotalPriceSumByShipperId(int shipperId);
 
