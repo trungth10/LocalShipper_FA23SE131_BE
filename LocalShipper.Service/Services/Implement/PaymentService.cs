@@ -95,9 +95,10 @@ namespace LocalShipper.Service.Services.Implement
             string paymentCode = GenerateRandomPaymentCode();
 
             var paymentCheck = await _unitOfWork.Repository<Payment>().GetAll()
+                                                                 .Include(o => o.Package)
                                                                  .Where(a => a.PackageId == request.PackageId)
                                                                  .ToListAsync();
-            if(paymentCheck != null)
+            if(paymentCheck.Count != 0)
             {
                 throw new CrudException(HttpStatusCode.BadRequest, "Sản phẩm đã được thanh toán rồi", request.PackageId.ToString());
             }
@@ -112,7 +113,6 @@ namespace LocalShipper.Service.Services.Implement
             };
             await _unitOfWork.Repository<Payment>().InsertAsync(payment);
             await _unitOfWork.CommitAsync();
-
 
             var paymentResponse = new PaymentResponse
             {
@@ -165,5 +165,94 @@ namespace LocalShipper.Service.Services.Implement
 
             return generatedTrackingNumber;
         }
+
+        public async Task<PaymentResponse> UpdatePayment(int id, PutPaymentRequest request)
+        {
+            var payments = await _unitOfWork.Repository<Payment>()
+                .GetAll()
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (payments == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy ví", id.ToString());
+            }
+
+            var paymentCheck = await _unitOfWork.Repository<Payment>().GetAll()
+                                                                 .Where(a => a.PackageId == request.PackageId && a.PackageId !=  payments.PackageId)
+                                                                 .ToListAsync();
+
+            if (paymentCheck.Count != 0)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Sản phẩm đã được thanh toán rồi", request.PackageId.ToString());
+            }
+
+            payments.PaymentMethod = request.PaymentMethod;
+            payments.Status = (int)request.Status;
+            payments.PaymentCode = request.PaymentCode;
+            payments.PaymentImage = request.PaymentImage;
+            payments.PackageId = request.PackageId;
+
+            await _unitOfWork.Repository<Payment>().Update(payments, id);
+            await _unitOfWork.CommitAsync();
+
+            var payment = await _unitOfWork.Repository<Payment>()
+                .GetAll()
+                .Include(o => o.Package)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            var paymentResponse = new PaymentResponse
+            {
+                Id = payment.Id,
+                PaymentMethod = payment.PaymentMethod,
+                PaymentDate = payment.PaymentDate,
+                Status = payment.Status,
+                PaymentCode = payment.PaymentCode,
+                PaymentImage = payment.PaymentImage,
+                PackageId = payment.PackageId,
+                Package = payment.Package != null ? new PackageResponse
+                {
+                    Id = payment.Package.Id,
+                    BatchId = payment.Package.BatchId,
+                    Capacity = payment.Package.Capacity,
+                    PackageWeight = payment.Package.PackageWeight,
+                    PackageWidth = payment.Package.PackageWidth,
+                    PackageHeight = payment.Package.PackageHeight,
+                    PackageLength = payment.Package.PackageLength,
+                    Status = payment.Package.Status,
+                    CustomerAddress = payment.Package.CustomerAddress,
+                    CustomerName = payment.Package.CustomerName,
+                    CustomerEmail = payment.Package.CustomerEmail,
+                    CancelReason = payment.Package.CancelReason,
+                    SubtotalPrice = payment.Package.SubtotalPrice,
+                    DistancePrice = payment.Package.DistancePrice,
+                    ActionId = payment.Package.ActionId,
+                    TypeId = payment.Package.TypeId,
+                } : null
+
+            };
+            return paymentResponse;
+        }
+
+        //DELETE Payment
+
+        public async Task<MessageResponse> DeletePayment(int id)
+        {
+            var payments = await _unitOfWork.Repository<Payment>().GetAll()
+            .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (payments == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy", id.ToString());
+            }
+
+            _unitOfWork.Repository<Payment>().Delete(payments);
+            await _unitOfWork.CommitAsync();
+
+            return new MessageResponse
+            {
+                Message = "Xóa thành công",
+            };
+        }
+
     }
 }

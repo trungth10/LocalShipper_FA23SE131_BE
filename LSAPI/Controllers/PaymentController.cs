@@ -19,8 +19,8 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<PaymentResponse>> GetPayment(int? id, string? paymentMethod, int? status, string? paymentCode
-            , string? paymentImage, int? packageId)
+        public async Task<ActionResult<PaymentResponse>> GetPayment(int id, string paymentMethod, int status, string paymentCode
+            , string paymentImage, int packageId)
         {
             try
             {
@@ -61,6 +61,34 @@ namespace LSAPI.Controllers
             catch (Exception ex)
             {
                 return BadRequest($"Tạo thất bại: {ex.Message}");
+            }
+        }
+
+        [HttpPut()]
+        public async Task<ActionResult<PaymentResponse>> UpdatePayment(int id,[FromBody] PutPaymentRequest request)
+        {
+            try
+            {
+                var rs = await _paymentService.UpdatePayment(id, request);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Cập nhật thất bại: {ex.Message}");
+            }
+        }
+
+        [HttpDelete()]
+        public async Task<ActionResult<PaymentResponse>> DeletePayment(int id)
+        {
+            try
+            {
+                var rs = await _paymentService.DeletePayment(id);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xóa thất bại: {ex.Message}");
             }
         }
     }

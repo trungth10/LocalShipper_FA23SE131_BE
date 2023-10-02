@@ -14,5 +14,7 @@ namespace LocalShipper.Service.Services.Interface
             , string? paymentImage, int? packageId);
         Task<int> GetTotalPaymentCount();
         Task<PaymentResponse> CreatePayment(PaymentRequest request);
+        Task<PaymentResponse> UpdatePayment(int id, PutPaymentRequest request);
+        Task<MessageResponse> DeletePayment(int id);
     }
 }
