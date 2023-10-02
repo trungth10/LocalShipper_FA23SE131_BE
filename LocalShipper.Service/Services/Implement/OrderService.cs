@@ -72,6 +72,7 @@ namespace LocalShipper.Service.Services.Implement
                 if (status == OrderStatusEnum.INPROCESS || string.IsNullOrWhiteSpace(cancelReason))
                 {
                     order.Status = (int)status;
+
                     order.PickupTime = DateTime.Now;
                 }
 
