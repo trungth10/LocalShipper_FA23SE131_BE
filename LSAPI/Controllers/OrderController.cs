@@ -12,7 +12,7 @@ using LocalShipper.Service.Helpers;
 namespace LSAPI.Controllers
 {
     [ApiController]
-    
+
 
     //[Authorize(Policy = "Shipper")]
     public class OrderController : Controller
@@ -23,7 +23,7 @@ namespace LSAPI.Controllers
             _orderService = orderService;
         }
 
-       
+
         [HttpGet("api/orders")]
         public async Task<ActionResult<OrderResponse>> GetOrder(int id, int status, int storeId, int batchId, int shipperId,
             string tracking_number, string cancle_reason, decimal distance_price,
@@ -32,7 +32,7 @@ namespace LSAPI.Controllers
             try
             {
 
-                var response = await _orderService.GetOrder(id,status,storeId,batchId,shipperId,tracking_number,cancle_reason,distance_price,subtotal_price,totalPrice,other);
+                var response = await _orderService.GetOrder(id, status, storeId, batchId, shipperId, tracking_number, cancle_reason, distance_price, subtotal_price, totalPrice, other);
 
 
                 return Ok(response);
@@ -43,7 +43,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        
+
         [HttpGet("api/orders/count")]
         public async Task<ActionResult<OrderResponse>> GetCountOrder(int storeId, int shipperId)
         {
@@ -60,7 +60,7 @@ namespace LSAPI.Controllers
 
         }
 
-    
+
         [HttpPost("api/orders")]
         public async Task<ActionResult<MessageResponse>> CreateOrder(OrderRequest request)
         {
@@ -77,7 +77,7 @@ namespace LSAPI.Controllers
 
         }
 
-        
+
         [HttpPut("api/orders")]
         public async Task<ActionResult<MessageResponse>> UpdateOrder(int id, PutOrderRequest orderRequest)
         {
@@ -93,7 +93,7 @@ namespace LSAPI.Controllers
 
         }
 
-        
+
         [HttpDelete("api/orders")]
         public async Task<ActionResult<MessageResponse>> DeleteOrder(int id)
         {
@@ -111,11 +111,11 @@ namespace LSAPI.Controllers
 
 
         [HttpPut("shipper/api/orders")]
-        public async Task<ActionResult<MessageResponse>> ShipperToStatusOrder(int id, int shipperId, OrderStatusEnum status)
+        public async Task<ActionResult<MessageResponse>> ShipperToStatusOrder(int id, int shipperId, string cancelReason, OrderStatusEnum status)
         {
             try
             {
-                var rs = await _orderService.ShipperToStatusOrder(id, shipperId, status);
+                var rs = await _orderService.ShipperToStatusOrder(id, shipperId, cancelReason, status);
                 return Ok(rs);
             }
             catch (Exception ex)

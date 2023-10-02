@@ -33,13 +33,13 @@ namespace LocalShipper.Service.Services.Implement
 
 
         //SHIPPER -> ORDER
-        public async Task<OrderResponse> ShipperToStatusOrder(int id, int shipperId, string? cancleReason, OrderStatusEnum status )
+        public async Task<OrderResponse> ShipperToStatusOrder(int id, int shipperId, string? cancelReason, OrderStatusEnum status )
         {
             try
             {
                 var order = await _unitOfWork.Repository<Order>()
                  .GetAll()                                                
-                 .FirstOrDefaultAsync(a => a.Id == id || string.IsNullOrWhiteSpace(cancleReason));
+                 .FirstOrDefaultAsync(a => a.Id == id || string.IsNullOrWhiteSpace(cancelReason));
 
                 var shipper = await _unitOfWork.Repository<Shipper>()
                  .GetAll()
@@ -62,23 +62,23 @@ namespace LocalShipper.Service.Services.Implement
 
                 //Shipper thao tác Order
 
-                if (status == OrderStatusEnum.ACCEPTED || string.IsNullOrWhiteSpace(cancleReason))
+                if (status == OrderStatusEnum.ACCEPTED || string.IsNullOrWhiteSpace(cancelReason))
                 {
                     order.ShipperId = shipperId;
                     order.AcceptTime = DateTime.Now;
                 }
 
-                if (status == OrderStatusEnum.INPROCESS || string.IsNullOrWhiteSpace(cancleReason))
+                if (status == OrderStatusEnum.INPROCESS || string.IsNullOrWhiteSpace(cancelReason))
                 {                   
                     order.PickupTime = DateTime.Now;
                 }
 
-                if (status == OrderStatusEnum.COMPLETED || string.IsNullOrWhiteSpace(cancleReason))
+                if (status == OrderStatusEnum.COMPLETED || string.IsNullOrWhiteSpace(cancelReason))
                 {
                     order.CompleteTime = DateTime.Now;
                 }
 
-                if (status == OrderStatusEnum.COMPLETED || string.IsNullOrWhiteSpace(cancleReason))
+                if (status == OrderStatusEnum.COMPLETED || string.IsNullOrWhiteSpace(cancelReason))
                 {
                     order.CompleteTime = DateTime.Now;
                 }
@@ -86,7 +86,7 @@ namespace LocalShipper.Service.Services.Implement
                 if (status == OrderStatusEnum.CANCELLED)
                 {
                     order.CancelTime = DateTime.Now;
-                    order.CancelReason = cancleReason;
+                    order.CancelReason = cancelReason;
                 }
 
                 await _unitOfWork.Repository<Order>().Update(order, id);
