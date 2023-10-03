@@ -119,7 +119,6 @@ namespace LSAPI
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IBatchService, BatchService>();
             services.AddScoped<IPackageService, PackageService>();
-            services.AddScoped<IBrandService, BrandService>();
             services.AddScoped<IRatingService, RatingService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ITransactionService, TransactionService>();

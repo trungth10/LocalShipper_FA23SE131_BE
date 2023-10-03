@@ -255,7 +255,6 @@ namespace LocalShipper.Service.Services.Implement
                     CloseTime = order.Store.CloseTime,
                     StoreDescription = order.Store.StoreDescription,
                     Status = order.Store.Status,
-                    BrandId = order.Store.BrandId,
                     TemplateId = order.Store.TemplateId,
                     ZoneId = order.Store.ZoneId,
                     AccountId = order.Store.AccountId,
@@ -263,7 +262,6 @@ namespace LocalShipper.Service.Services.Implement
                 Batches = order.Batch != null ? new BatchResponse
                 {
                     Id = order.Batch.Id,
-                    StoreId = order.Batch.StoreId,
                     BatchName = order.Batch.BatchName,
                     BatchDescription = order.Batch.BatchDescription,
                     CreatedAt = order.Batch.CreatedAt,
@@ -450,7 +448,6 @@ namespace LocalShipper.Service.Services.Implement
                     CloseTime = order.Store.CloseTime,
                     StoreDescription = order.Store.StoreDescription,
                     Status = order.Store.Status,
-                    BrandId = order.Store.BrandId,
                     TemplateId = order.Store.TemplateId,
                     ZoneId = order.Store.ZoneId,
                     AccountId = order.Store.AccountId,
@@ -458,7 +455,6 @@ namespace LocalShipper.Service.Services.Implement
                 Batches = order.Batch != null ? new BatchResponse
                 {
                     Id = order.Batch.Id,
-                    StoreId = order.Batch.StoreId,
                     BatchName = order.Batch.BatchName,
                     BatchDescription = order.Batch.BatchDescription,
                     CreatedAt = order.Batch.CreatedAt,
@@ -541,7 +537,6 @@ namespace LocalShipper.Service.Services.Implement
                     CloseTime = order.Store.CloseTime,
                     StoreDescription = order.Store.StoreDescription,
                     Status = order.Store.Status,
-                    BrandId = order.Store.BrandId,
                     TemplateId = order.Store.TemplateId,
                     ZoneId = order.Store.ZoneId,
                     AccountId = order.Store.AccountId,
@@ -549,7 +544,6 @@ namespace LocalShipper.Service.Services.Implement
                 Batches = order.Batch != null ? new BatchResponse
                 {
                     Id = order.Batch.Id,
-                    StoreId = order.Batch.StoreId,
                     BatchName = order.Batch.BatchName,
                     BatchDescription = order.Batch.BatchDescription,
                     CreatedAt = order.Batch.CreatedAt,

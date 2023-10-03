@@ -9,9 +9,10 @@ namespace LocalShipper.Data.Models
     {
         public Store()
         {
-            Batches = new HashSet<Batch>();
             Histories = new HashSet<History>();
             Orders = new HashSet<Order>();
+            Packages = new HashSet<Package>();
+            Prices = new HashSet<Price>();
             Ratings = new HashSet<Rating>();
         }
 
@@ -24,20 +25,19 @@ namespace LocalShipper.Data.Models
         public TimeSpan? CloseTime { get; set; }
         public string StoreDescription { get; set; }
         public int? Status { get; set; }
-        public int BrandId { get; set; }
         public int? TemplateId { get; set; }
         public int? ZoneId { get; set; }
         public int WalletId { get; set; }
         public int AccountId { get; set; }
 
         public virtual Account Account { get; set; }
-        public virtual Brand Brand { get; set; }
         public virtual Template Template { get; set; }
         public virtual Wallet Wallet { get; set; }
         public virtual Zone Zone { get; set; }
-        public virtual ICollection<Batch> Batches { get; set; }
         public virtual ICollection<History> Histories { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
+        public virtual ICollection<Package> Packages { get; set; }
+        public virtual ICollection<Price> Prices { get; set; }
         public virtual ICollection<Rating> Ratings { get; set; }
     }
 }

@@ -30,9 +30,11 @@ namespace LocalShipper.Data.Models
         public decimal? TotalPrice { get; set; }
         public int ActionId { get; set; }
         public int? TypeId { get; set; }
+        public int StoreId { get; set; }
 
         public virtual PackageAction Action { get; set; }
         public virtual Batch Batch { get; set; }
+        public virtual Store Store { get; set; }
         public virtual PackageType Type { get; set; }
         public virtual ICollection<Payment> Payments { get; set; }
     }

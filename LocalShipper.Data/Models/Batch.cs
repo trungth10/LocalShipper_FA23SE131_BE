@@ -14,14 +14,12 @@ namespace LocalShipper.Data.Models
         }
 
         public int Id { get; set; }
-        public int StoreId { get; set; }
         public string BatchName { get; set; }
         public string BatchDescription { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdateAt { get; set; }
         public int? Status { get; set; }
 
-        public virtual Store Store { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<Package> Packages { get; set; }
     }

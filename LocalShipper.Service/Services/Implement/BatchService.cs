@@ -32,41 +32,22 @@ namespace LocalShipper.Service.Services.Implement
 
 
 
-        public async Task<List<BatchResponse>> GetBatch(int? id, int? storeId, string? batchName)
+        public async Task<List<BatchResponse>> GetBatch(int? id, string? batchName)
         {
 
-            var batchs = await _unitOfWork.Repository<Batch>().GetAll().Include(b => b.Store)
+            var batchs = await _unitOfWork.Repository<Batch>().GetAll()
                                                               .Where(b => id == 0 || b.Id == id)
-                                                              .Where(b => storeId == 0 || b.StoreId == storeId)
                                                               .Where(b => string.IsNullOrWhiteSpace(batchName) || b.BatchName.Contains(batchName))
                                                               .ToListAsync();
             var batchResponses = batchs.Select(batch => new BatchResponse
             {
                 Id = batch.Id,
-                StoreId = batch.StoreId,
                 BatchName = batch.BatchName,
                 BatchDescription = batch.BatchDescription,
                 CreatedAt = batch.CreatedAt,
                 UpdateAt = batch.UpdateAt,
                 Status = batch.Status,
-                Store = batch.Store != null ? new StoreResponse
-                {
-                    Id = batch.Store.Id,
-                    StoreName = batch.Store.StoreName,
-                    StoreAddress = batch.Store.StoreAddress,
-                    StorePhone = batch.Store.StorePhone,
-                    StoreEmail = batch.Store.StoreEmail,
-                    OpenTime = batch.Store.OpenTime,
-                    CloseTime = batch.Store.CloseTime,
-                    StoreDescription = batch.Store.StoreDescription,
-                    Status = batch.Store.Status,
-                    BrandId = batch.Store.BrandId,
-                    TemplateId = batch.Store.TemplateId,
-                    ZoneId = batch.Store.ZoneId,
-                    WalletId = batch.Store.WalletId,
-                    AccountId = batch.Store.AccountId
-
-                } : null,
+               
 
 
             }).ToList();
@@ -84,7 +65,6 @@ namespace LocalShipper.Service.Services.Implement
 
             var newBatch = new Batch
             {
-                StoreId = request.StoreId,
                 BatchName = request.BatchName,
                 BatchDescription = request.BatchDescription,
                 CreatedAt = DateTime.Now,
@@ -103,7 +83,7 @@ namespace LocalShipper.Service.Services.Implement
         public async Task<BatchResponse> UpdateBatch(int id, BatchRequest batchRequest)
         {
             var batch = await _unitOfWork.Repository<Batch>()
-                .GetAll().Include(b => b.Store)
+                .GetAll()
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (batch == null)
@@ -123,30 +103,12 @@ namespace LocalShipper.Service.Services.Implement
             var updatedBatchResponse = new BatchResponse
             {
                 Id = batch.Id,
-                StoreId = batch.StoreId,
                 BatchName = batch.BatchName,
                 BatchDescription = batch.BatchDescription,
                 CreatedAt = batch.CreatedAt,
                 UpdateAt = batch.UpdateAt,
                 Status= batch.Status,
-                Store = batch.Store != null ? new StoreResponse
-                {
-                    Id = batch.Store.Id,
-                    StoreName = batch.Store.StoreName,
-                    StoreAddress = batch.Store.StoreAddress,
-                    StorePhone = batch.Store.StorePhone,
-                    StoreEmail = batch.Store.StoreEmail,
-                    OpenTime = batch.Store.OpenTime,
-                    CloseTime = batch.Store.CloseTime,
-                    StoreDescription = batch.Store.StoreDescription,
-                    Status = batch.Store.Status,
-                    BrandId = batch.Store.BrandId,
-                    TemplateId = batch.Store.TemplateId,
-                    ZoneId = batch.Store.ZoneId,
-                    WalletId = batch.Store.WalletId,
-                    AccountId = batch.Store.AccountId
-
-                } : null,
+               
             };
 
             return updatedBatchResponse;
@@ -155,7 +117,7 @@ namespace LocalShipper.Service.Services.Implement
         public async Task<BatchResponse> DeleteBatch(int id)
         {
             var batch = await _unitOfWork.Repository<Batch>()
-                .GetAll().Include(b => b.Store)
+                .GetAll()
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (batch == null)

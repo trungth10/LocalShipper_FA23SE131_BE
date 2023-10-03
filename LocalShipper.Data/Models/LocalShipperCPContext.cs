@@ -21,13 +21,15 @@ namespace LocalShipper.Data.Models
 
         public virtual DbSet<Account> Accounts { get; set; }
         public virtual DbSet<Batch> Batches { get; set; }
-        public virtual DbSet<Brand> Brands { get; set; }
         public virtual DbSet<History> Histories { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<Package> Packages { get; set; }
         public virtual DbSet<PackageAction> PackageActions { get; set; }
         public virtual DbSet<PackageType> PackageTypes { get; set; }
         public virtual DbSet<Payment> Payments { get; set; }
+        public virtual DbSet<Price> Prices { get; set; }
+        public virtual DbSet<PriceInZone> PriceInZones { get; set; }
+        public virtual DbSet<PriceItem> PriceItems { get; set; }
         public virtual DbSet<Rating> Ratings { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<Shipper> Shippers { get; set; }
@@ -50,6 +52,7 @@ namespace LocalShipper.Data.Models
                 IConfigurationRoot configuration = builder.Build();
                 optionsBuilder.UseSqlServer(configuration.GetConnectionString("DBLocalShipper"));
             }
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -124,57 +127,10 @@ namespace LocalShipper.Data.Models
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
-                entity.Property(e => e.StoreId).HasColumnName("storeId");
-
                 entity.Property(e => e.UpdateAt)
                     .HasColumnType("datetime")
                     .HasColumnName("update_at")
                     .HasDefaultValueSql("(getdate())");
-
-                entity.HasOne(d => d.Store)
-                    .WithMany(p => p.Batches)
-                    .HasForeignKey(d => d.StoreId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Batch_Store");
-            });
-
-            modelBuilder.Entity<Brand>(entity =>
-            {
-                entity.ToTable("Brand");
-
-                entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.AccountId).HasColumnName("accountId");
-
-                entity.Property(e => e.Active).HasColumnName("active");
-
-                entity.Property(e => e.BrandDescription)
-                    .HasMaxLength(255)
-                    .HasColumnName("brand_description");
-
-                entity.Property(e => e.BrandName)
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .HasColumnName("brand_name");
-
-                entity.Property(e => e.CreatedAt)
-                    .HasColumnType("datetime")
-                    .HasColumnName("created_at")
-                    .HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.IconUrl)
-                    .HasMaxLength(255)
-                    .HasColumnName("iconUrl");
-
-                entity.Property(e => e.ImageUrl)
-                    .HasMaxLength(255)
-                    .HasColumnName("imageUrl");
-
-                entity.HasOne(d => d.Account)
-                    .WithMany(p => p.Brands)
-                    .HasForeignKey(d => d.AccountId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Brand_Account");
             });
 
             modelBuilder.Entity<History>(entity =>
@@ -338,6 +294,8 @@ namespace LocalShipper.Data.Models
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
+                entity.Property(e => e.StoreId).HasColumnName("storeId");
+
                 entity.Property(e => e.SubtotalPrice)
                     .HasColumnType("decimal(10, 2)")
                     .HasColumnName("subtotal_price");
@@ -357,8 +315,13 @@ namespace LocalShipper.Data.Models
                 entity.HasOne(d => d.Batch)
                     .WithMany(p => p.Packages)
                     .HasForeignKey(d => d.BatchId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Package_Batch");
+
+                entity.HasOne(d => d.Store)
+                    .WithMany(p => p.Packages)
+                    .HasForeignKey(d => d.StoreId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Package_Store");
 
                 entity.HasOne(d => d.Type)
                     .WithMany(p => p.Packages)
@@ -431,6 +394,97 @@ namespace LocalShipper.Data.Models
                     .HasForeignKey(d => d.PackageId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Payment_Package");
+            });
+
+            modelBuilder.Entity<Price>(entity =>
+            {
+                entity.ToTable("Price");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Datefilter).HasColumnName("datefilter");
+
+                entity.Property(e => e.Hourfilter).HasColumnName("hourfilter");
+
+                entity.Property(e => e.Mode).HasColumnName("mode");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnName("name");
+
+                entity.Property(e => e.PriceInZoneId).HasColumnName("priceInZoneId");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.StoreId).HasColumnName("storeId");
+
+                entity.HasOne(d => d.Store)
+                    .WithMany(p => p.Prices)
+                    .HasForeignKey(d => d.StoreId)
+                    .HasConstraintName("FK_Price_Store");
+            });
+
+            modelBuilder.Entity<PriceInZone>(entity =>
+            {
+                entity.ToTable("PriceInZone");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.PriceId).HasColumnName("priceId");
+
+                entity.Property(e => e.ZoneId).HasColumnName("zoneId");
+
+                entity.HasOne(d => d.Price)
+                    .WithMany(p => p.PriceInZones)
+                    .HasForeignKey(d => d.PriceId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_PriceInZone_Price");
+
+                entity.HasOne(d => d.Zone)
+                    .WithMany(p => p.PriceInZones)
+                    .HasForeignKey(d => d.ZoneId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_PriceInZone_Zone");
+            });
+
+            modelBuilder.Entity<PriceItem>(entity =>
+            {
+                entity.ToTable("PriceItem");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.ApplyFrom)
+                    .HasColumnType("date")
+                    .HasColumnName("apply_from");
+
+                entity.Property(e => e.ApplyTo)
+                    .HasColumnType("date")
+                    .HasColumnName("apply_to");
+
+                entity.Property(e => e.MaxAmount)
+                    .HasColumnType("decimal(10, 2)")
+                    .HasColumnName("max_amount");
+
+                entity.Property(e => e.MaxDistance).HasColumnName("max_distance");
+
+                entity.Property(e => e.MinAmount)
+                    .HasColumnType("decimal(10, 2)")
+                    .HasColumnName("min_amount");
+
+                entity.Property(e => e.MinDistance).HasColumnName("min_distance");
+
+                entity.Property(e => e.Price)
+                    .HasColumnType("decimal(10, 2)")
+                    .HasColumnName("price");
+
+                entity.Property(e => e.PriceId).HasColumnName("priceId");
+
+                entity.HasOne(d => d.PriceNavigation)
+                    .WithMany(p => p.PriceItems)
+                    .HasForeignKey(d => d.PriceId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_PriceItem_Price");
             });
 
             modelBuilder.Entity<Rating>(entity =>
@@ -513,7 +567,11 @@ namespace LocalShipper.Data.Models
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
+                entity.Property(e => e.StoreId).HasColumnName("storeId");
+
                 entity.Property(e => e.TransportId).HasColumnName("transportId");
+
+                entity.Property(e => e.Type).HasColumnName("type");
 
                 entity.Property(e => e.WalletId).HasColumnName("walletId");
 
@@ -550,8 +608,6 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.AccountId).HasColumnName("accountId");
-
-                entity.Property(e => e.BrandId).HasColumnName("brandId");
 
                 entity.Property(e => e.CloseTime).HasColumnName("close_time");
 
@@ -594,12 +650,6 @@ namespace LocalShipper.Data.Models
                     .HasForeignKey(d => d.AccountId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Store_Account");
-
-                entity.HasOne(d => d.Brand)
-                    .WithMany(p => p.Stores)
-                    .HasForeignKey(d => d.BrandId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Store_Brand");
 
                 entity.HasOne(d => d.Template)
                     .WithMany(p => p.Stores)
@@ -824,6 +874,8 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.Longitude)
                     .HasColumnType("decimal(11, 8)")
                     .HasColumnName("longitude");
+
+                entity.Property(e => e.PriceInZoneId).HasColumnName("priceInZoneId");
 
                 entity.Property(e => e.Radius)
                     .HasColumnType("decimal(10, 2)")

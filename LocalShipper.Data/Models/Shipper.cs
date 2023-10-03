@@ -25,6 +25,8 @@ namespace LocalShipper.Data.Models
         public int? Status { get; set; }
         public string Fcmtoken { get; set; }
         public int? WalletId { get; set; }
+        public int? StoreId { get; set; }
+        public int Type { get; set; }
 
         public virtual Account Account { get; set; }
         public virtual Transport Transport { get; set; }

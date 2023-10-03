@@ -10,7 +10,7 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IBatchService
     {
-        Task<List<BatchResponse>> GetBatch(int? id, int? storeId, string? batchName);
+        Task<List<BatchResponse>> GetBatch(int? id, string? batchName);
         Task<BatchResponse> CreateBatch(BatchRequest request);
         Task<BatchResponse> UpdateBatch(int id, BatchRequest batchRequest);
 

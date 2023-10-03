@@ -9,6 +9,7 @@ namespace LocalShipper.Data.Models
     {
         public Zone()
         {
+            PriceInZones = new HashSet<PriceInZone>();
             Shippers = new HashSet<Shipper>();
             Stores = new HashSet<Store>();
         }
@@ -22,7 +23,9 @@ namespace LocalShipper.Data.Models
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdateAt { get; set; }
         public bool? Active { get; set; }
+        public int? PriceInZoneId { get; set; }
 
+        public virtual ICollection<PriceInZone> PriceInZones { get; set; }
         public virtual ICollection<Shipper> Shippers { get; set; }
         public virtual ICollection<Store> Stores { get; set; }
     }

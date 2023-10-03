@@ -22,11 +22,11 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<List<BatchResponse>>> GetBatch(int id, int storeId, string batchName)
+        public async Task<ActionResult<List<BatchResponse>>> GetBatch(int id, string batchName)
         {
             try
             {
-                var rs = await _batchService.GetBatch(id, storeId, batchName);
+                var rs = await _batchService.GetBatch(id, batchName);
                 return Ok(rs);
             }
             catch (Exception ex)

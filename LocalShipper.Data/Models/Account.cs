@@ -9,7 +9,6 @@ namespace LocalShipper.Data.Models
     {
         public Account()
         {
-            Brands = new HashSet<Brand>();
             Shippers = new HashSet<Shipper>();
             Stores = new HashSet<Store>();
         }
@@ -26,7 +25,6 @@ namespace LocalShipper.Data.Models
         public string Password { get; set; }
 
         public virtual Role Role { get; set; }
-        public virtual ICollection<Brand> Brands { get; set; }
         public virtual ICollection<Shipper> Shippers { get; set; }
         public virtual ICollection<Store> Stores { get; set; }
     }
