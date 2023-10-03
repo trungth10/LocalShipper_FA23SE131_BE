@@ -28,14 +28,15 @@ namespace LocalShipper.Service.Services.Implement
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<PackageResponse>> GetPackage(int? batchId,int? id, int? status,int? actionId, int? typeId,string? customerName,string? customerAddress, string? customerPhome, string? custommerEmail,decimal? totalPrice)
+        public async Task<List<PackageResponse>> GetPackage(int? batchId,int? id, int? status,int? actionId, int? typeId, int? storeId, string? customerName,string? customerAddress, string? customerPhome, string? custommerEmail,decimal? totalPrice)
         {           
-            var packages = await _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch)
+            var packages = await _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch).Include(b => b.Store)
                 .Where(f => f.BatchId == batchId || batchId == 0)
                 .Where(f => f.Id == id || id == 0)
                 .Where(f => f.Status == status || status == 0)
                 .Where(f => f.ActionId == actionId || actionId == 0)
                 .Where(f => typeId== id || typeId == 0)
+                .Where(f => f.StoreId == storeId || storeId == 0)
                 .Where(f => string.IsNullOrWhiteSpace(customerName) ||f.CustomerName.Contains(customerName))
                 .ToListAsync();
 

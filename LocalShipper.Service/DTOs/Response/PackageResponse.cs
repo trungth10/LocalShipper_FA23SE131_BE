@@ -31,8 +31,9 @@ namespace LocalShipper.Service.DTOs.Response
         public PackageActionResponse Action { get; set; }
         public int? TypeId { get; set; }
 
-        
-       
+        public int StoreId { get; set; }
+        public StoreResponse Store { get; set; }
+
         public PackageTypeResponse Type { get; set; }
     }
 }
