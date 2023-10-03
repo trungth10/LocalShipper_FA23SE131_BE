@@ -32,14 +32,30 @@ namespace LocalShipper.Service.Services.Implement
 
 
 
-        public async Task<List<BatchResponse>> GetBatch(int? id, string? batchName)
+        public async Task<List<BatchResponse>> GetBatch(int? id, string? batchName, int? pageNumber, int? pageSize)
         {
 
-            var batchs = await _unitOfWork.Repository<Batch>().GetAll()
+            var batchs = _unitOfWork.Repository<Batch>().GetAll()
                                                               .Where(b => id == 0 || b.Id == id)
-                                                              .Where(b => string.IsNullOrWhiteSpace(batchName) || b.BatchName.Contains(batchName))
-                                                              .ToListAsync();
-            var batchResponses = batchs.Select(batch => new BatchResponse
+                                                              .Where(b => string.IsNullOrWhiteSpace(batchName) || b.BatchName.Contains(batchName));
+
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                batchs = batchs.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var batchList = await batchs.ToListAsync();
+            if (batchList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Lô hàng không có hoặc không tồn tại", id.ToString());
+            }
+
+
+            var batchResponses = batchList.Select(batch => new BatchResponse
             {
                 Id = batch.Id,
                 BatchName = batch.BatchName,

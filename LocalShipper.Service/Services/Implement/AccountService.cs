@@ -145,24 +145,33 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //Get Account  
-        public async Task<List<AccountResponse>> GetAccount(int? id, string? phone, string? email, int? role, string? fcm_token)
+        public async Task<List<AccountResponse>> GetAccount(int? id, string? phone, string? email, int? role, string? fcm_token, int? pageNumber, int? pageSize)
         {
-            
-            var accoutns = await _unitOfWork.Repository<Account>().GetAll()
+
+            var accounts = _unitOfWork.Repository<Account>().GetAll()
                                                               .Include(o => o.Role)
                                                               .Where(a => id == 0 || a.Id == id)
                                                               .Where(a => string.IsNullOrWhiteSpace(phone) || a.Phone.Contains(phone))
                                                               .Where(a => string.IsNullOrWhiteSpace(email) || a.Email.Contains(email))
                                                               .Where(a => role == 0 || a.RoleId == role)
-                                                              .Where(a => string.IsNullOrWhiteSpace(fcm_token) || a.FcmToken.Contains(fcm_token))
-                                                              .ToListAsync();
+                                                              .Where(a => string.IsNullOrWhiteSpace(fcm_token) || a.FcmToken.Contains(fcm_token));
 
-            if (accoutns == null)
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                accounts = accounts.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var accountList = await accounts.ToListAsync();
+            if (accountList == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Tài khoản không có hoặc không tồn tại", id.ToString());
             }
 
-            var accountResponses = accoutns.Select(account => new AccountResponse
+            var accountResponses = accountList.Select(account => new AccountResponse
             {
                 Id = account.Id,
                 Fullname = account.Fullname,

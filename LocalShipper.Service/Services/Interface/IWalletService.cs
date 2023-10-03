@@ -10,7 +10,7 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IWalletService
     {
-        Task<List<WalletResponse>> GetWallet(int? id, decimal? balance);
+        Task<List<WalletResponse>> GetWallet(int? id, decimal? balance, int? pageNumber, int? pageSize);
         Task<int> GetTotalWalletCount();
         Task<WalletResponse> CreateWallet(WalletRequest request);
         Task<WalletResponse> UpdateWallet(int id, WalletRequest request);

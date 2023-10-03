@@ -68,18 +68,32 @@ namespace LocalShipper.Service.Services.Implement
 
         //GET 
         public async Task<List<TransactionResponse>> GetTransaction(int? id, string? transactionMethod,
-            int? orderId, int? walletId, decimal? amount)
+            int? orderId, int? walletId, decimal? amount, int? pageNumber, int? pageSize)
         {
 
-            var transactions = await _unitOfWork.Repository<Transaction>().GetAll()
-                                                              .Include(t => t.Order).Include(t => t.Wallet)
+            var transactions = _unitOfWork.Repository<Transaction>().GetAll()
                                                               .Where(t => id == 0 || t.Id == id)
                                                               .Where(t => string.IsNullOrWhiteSpace(transactionMethod) || t.TransactionMethod.Contains(transactionMethod))
                                                               .Where(t => orderId == 0 || t.OrderId == orderId)
                                                               .Where(t => walletId == 0 || t.WalletId == walletId)
-                                                              .Where(t => amount == 0 || t.Amount == amount)
-                                                              .ToListAsync();
-            var transactionReponses = transactions.Select(transaction => new TransactionResponse
+                                                              .Where(t => amount == 0 || t.Amount == amount);
+
+
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                transactions = transactions.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var transactionList = await transactions.ToListAsync();
+            if (transactionList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Giao dịch không có hoặc không tồn tại", id.ToString());
+            }
+            var transactionReponses = transactionList.Select(transaction => new TransactionResponse
             {
                 Id = transaction.Id,
                 TransactionMethod = transaction.TransactionMethod,
@@ -89,6 +103,7 @@ namespace LocalShipper.Service.Services.Implement
                 TransactionTime = transaction.TransactionTime,
                 TransactionDescription = transaction.TransactionDescription,
                 CreatedAt = transaction.CreatedAt,
+
 
                 Order = transaction.Order != null ? new OrderResponse
                 {

@@ -54,14 +54,27 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //GET 
-        public async Task<List<RoleResponse>> GetRole(int? id, string? name)
+        public async Task<List<RoleResponse>> GetRole(int? id, string? name, int? pageNumber, int? pageSize)
         {
 
-            var roles = await _unitOfWork.Repository<Role>().GetAll()
+            var roles = _unitOfWork.Repository<Role>().GetAll()
             .Where(t => !id.HasValue || t.Id == id)
-            .Where(r => string.IsNullOrWhiteSpace(name) || r.Name.Contains(name))
-            .ToListAsync();
-            var roleReponses = roles.Select(role => new RoleResponse
+            .Where(r => string.IsNullOrWhiteSpace(name) || r.Name.Contains(name));
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                roles = roles.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var roleList = await roles.ToListAsync();
+            if (roleList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Role không có hoặc không tồn tại", id.ToString());
+            }
+            var roleReponses = roleList.Select(role => new RoleResponse
             {
                 Id = role.Id,
                 Name = role.Name

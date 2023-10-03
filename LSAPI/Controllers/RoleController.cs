@@ -20,11 +20,11 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<List<RoleResponse>>> GetRole(int? id, string? name)
+        public async Task<ActionResult<List<RoleResponse>>> GetRole(int? id, string? name, int? pageNumber, int? pageSize)
         {
             try
             {
-                var rs = await _roleService.GetRole(id, name);
+                var rs = await _roleService.GetRole(id, name, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)

@@ -10,7 +10,7 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IHistoryService
     {
-        Task<List<HistoryResponse>> GetHistory(int? id, string? action, int? storeId);
+        Task<List<HistoryResponse>> GetHistory(int? id, string? action, int? storeId, int? pageNumber, int? pageSize);
 
         Task<int> GetTotalHistoryCount();
         Task<HistoryResponse> CreateHistory(RegisterHistoryRequest request);

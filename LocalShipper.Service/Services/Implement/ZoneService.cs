@@ -28,21 +28,31 @@ namespace LocalShipper.Service.Services.Implement
 
 
         //Get Zone   
-        public async Task<List<ZoneResponse>> GetZones(int? id, string? zoneName, decimal? latitude, decimal? longtitude, decimal? radius)
+        public async Task<List<ZoneResponse>> GetZones(int? id, string? zoneName, decimal? latitude, decimal? longtitude, decimal? radius, int? pageNumber, int? pageSize)
         {
 
-            var zone = await _unitOfWork.Repository<Zone>().GetAll()
+            var zones = _unitOfWork.Repository<Zone>().GetAll()
                                                               .Where(a => id == 0 || a.Id == id)
                                                               .Where(a => string.IsNullOrWhiteSpace(zoneName) || a.ZoneName.Contains(zoneName))
                                                               .Where(a => latitude == 0 || a.Latitude == latitude)
                                                               .Where(a => longtitude == 0 || a.Longitude == longtitude)
-                                                              .Where(a => radius == 0 || a.Radius == radius)
-                                                              .ToListAsync();
-            if (zone == null)
+                                                              .Where(a => radius == 0 || a.Radius == radius);
+
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Zone không tồn tại", id.ToString());
+                zones = zones.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
             }
-            var zoneResponse = zone.Select(zones => new ZoneResponse
+
+            var zoneList = await zones.ToListAsync();
+            if (zoneList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Khu vực không có hoặc không tồn tại", id.ToString());
+            }
+            var zoneResponse = zoneList.Select(zones => new ZoneResponse
             {
                Id = zones.Id,
                ZoneName = zones.ZoneName,

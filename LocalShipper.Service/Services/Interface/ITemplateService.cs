@@ -10,7 +10,7 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface ITemplateService
     {
-        Task<List<TemplateResponse>> GetTemplate(int? id, string? templateName);
+        Task<List<TemplateResponse>> GetTemplate(int? id, string? templateName, int? pageNumber, int? pageSize);
         Task<TemplateResponse> CreateTemplate(TemplateRequest request);
         Task<TemplateResponse> UpdateTemplate(int id, TemplateRequest templateRequest);
 

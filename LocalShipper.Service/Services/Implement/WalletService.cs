@@ -30,18 +30,27 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //Get Wallet  
-        public async Task<List<WalletResponse>> GetWallet(int? id, decimal? balance)
+        public async Task<List<WalletResponse>> GetWallet(int? id, decimal? balance, int? pageNumber, int? pageSize)
         {
 
-            var wallet = await _unitOfWork.Repository<Wallet>().GetAll()                                                            
-                                                              .Where(a => id == 0 || a.Id == id)                                                           
-                                                              .Where(a => balance == 0 || a.Balance == balance)
-                                                              .ToListAsync();
-            if (wallet == null)
+            var wallets = _unitOfWork.Repository<Wallet>().GetAll()
+                                                              .Where(a => id == 0 || a.Id == id)
+                                                              .Where(a => balance == 0 || a.Balance == balance);
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Wallet khong tồn tại", id.ToString());
+                wallets = wallets.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
             }
-            var walletResponses = wallet.Select(wallets => new WalletResponse
+
+            var walletList = await wallets.ToListAsync();
+            if (walletList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Ví không có hoặc không tồn tại", id.ToString());
+            }
+            var walletResponses = walletList.Select(wallets => new WalletResponse
             {
                 Id = wallets.Id,
                 Balance = wallets.Balance,

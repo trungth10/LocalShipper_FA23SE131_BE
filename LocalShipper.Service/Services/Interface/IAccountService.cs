@@ -11,7 +11,7 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IAccountService
     {
-        Task<List<AccountResponse>> GetAccount(int? id, string? phone, string? email, int? role, string? fcm_token);
+        Task<List<AccountResponse>> GetAccount(int? id, string? phone, string? email, int? role, string? fcm_token, int? pageNumber, int? pageSize);
         Task<int> GetTotalAccountCount();
         Task<AccountResponse> RegisterShipperAccount(RegisterRequest request);
         Task<AccountResponse> UpdateAccount(int id, AccountRequest accountRequest);

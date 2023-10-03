@@ -29,11 +29,11 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<AccountResponse>> GetAccount(int id, string phone, string email, int role, string fcm_token)
+        public async Task<ActionResult<AccountResponse>> GetAccount(int id, string phone, string email, int role, string fcm_token, int? pageNumber, int? pageSize)
         {
             try
             {
-                var rs = await _accountService.GetAccount(id, phone, email, role, fcm_token);
+                var rs = await _accountService.GetAccount(id, phone, email, role, fcm_token, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)

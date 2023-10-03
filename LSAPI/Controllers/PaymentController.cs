@@ -20,11 +20,11 @@ namespace LSAPI.Controllers
 
         [HttpGet()]
         public async Task<ActionResult<PaymentResponse>> GetPayment(int id, string paymentMethod, int status, string paymentCode
-            , string paymentImage, int packageId)
+            , string paymentImage, int packageId, int? pageNumber, int? pageSize)
         {
             try
             {
-                var rs = await _paymentService.GetPayment(id, paymentMethod, status, paymentCode, paymentImage, packageId);
+                var rs = await _paymentService.GetPayment(id, paymentMethod, status, paymentCode, paymentImage, packageId, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)

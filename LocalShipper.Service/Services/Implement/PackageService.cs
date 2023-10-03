@@ -28,39 +28,32 @@ namespace LocalShipper.Service.Services.Implement
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<PackageResponse>> GetPackage(int? batchId,int? id, int? status,int? actionId, int? typeId,string? customerName,string? customerAddress, string? customerPhome, string? custommerEmail,decimal? totalPrice)
-        {           
-            var packages = await _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch)
+        public async Task<List<PackageResponse>> GetPackage(int? batchId,int? id, int? status,int? actionId,
+            int? typeId,string? customerName,string? customerAddress, string? customerPhome, string? custommerEmail,decimal? totalPrice, int? pageNumber, int? pageSize)
+        {
+            var packages = _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch)
                 .Where(f => f.BatchId == batchId || batchId == 0)
                 .Where(f => f.Id == id || id == 0)
                 .Where(f => f.Status == status || status == 0)
                 .Where(f => f.ActionId == actionId || actionId == 0)
-                .Where(f => typeId== id || typeId == 0)
-                .Where(f => string.IsNullOrWhiteSpace(customerName) ||f.CustomerName.Contains(customerName))
-                .ToListAsync();
+                .Where(f => typeId == id || typeId == 0)
+                .Where(f => string.IsNullOrWhiteSpace(customerName) || f.CustomerName.Contains(customerName));
 
-            //var packageResponses = packages.Select(package => new PackageResponse
-            //{
-            //    Id = package.Id,
-            //    BatchId = package.BatchId,
-            //    Capacity= package.Capacity,
-            //    PackageWeight = package.PackageWeight,
-            //    PackageWidth= package.PackageWidth,
-            //    PackageHeight= package.PackageHeight,
-            //    PackageLength= package.PackageLength,
-            //    Status= package.Status,
-            //    CustomerAddress= package.CustomerAddress,
-            //    CustomerName= package.CustomerName,
-            //    CustomerEmail= package.CustomerEmail,
-            //    CancelReason= package.CancelReason,
-            //    SubtotalPrice= package.SubtotalPrice,
-            //    DistancePrice= package.DistancePrice,
-            //    TotalPrice = package.TotalPrice,
-            //    ActionId= package.ActionId,
-            //    TypeId= package.TypeId,
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                packages = packages.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
 
-            //}).ToList();
-            var packageResponses = _mapper.Map<List<Package>, List<PackageResponse>>(packages);
+            var packageList = await packages.ToListAsync();
+            if (packageList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Package không có hoặc không tồn tại", id.ToString());
+            }
+            var packageResponses = _mapper.Map<List<Package>, List<PackageResponse>>(packageList);
             return packageResponses;
         }
 

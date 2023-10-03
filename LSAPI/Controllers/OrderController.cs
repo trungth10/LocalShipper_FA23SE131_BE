@@ -27,12 +27,13 @@ namespace LSAPI.Controllers
         [HttpGet("api/orders")]
         public async Task<ActionResult<OrderResponse>> GetOrder(int id, int status, int storeId, int batchId, int? shipperId,
             string tracking_number, string cancel_reason, decimal distance_price,
-            decimal subtotal_price, decimal totalPrice, string other)
+            decimal subtotal_price, decimal totalPrice, string other, int? pageNumber, int? pageSize)
         {
             try
             {
 
-                var response = await _orderService.GetOrder(id, status, storeId, batchId, shipperId, tracking_number, cancel_reason, distance_price, subtotal_price, totalPrice, other);
+                var response = await _orderService.GetOrder(id, status, storeId, batchId, shipperId, 
+                    tracking_number, cancel_reason, distance_price, subtotal_price, totalPrice, other, pageNumber, pageSize);
 
 
                 return Ok(response);

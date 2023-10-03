@@ -23,11 +23,11 @@ namespace LSAPI.Controllers
 
         [HttpGet("wallet-transaction")]
         public async Task<ActionResult<WalletTransactionResponse>> GetWalletTrans(int id, string transactionType, int fromWallet, 
-            int toWallet, decimal amount)
+            int toWallet, decimal amount, int? pageNumber, int? pageSize)
         {
             try
             {
-                var rs = await _walletTransService.GetWalletTrans(id, transactionType, fromWallet, toWallet, amount);
+                var rs = await _walletTransService.GetWalletTrans(id, transactionType, fromWallet, toWallet, amount, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)
@@ -96,11 +96,11 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<WalletResponse>> GetWallet(int id, decimal balance)
+        public async Task<ActionResult<WalletResponse>> GetWallet(int id, decimal balance, int? pageNumber, int? pageSize)
         {
             try
             {
-                var rs = await _walletService.GetWallet(id, balance);
+                var rs = await _walletService.GetWallet(id, balance, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)

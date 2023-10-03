@@ -10,7 +10,7 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IRoleService
     {
-        Task<List<RoleResponse>> GetRole(int? id, string? name);
+        Task<List<RoleResponse>> GetRole(int? id, string? name, int? pageNumber, int? pageSize);
 
         Task<int> GetTotalRoleCount();
         Task<RoleResponse> CreateRole(RegisterRoleRequest request);

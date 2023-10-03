@@ -22,11 +22,11 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<List<PackageActionResponse>>> GetPackageAction(int id, string actionType)
+        public async Task<ActionResult<List<PackageActionResponse>>> GetPackageAction(int id, string actionType, int? pageNumber, int? pageSize)
         {
             try
             {
-                var rs = await _packageActionService.GetPackageAction(id, actionType);
+                var rs = await _packageActionService.GetPackageAction(id, actionType, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)

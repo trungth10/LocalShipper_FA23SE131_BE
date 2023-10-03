@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace LocalShipper.Service.Services.Implement
@@ -60,16 +61,30 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //GET 
-        public async Task<List<HistoryResponse>> GetHistory(int? id, string? action, int? storeId)
+        public async Task<List<HistoryResponse>> GetHistory(int? id, string? action, int? storeId, int? pageNumber, int? pageSize)
         {
 
-            var histories = await _unitOfWork.Repository<History>().GetAll()
+            var histories = _unitOfWork.Repository<History>().GetAll()
             .Include(t => t.Store)
             .Where(t => id == 0 || t.Id == id)
             .Where(t => string.IsNullOrWhiteSpace(action) || t.Action.Contains(action))
-            .Where(t => storeId == 0 || t.StoreId == storeId)
-            .ToListAsync();
-            var historyResponses = histories.Select(history => new HistoryResponse
+            .Where(t => storeId == 0 || t.StoreId == storeId);
+
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                histories = histories.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var historyList = await histories.ToListAsync();
+            if (historyList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Lịch sử không có hoặc không tồn tại", id.ToString());
+            }
+            var historyResponses = historyList.Select(history => new HistoryResponse
             {
                 Id = history.Id,
                 Action = history.Action,

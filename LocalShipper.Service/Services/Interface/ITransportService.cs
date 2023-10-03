@@ -11,7 +11,7 @@ namespace LocalShipper.Service.Services.Interface
     public interface ITransportService
     {
         Task<List<TransportResponse>> GetTransport(int? id, int? typeId, string? licencePlate, string? transportColor,
-                                                    string? transportImage, string? transportRegistration);
+                                                    string? transportImage, string? transportRegistration, int? pageNumber, int? pageSize);
 
         //Task<List<TransportResponse>> GetListTransport(int? typeId, string? transportColor);
 

@@ -29,25 +29,33 @@ namespace LocalShipper.Service.Services.Implement
 
         //Get Payment  
         public async Task<List<PaymentResponse>> GetPayment(int? id, string? paymentMethod, int? status, string? paymentCode
-            , string? paymentImage, int? packageId)
+            , string? paymentImage, int? packageId, int? pageNumber, int? pageSize)
         {
 
-            var payments = await _unitOfWork.Repository<Payment>().GetAll()
+            var payments = _unitOfWork.Repository<Payment>().GetAll()
                                                               .Include(o => o.Package)
                                                               .Where(a => id == 0 || a.Id == id)
                                                               .Where(a => string.IsNullOrWhiteSpace(paymentMethod) || a.PaymentMethod.Contains(paymentMethod))
                                                               .Where(a => status == 0 || a.Status == status)
                                                               .Where(a => string.IsNullOrWhiteSpace(paymentCode) || a.PaymentCode.Contains(paymentCode))
                                                               .Where(a => string.IsNullOrWhiteSpace(paymentImage) || a.PaymentImage.Contains(paymentImage))
-                                                              .Where(a => packageId == 0 || a.PackageId == packageId)
-                                                              .ToListAsync();
-
-            if (payments == null)
+                                                              .Where(a => packageId == 0 || a.PackageId == packageId);
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Không có hoặc không tồn tại", id.ToString());
+                payments = payments.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
             }
 
-            var paymentResponses = payments.Select(payment => new PaymentResponse
+            var paymentList = await payments.ToListAsync();
+            if (paymentList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Package không có hoặc không tồn tại", id.ToString());
+            }
+
+            var paymentResponses = paymentList.Select(payment => new PaymentResponse
             {
                 Id = payment.Id,
                 PaymentMethod = payment.PaymentMethod,

@@ -21,11 +21,11 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<List<PackageTypeResponse>>> GetPackageType(int id, string packageType)
+        public async Task<ActionResult<List<PackageTypeResponse>>> GetPackageType(int id, string packageType, int? pageNumber, int? pageSize)
         {
             try
             {
-                var rs = await _packageTypeService.GetPackageType(id, packageType);
+                var rs = await _packageTypeService.GetPackageType(id, packageType, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch(Exception ex)

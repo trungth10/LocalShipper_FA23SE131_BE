@@ -49,19 +49,37 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //GET
-        public async Task<List<TransportTypeResponse>> GetTransportType(int? id, string? transportType)
+        public async Task<List<TransportTypeResponse>> GetTransportType(int? id, string? transportType, int? pageNumber, int? pageSize)
         {
+            var transportTypes = _unitOfWork.Repository<TransportType>()
+                .GetAll()
+                .Where(b => id == 0 || b.Id == id)
+                .Where(b => string.IsNullOrWhiteSpace(transportType) || b.TransportType1.Contains(transportType));
 
-            var transportTypes = await _unitOfWork.Repository<TransportType>().GetAll()
-                                                              .Where(b => id == 0 || b.Id == id)
-                                                              .Where(b => string.IsNullOrWhiteSpace(transportType) || b.TransportType1.Contains(transportType))
-                                                              .ToListAsync();
-            var transportTypeResponses = transportTypes.Select(transportType => new TransportTypeResponse
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                transportTypes = transportTypes.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                               .Take(pageSize.Value);
+            }
+
+            var transportTypeList = await transportTypes.ToListAsync();
+
+            if (transportTypeList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Loại phương tiện không có hoặc không tồn tại", id.ToString());
+            }
+
+            var transportTypeResponses = transportTypeList.Select(transportType => new TransportTypeResponse
             {
                 Id = transportType.Id,
                 TransportType1 = transportType.TransportType1,
                 CreateAt = transportType.CreateAt,
             }).ToList();
+
             return transportTypeResponses;
         }
 

@@ -26,15 +26,28 @@ namespace LocalShipper.Service.Services.Implement
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<PackageTypeResponse>> GetPackageType(int? id, string? packageType)
+        public async Task<List<PackageTypeResponse>> GetPackageType(int? id, string? packageType, int? pageNumber, int? pageSize)
         {
 
-            var packageTypes = await _unitOfWork.Repository<PackageType>().GetAll()
+            var packageTypes = _unitOfWork.Repository<PackageType>().GetAll()
                                                               .Where(b => id == 0 || b.Id == id)
 
-                                                              .Where(b => string.IsNullOrWhiteSpace(packageType) || b.PackageType1.Contains(packageType))
-                                                              .ToListAsync();
-            var packageTypeResponses = _mapper.Map<List<PackageType>, List<PackageTypeResponse>>(packageTypes);
+                                                              .Where(b => string.IsNullOrWhiteSpace(packageType) || b.PackageType1.Contains(packageType));
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                packageTypes = packageTypes.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var packageTypeList = await packageTypes.ToListAsync();
+            if (packageTypeList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Package không có hoặc không tồn tại", id.ToString());
+            }
+            var packageTypeResponses = _mapper.Map<List<PackageType>, List<PackageTypeResponse>>(packageTypeList);
             return packageTypeResponses;
         }
 

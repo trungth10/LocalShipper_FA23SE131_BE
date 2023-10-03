@@ -13,7 +13,7 @@ namespace LocalShipper.Service.Services.Interface
 
 
         Task<List<ShipperResponse>> GetShipper(int? id, string? firstName, string? lastName, string? email, string? phone, 
-            string? address, int? transportId, int? accountId, int? zoneId, int? status, string? fcmToken, int? walletId);
+            string? address, int? transportId, int? accountId, int? zoneId, int? status, string? fcmToken, int? walletId, int? pageNumber, int? pageSize);
         //Task<List<ShipperResponse>> GetListShipper(int? zoneId);
         //Task<List<ShipperResponse>> GetAll();
         Task<ShipperResponse> UpdateShipperStatus(int shipperId, UpdateShipperStatusRequest request);

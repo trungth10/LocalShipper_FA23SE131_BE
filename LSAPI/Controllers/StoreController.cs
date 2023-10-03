@@ -20,11 +20,11 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<List<StoreResponse>>> GetStore(int id, string storeName, int status, int zoneId, int walletId, int accountId)
+        public async Task<ActionResult<List<StoreResponse>>> GetStore(int id, string storeName, int status, int zoneId, int walletId, int accountId, int? pageNumber, int? pageSize)
         {
             try
             {
-                var rs = await _storeService.GetStore(id, storeName, status, zoneId, walletId, accountId);
+                var rs = await _storeService.GetStore(id, storeName, status, zoneId, walletId, accountId, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch(Exception ex)

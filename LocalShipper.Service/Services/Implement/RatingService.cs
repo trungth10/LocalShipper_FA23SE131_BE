@@ -141,16 +141,31 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //GET 
-        public async Task<List<RatingResponse>> GetRating(int? id, int? shipperId, int? ratingValue, int? byStoreId)
+        public async Task<List<RatingResponse>> GetRating(int? id, int? shipperId, int? ratingValue, int? byStoreId, int? pageNumber, int? pageSize)
         {
 
-            var ratings = await _unitOfWork.Repository<Rating>().GetAll().Include(t => t.Shipper).Include(t => t.ByStore)
+            var ratings = _unitOfWork.Repository<Rating>().GetAll().Include(t => t.Shipper).Include(t => t.ByStore)
                     .Where(t => id == 0 || t.Id == id)
                     .Where(t => shipperId == 0 || t.ShipperId == shipperId)
                     .Where(t => ratingValue == 0 || t.RatingValue == ratingValue)
-                    .Where(t => byStoreId == 0 || t.ByStoreId == byStoreId)
-                    .ToListAsync();
-            var ratingResponses = ratings.Select(rating => new RatingResponse
+                    .Where(t => byStoreId == 0 || t.ByStoreId == byStoreId);
+
+
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                ratings = ratings.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var ratingList = await ratings.ToListAsync();
+            if (ratingList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Đánh giá không có hoặc không tồn tại", id.ToString());
+            }
+            var ratingResponses = ratingList.Select(rating => new RatingResponse
             {
                 Id = rating.Id,
                 ShipperId = rating.ShipperId,

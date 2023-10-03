@@ -23,11 +23,13 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<List<PackageResponse>>> GetPackage(int batchId, int id, int status, int actionId, int typeId, string customerName, string customerAddress, string customerPhome, string custommerEmail, decimal totalPrice)
+        public async Task<ActionResult<List<PackageResponse>>> GetPackage(int batchId, int id, int status, int actionId,
+            int typeId, string customerName, string customerAddress, string customerPhome, string custommerEmail, decimal totalPrice, int? pageNumber, int? pageSize)
         {
             try
             {
-                var package = await _packageService.GetPackage(batchId, id, status, actionId, typeId, customerName, customerAddress, customerPhome, custommerEmail, totalPrice);
+                var package = await _packageService.GetPackage(batchId, id, status, actionId, typeId, customerName,
+                    customerAddress, customerPhome, custommerEmail, totalPrice, pageNumber, pageSize);
                 return Ok(package);
 
             }

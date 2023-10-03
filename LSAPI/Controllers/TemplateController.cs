@@ -21,11 +21,11 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<List<TemplateResponse>>> GetTemplate(int id, string templateName)
+        public async Task<ActionResult<List<TemplateResponse>>> GetTemplate(int id, string templateName, int? pageNumber, int? pageSize)
         {
             try
             {
-                var rs = await _templateService.GetTemplate(id, templateName);
+                var rs = await _templateService.GetTemplate(id, templateName, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch(Exception ex)
