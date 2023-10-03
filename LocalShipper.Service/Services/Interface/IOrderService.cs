@@ -17,13 +17,6 @@ namespace LocalShipper.Service.Services.Interface
 
         Task<decimal> GetCancelRateByShipperId(int shipperId);
         Task<decimal> GetReceiveRateByShipperId(int shipperId);
-
-        Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCountInMonth(int shipperId,int month, int year);
-
-        Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCountInWeek(int shipperId, int month, int weekOfMonth, int year);
-
-        Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCountInDay(int shipperId, int month, int day, int year);
-
         Task<List<OrderResponse>> GetOrder(int? id, int? status, int? storeId, int? batchId, int? shipperId,
             string? tracking_number, string? cancel_reason, decimal? distance_price,
             decimal? subtotal_price, decimal? totalPrice, string? other);

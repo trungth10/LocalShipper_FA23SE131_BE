@@ -110,6 +110,8 @@ namespace LSAPI.Controllers
         }
 
 
+        //SHIPPER
+
         [HttpPut("shipper/api/orders")]
         public async Task<ActionResult<MessageResponse>> ShipperToStatusOrder(int id, int shipperId, string cancelReason, OrderStatusEnum status)
         {
@@ -124,7 +126,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpGet("api/orders/total-price-order-count")]
+        [HttpGet("shipper/api/orders/statistical")]
         public async Task<ActionResult<TotalPriceResponse>> GetTotalPriceSumByShipperId(int shipperId, int? month, int? year, int? day)
         {
             try
@@ -143,63 +145,26 @@ namespace LSAPI.Controllers
             }
 
         }
-
-        /* 
-
-         [HttpGet("totalPriceByShipperId")]
+      
+         [HttpGet("shipper/api/orders/statistical-price")]
          public async Task<ActionResult<TotalPriceResponse>> GetTotalPriceSumByShipperId(int shipperId)
          {
              var rs = await _orderService.GetTotalPriceSumByShipperId(shipperId);
              return Ok(rs);
          }
 
-         [HttpGet("CancelRateByShipperId")]
+         [HttpGet("shipper/api/orders/rate-cancel")]
          public async Task<ActionResult<TotalPriceResponse>> GetCancelRateByShipperId(int shipperId)
          {
              var rs = await _orderService.GetCancelRateByShipperId(shipperId);
              return Ok(rs);
          }
 
-         [HttpGet("ReceiveRateByShipperId")]
+         [HttpGet("shipper/api/orders/rate-complete")]
          public async Task<ActionResult<TotalPriceResponse>> GetReceiveRateByShipperId(int shipperId)
          {
              var rs = await _orderService.GetReceiveRateByShipperId(shipperId);
              return Ok(rs);
-         }
-
-         [HttpGet("TotalPriceAndOrderCountInMonth")]
-         public async Task<ActionResult<(decimal TotalPrice, int TotalOrders)>> GetTotalPriceAndOrderCountInMonth(int shipperId,int month, int year)
-         {
-             var result = await _orderService.GetTotalPriceAndOrderCountInMonth(shipperId,month, year);
-             return Ok(result);
-         }
-
-         [HttpGet("TotalPriceAndOrderCountInWeek")]
-         public async Task<ActionResult<(decimal TotalPrice, int TotalOrders)>> GetTotalPriceAndOrderCountInWeek(int shipperId, int month, int weekOfMonth, int year)
-         {
-             var result = await _orderService.GetTotalPriceAndOrderCountInWeek(shipperId, month, weekOfMonth, year);
-             return Ok(result);
-         }
-         [HttpGet("TotalPriceAndOrderCountInDay")]
-         public async Task<ActionResult<(decimal TotalPrice, int TotalOrders)>> GetTotalPriceAndOrderCountInDay(int shipperId, int month, int day, int year)
-         {
-             var result = await _orderService.GetTotalPriceAndOrderCountInDay(shipperId, month, day, year);
-             return Ok(result);
-         }
-
-
-         [HttpGet("GetCompleteOrderByShipperId")]
-         public async Task<ActionResult<List<OrderResponse>>> GetCompleteOrder(int shipperId)
-         {
-             var orders = await _orderService.GetCompleteOrder(shipperId);
-             return Ok(orders);
-         }
-
-         [HttpGet("GetCancelOrderByShipperId")]
-         public async Task<ActionResult<List<OrderResponse>>> GetCancelOrder(int shipperId)
-         {
-             var orders = await _orderService.GetCancelOrder(shipperId);
-             return Ok(orders);
-         }*/
+         }         
     }
 }
