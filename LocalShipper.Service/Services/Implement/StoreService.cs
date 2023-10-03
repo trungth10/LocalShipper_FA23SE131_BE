@@ -27,13 +27,12 @@ namespace LocalShipper.Service.Services.Implement
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<StoreResponse>> GetStore(int? id, string? storeName, int? status, int? brandId, int? zoneId, int? walletId, int? accountId)
+        public async Task<List<StoreResponse>> GetStore(int? id, string? storeName, int? status, int? zoneId, int? walletId, int? accountId)
         {
 
-            var stores = await _unitOfWork.Repository<Store>().GetAll().Include(b => b.Wallet).Include(b => b.Account).Include(b => b.Zone).Include(b => b.Template).Include(b => b.Brand)
+            var stores = await _unitOfWork.Repository<Store>().GetAll().Include(b => b.Wallet).Include(b => b.Account).Include(b => b.Zone).Include(b => b.Template)
                                                               .Where(b => id == 0 || b.Id == id)
                                                               .Where(b => status ==0 || b.Status == status)
-                                                              .Where(b => brandId ==0 || b.BrandId == brandId)
                                                               .Where(b => zoneId ==0 || b.ZoneId == zoneId)
                                                               .Where(b => walletId ==0 || b.WalletId == walletId)
                                                               .Where(b => accountId ==0 || b.AccountId == accountId)
@@ -75,7 +74,6 @@ namespace LocalShipper.Service.Services.Implement
                 CloseTime = request.CloseTime,
                 StoreDescription = request.StoreDescription,
                 Status = request.Status ?? 0, 
-                BrandId = request.BrandId,
                 TemplateId = request.TemplateId,
                 ZoneId = request.ZoneId,
                 WalletId = request.WalletId,
@@ -94,7 +92,7 @@ namespace LocalShipper.Service.Services.Implement
         public async Task<StoreResponse> UpdateStore(int id, StoreRequest storeRequest)
         {
             var store = await _unitOfWork.Repository<Store>()
-                .GetAll().Include(b => b.Wallet).Include(b => b.Account).Include(b => b.Zone).Include(b => b.Template).Include(b => b.Brand)
+                .GetAll().Include(b => b.Wallet).Include(b => b.Account).Include(b => b.Zone).Include(b => b.Template)
                 .FirstOrDefaultAsync(s => s.Id == id);
 
             if (store == null)
@@ -110,7 +108,6 @@ namespace LocalShipper.Service.Services.Implement
             store.CloseTime = storeRequest.CloseTime;
             store.StoreDescription = storeRequest.StoreDescription;
             store.Status = storeRequest.Status ?? 0; 
-            store.BrandId = storeRequest.BrandId;
             store.TemplateId = storeRequest.TemplateId;
             store.ZoneId = storeRequest.ZoneId;
             store.WalletId = storeRequest.WalletId;
@@ -121,26 +118,7 @@ namespace LocalShipper.Service.Services.Implement
 
             await _unitOfWork.Repository<Store>().Update(store, id);
             await _unitOfWork.CommitAsync();
-
-            //var updatedStoreResponse = new StoreResponse
-            //{
-            //    Id = store.Id,
-            //    StoreName = store.StoreName,
-            //    StoreAddress = store.StoreAddress,
-            //    StorePhone = store.StorePhone,
-            //    StoreEmail = store.StoreEmail,
-            //    OpenTime = store.OpenTime,
-            //    CloseTime = store.CloseTime,
-            //    StoreDescription = store.StoreDescription,
-            //    Status = store.Status,
-            //    BrandId = store.BrandId,
-            //    TemplateId = store.TemplateId,
-            //    ZoneId = store.ZoneId,
-            //    WalletId = store.WalletId,
-            //    AccountId= store.AccountId,
-
-
-            //};
+          
             var updatedStoreResponse = _mapper.Map<StoreResponse>(store);
             return updatedStoreResponse;
         }

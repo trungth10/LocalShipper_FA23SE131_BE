@@ -17,7 +17,6 @@ namespace LocalShipper.Service.DTOs.Request
         public TimeSpan? CloseTime { get; set; }
         public string StoreDescription { get; set; }
         public int? Status { get; set; }
-        public int BrandId { get; set; }
         public int? TemplateId { get; set; }
         public int? ZoneId { get; set; }
         public int WalletId { get; set; }

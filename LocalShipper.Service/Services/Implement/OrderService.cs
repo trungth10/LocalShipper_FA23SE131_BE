@@ -33,74 +33,74 @@ namespace LocalShipper.Service.Services.Implement
 
 
         //SHIPPER -> ORDER
-        public async Task<OrderResponse> ShipperToStatusOrder(int id, int shipperId, string? cancelReason, OrderStatusEnum status )
+        public async Task<OrderResponse> ShipperToStatusOrder(int id, int shipperId, string? cancelReason, OrderStatusEnum status)
         {
-           
-                var order = await _unitOfWork.Repository<Order>()
-                 .GetAll()                                                
-                 .FirstOrDefaultAsync(a => a.Id == id && string.IsNullOrWhiteSpace(cancelReason));
 
-                var shipper = await _unitOfWork.Repository<Shipper>()
-                 .GetAll()
-                 .FirstOrDefaultAsync(a => a.Id == shipperId);
+            var order = await _unitOfWork.Repository<Order>()
+             .GetAll()
+             .FirstOrDefaultAsync(a => a.Id == id && string.IsNullOrWhiteSpace(cancelReason));
 
-                if (shipper == null)
-                {
-                    throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy Shipper", order.ToString());
-                }
+            var shipper = await _unitOfWork.Repository<Shipper>()
+             .GetAll()
+             .FirstOrDefaultAsync(a => a.Id == shipperId);
 
-                if (shipper.Status == (int)ShipperStatusEnum.Offline)
-                {
-                    throw new CrudException(HttpStatusCode.NotFound, "Shipper đang ngoại tuyến", order.ToString());
-                }
+            if (shipper == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy Shipper", order.ToString());
+            }
 
-                if (order == null)
-                {
-                    throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy đơn hàng", order.ToString());
-                }
+            if (shipper.Status == (int)ShipperStatusEnum.Offline)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Shipper đang ngoại tuyến", order.ToString());
+            }
 
-                //Shipper thao tác Order
+            if (order == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy đơn hàng", order.ToString());
+            }
 
-                if (status == OrderStatusEnum.ACCEPTED && string.IsNullOrWhiteSpace(cancelReason))
-                {
-                    order.Status = (int)status;
-                    order.ShipperId = shipperId;
-                    order.AcceptTime = DateTime.Now;
-                }
+            //Shipper thao tác Order
 
-
-                if (status == OrderStatusEnum.INPROCESS || string.IsNullOrWhiteSpace(cancelReason))
-                {
-                    order.Status = (int)status;
-                    order.PickupTime = DateTime.Now;
-                }
-
-                if (status == OrderStatusEnum.COMPLETED && string.IsNullOrWhiteSpace(cancelReason))
-                {
-                    order.Status = (int)status;
-                    order.CompleteTime = DateTime.Now;
-                }
-
-                if (status == OrderStatusEnum.COMPLETED && string.IsNullOrWhiteSpace(cancelReason))
-                {
-                    order.Status = (int)status;
-                    order.CompleteTime = DateTime.Now;
-                }
-
-                if (status == OrderStatusEnum.CANCELLED)
-                {
-                    order.Status = (int)status;
-                    order.CancelTime = DateTime.Now;
-                    order.CancelReason = cancelReason;
-                }
-
-                await _unitOfWork.Repository<Order>().Update(order, id);
-                await _unitOfWork.CommitAsync();
+            if (status == OrderStatusEnum.ACCEPTED && string.IsNullOrWhiteSpace(cancelReason))
+            {
+                order.Status = (int)status;
+                order.ShipperId = shipperId;
+                order.AcceptTime = DateTime.Now;
+            }
 
 
-                return _mapper.Map<Order, OrderResponse>(order);         
+            if (status == OrderStatusEnum.INPROCESS || string.IsNullOrWhiteSpace(cancelReason))
+            {
+                order.Status = (int)status;
+                order.PickupTime = DateTime.Now;
+            }
+
+            if (status == OrderStatusEnum.COMPLETED && string.IsNullOrWhiteSpace(cancelReason))
+            {
+                order.Status = (int)status;
+                order.CompleteTime = DateTime.Now;
+            }
+
+            if (status == OrderStatusEnum.COMPLETED && string.IsNullOrWhiteSpace(cancelReason))
+            {
+                order.Status = (int)status;
+                order.CompleteTime = DateTime.Now;
+            }
+
+            if (status == OrderStatusEnum.CANCELLED)
+            {
+                order.Status = (int)status;
+                order.CancelTime = DateTime.Now;
+                order.CancelReason = cancelReason;
+            }
+
+            await _unitOfWork.Repository<Order>().Update(order, id);
+            await _unitOfWork.CommitAsync();
+
+
+            return _mapper.Map<Order, OrderResponse>(order);
         }
-        
+
         public async Task<decimal> GetTotalPriceSumByShipperId(int shipperId)
         {
             var orders = await _unitOfWork.Repository<Order>().GetAll().Where(f => f.ShipperId == shipperId).ToListAsync();
@@ -130,7 +130,7 @@ namespace LocalShipper.Service.Services.Implement
             var orders = await _unitOfWork.Repository<Order>().GetAll()
                                                               .Where(o => o.ShipperId == shipperId)
                                                               .ToListAsync();
-                
+
             if (orders.Count == 0)
             {
                 return 0;
@@ -152,7 +152,7 @@ namespace LocalShipper.Service.Services.Implement
                 throw new ArgumentException("Invalid month.", nameof(month));
             }
 
-            if (day.HasValue && (day < 1 || day > 31)) 
+            if (day.HasValue && (day < 1 || day > 31))
             {
                 throw new ArgumentException("Invalid day.", nameof(day));
             }
@@ -180,7 +180,7 @@ namespace LocalShipper.Service.Services.Implement
             }
 
             var ordersInRange = await _unitOfWork.Repository<Order>().GetAll()
-                .Where(o => o.ShipperId == shipperId && o.CompleteTime >= startDate && o.CompleteTime <= endDate )
+                .Where(o => o.ShipperId == shipperId && o.CompleteTime >= startDate && o.CompleteTime <= endDate)
                 .ToListAsync();
 
             decimal total = (decimal)ordersInRange.Sum(o => o.TotalPrice);
@@ -198,27 +198,27 @@ namespace LocalShipper.Service.Services.Implement
 
 
         //GET Order
-        public async Task<List<OrderResponse>> GetOrder(int? id, int? status, int? storeId, int? batchId, int? shipperId, 
-            string? tracking_number, string? cancel_reason,decimal? distance_price, 
-            decimal? subtotal_price, decimal? totalPrice, string? other )
+        public async Task<List<OrderResponse>> GetOrder(int? id, int? status, int? storeId, int? batchId, int? shipperId,
+                                      string? tracking_number, string? cancel_reason, decimal? distance_price,
+                                     decimal? subtotal_price, decimal? totalPrice, string? other)
         {
 
             var orders = await _unitOfWork.Repository<Order>().GetAll()
-                                                              .Include(o => o.Store)
-                                                              .Include(o => o.Batch)
-                                                              .Include(o => o.Shipper)
-                                                              .Where(a => id == 0 || a.Id == id)
-                                                              .Where(a => status == 0 || a.Status == status)
-                                                              .Where(a => storeId == 0 || a.StoreId == storeId)
-                                                              .Where(a => batchId == 0 || a.BatchId == batchId)
-                                                              .Where(a => shipperId == 0 || a.ShipperId == shipperId)
-                                                              .Where(a => string.IsNullOrWhiteSpace(tracking_number) || a.TrackingNumber.Contains(tracking_number))
-                                                              .Where(a => string.IsNullOrWhiteSpace(cancel_reason) || a.CancelReason.Contains(cancel_reason))
-                                                              .Where(a => distance_price == 0 || a.DistancePrice == distance_price)
-                                                              .Where(a => subtotal_price == 0 || a.SubtotalPrice == subtotal_price)
-                                                              .Where(a => totalPrice == 0 || a.TotalPrice == totalPrice)
-                                                              .Where(a => string.IsNullOrWhiteSpace(other) || a.Other.Contains(other))
-                                                              .ToListAsync();
+                                                      .Include(o => o.Store)
+                                                      .Include(o => o.Batch)
+                                                      .Include(o => o.Shipper)
+                                                      .Where(a => (id == null || id == 0) || a.Id == id)
+                                                      .Where(a => (status == null || status == 0) || a.Status == status)
+                                                      .Where(a => (storeId == null || storeId == 0) || a.StoreId == storeId)
+                                                      .Where(a => (batchId == null || batchId == 0) || a.BatchId == batchId)
+                                                      .Where(a => (shipperId == null || shipperId == 0) || a.ShipperId == shipperId)
+                                                      .Where(a => string.IsNullOrWhiteSpace(tracking_number) || a.TrackingNumber.Contains(tracking_number))
+                                                      .Where(a => string.IsNullOrWhiteSpace(cancel_reason) || a.CancelReason.Contains(cancel_reason))
+                                                      .Where(a => (distance_price == null || distance_price == 0) || a.DistancePrice == distance_price)
+                                                      .Where(a => (subtotal_price == null || subtotal_price == 0) || a.SubtotalPrice == subtotal_price)
+                                                      .Where(a => (totalPrice == null || totalPrice == 0) || a.TotalPrice == totalPrice)
+                                                      .Where(a => string.IsNullOrWhiteSpace(other) || a.Other.Contains(other))
+                                                      .ToListAsync();
             if (orders == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Order không có hoặc không tồn tại", id.ToString());
@@ -229,7 +229,7 @@ namespace LocalShipper.Service.Services.Implement
                 Id = order.Id,
                 storeId = order.StoreId,
                 batchId = order.BatchId,
-                shipperId = order.ShipperId == null ? null: (int)order.ShipperId,
+                shipperId = order.ShipperId == null ? null : (int)order.ShipperId,
                 status = order.Status,
                 trackingNumber = order.TrackingNumber,
                 createTime = order.CreateTime,
@@ -243,7 +243,7 @@ namespace LocalShipper.Service.Services.Implement
                 subTotalprice = order.SubtotalPrice,
                 totalPrice = order.TotalPrice,
                 other = order.Other,
-               
+
                 Store = order.Store != null ? new StoreResponse
                 {
                     Id = order.StoreId,
@@ -269,7 +269,7 @@ namespace LocalShipper.Service.Services.Implement
                     CreatedAt = order.Batch.CreatedAt,
                     UpdateAt = order.Batch.UpdateAt,
                 } : null,
-                Shipper = order.Shipper !=null ? new ShipperResponse
+                Shipper = order.Shipper != null ? new ShipperResponse
                 {
                     Id = order.Shipper.Id,
                     FirstName = order.Shipper.FirstName,
@@ -283,7 +283,7 @@ namespace LocalShipper.Service.Services.Implement
                     Status = (ShipperStatusEnum)order.Shipper.Status,
                     Fcmtoken = order.Shipper.Fcmtoken,
                     WalletId = order.Shipper.WalletId
-                } : null           
+                } : null
             }).ToList();
             return orderResponses;
         }
@@ -321,7 +321,7 @@ namespace LocalShipper.Service.Services.Implement
             }
 
             Order order = new Order
-            {              
+            {
                 Status = (int)OrderStatusEnum.IDLE,
                 StoreId = request.storeId,
                 BatchId = request.batchId,
@@ -334,11 +334,11 @@ namespace LocalShipper.Service.Services.Implement
             await _unitOfWork.Repository<Order>().InsertAsync(order);
             await _unitOfWork.CommitAsync();
 
-            
+
             var messageResponse = new MessageResponse
             {
-               Message = "Tạo đơn hàng thành công",
-               id = order.Id,
+                Message = "Tạo đơn hàng thành công",
+                id = order.Id,
             };
             return messageResponse;
 
@@ -348,7 +348,7 @@ namespace LocalShipper.Service.Services.Implement
         {
             string allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-            int length = 7; 
+            int length = 7;
 
             Random random = new Random();
 
@@ -395,7 +395,7 @@ namespace LocalShipper.Service.Services.Implement
             orders.Status = orderRequest.status;
             orders.ShipperId = orderRequest.shipperId;
             orders.TrackingNumber = orderRequest.trackingNumber;
-            orders.CreateTime = orderRequest.createTime;           
+            orders.CreateTime = orderRequest.createTime;
             orders.OrderTime = orderRequest.orderTime;
             orders.AcceptTime = orderRequest.acceptTime;
             orders.PickupTime = orderRequest.pickupTime;
@@ -578,5 +578,5 @@ namespace LocalShipper.Service.Services.Implement
     }
 
 
-    
+
 }
