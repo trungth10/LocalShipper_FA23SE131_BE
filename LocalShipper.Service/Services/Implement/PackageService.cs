@@ -29,14 +29,15 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         public async Task<List<PackageResponse>> GetPackage(int? batchId,int? id, int? status,int? actionId,
-            int? typeId,string? customerName,string? customerAddress, string? customerPhome, string? custommerEmail,decimal? totalPrice, int? pageNumber, int? pageSize)
+            int? typeId,string? customerName,string? customerAddress, string? customerPhome, string? custommerEmail,decimal? totalPrice, int? storeId, int? pageNumber, int? pageSize)
         {
-            var packages = _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch)
+            var packages = _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch).Include(b => b.Store)
                 .Where(f => f.BatchId == batchId || batchId == 0)
                 .Where(f => f.Id == id || id == 0)
                 .Where(f => f.Status == status || status == 0)
                 .Where(f => f.ActionId == actionId || actionId == 0)
                 .Where(f => typeId == id || typeId == 0)
+                .Where(f => storeId == id || storeId == 0)
                 .Where(f => string.IsNullOrWhiteSpace(customerName) || f.CustomerName.Contains(customerName));
 
             // Xác định giá trị cuối cùng của pageNumber
@@ -86,7 +87,8 @@ namespace LocalShipper.Service.Services.Implement
                 SubtotalPrice = request.SubtotalPrice,
                 TotalPrice = distancePrice+ request.SubtotalPrice,
                 ActionId = request.ActionId,
-                TypeId = request.TypeId ?? 0, 
+                TypeId = request.TypeId ?? 0,
+                StoreId = request.StoreId,
             };
 
           
