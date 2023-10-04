@@ -67,6 +67,21 @@ namespace LSAPI.Controllers
 
         }
 
+        [HttpPut("status")]
+        public async Task<ActionResult<PackageResponse>> PutStatusPackage(int id,  PackageStatusEnum status)
+        {
+            try
+            {
+                var rs = await _packageService.UpdateStatusPackage(id, status);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"update status Package thất bại: {ex.Message}");
+            }
+
+        }
+
         [HttpDelete()]
         public async Task<ActionResult<PackageResponse>> DeletePackage(int id)
         {

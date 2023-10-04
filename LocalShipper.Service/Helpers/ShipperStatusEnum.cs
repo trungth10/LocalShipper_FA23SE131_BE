@@ -10,7 +10,7 @@ namespace LocalShipper.Service.Helpers
 {
     public enum ShipperStatusEnum
     {
-        [Display(Name = "Chưa kích hoạt")]
+        [Display(Name = "Vô hiệu hóa")]
         Deactive = 1,
         [Display(Name = "Ngoại tuyến")]
         Offline =  2,

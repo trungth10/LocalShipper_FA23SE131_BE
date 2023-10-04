@@ -1,5 +1,6 @@
 ﻿using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
+using LocalShipper.Service.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,5 +18,6 @@ namespace LocalShipper.Service.Services.Interface
 
         Task<MessageResponse> DeletePackage(int id);
         Task<int> GetTotalPackageCount();
+        Task<PackageResponse> UpdateStatusPackage(int id, PackageStatusEnum status);
     }
 }

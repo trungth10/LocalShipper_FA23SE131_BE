@@ -30,16 +30,16 @@ namespace LocalShipper.Service.Services.Implement
 
 
         public async Task<List<PackageResponse>> GetPackage(int? batchId,int? id, int? status,int? actionId, int? typeId, int? storeId, string? customerName,string? customerAddress, string? customerPhome, string? custommerEmail,decimal? totalPrice)
-        {           
-            var packages = await _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch).Include(b => b.Store)
+        {
+            var packages =  _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch).Include(b => b.Store)
                 .Where(f => f.BatchId == batchId || batchId == 0)
                 .Where(f => f.Id == id || id == 0)
                 .Where(f => f.Status == status || status == 0)
                 .Where(f => f.ActionId == actionId || actionId == 0)
-                .Where(f => typeId== id || typeId == 0)
+                .Where(f => typeId == id || typeId == 0)
                 .Where(f => f.StoreId == storeId || storeId == 0)
-                .Where(f => string.IsNullOrWhiteSpace(customerName) ||f.CustomerName.Contains(customerName))
-                .ToListAsync();
+                .Where(f => string.IsNullOrWhiteSpace(customerName) || f.CustomerName.Contains(customerName));
+                
 
             //var packageResponses = packages.Select(package => new PackageResponse
             //{
@@ -145,30 +145,30 @@ namespace LocalShipper.Service.Services.Implement
             await _unitOfWork.Repository<Package>().Update(package, id);
             await _unitOfWork.CommitAsync();
 
-            //var updatedPackageResponse = new PackageResponse
-            //{
-            //    Id = package.Id,
-            //    BatchId = package.BatchId,
-            //    Capacity = package.Capacity,
-            //    PackageWeight = package.PackageWeight,
-            //    PackageWidth = package.PackageWidth,
-            //    PackageHeight = package.PackageHeight,
-            //    PackageLength = package.PackageLength,
-            //    Status = package.Status,
-            //    CustomerAddress = package.CustomerAddress,
-            //    CustomerPhone = package.CustomerPhone,
-            //    CustomerName = package.CustomerName,
-            //    CustomerEmail = package.CustomerEmail,
-            //    DistancePrice = package.DistancePrice,
-            //    SubtotalPrice = package.SubtotalPrice,
-            //    TotalPrice = package.TotalPrice,
-            //    ActionId = package.ActionId,
-            //    TypeId = package.TypeId
-              
-            //};
             var updatedPackageResponse = _mapper.Map<PackageResponse>(package);
             return updatedPackageResponse;
         }
+
+        public async Task<PackageResponse> UpdateStatusPackage(int id, PackageStatusEnum status)
+        {
+            var package = await _unitOfWork.Repository<Package>()
+                .GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (package == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy gói hàng", id.ToString());
+            }
+   
+            package.Status = (int)status;
+ 
+            await _unitOfWork.Repository<Package>().Update(package, id);
+            await _unitOfWork.CommitAsync();
+
+            var updatedPackageResponse = _mapper.Map<PackageResponse>(package);
+            return updatedPackageResponse;
+        }
+
         private decimal CalculateTotalPrice(decimal distancePrice)
         {
             if (distancePrice == 3)

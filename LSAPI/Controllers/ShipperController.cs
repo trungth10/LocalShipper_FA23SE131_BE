@@ -24,13 +24,12 @@ namespace LSAPI.Controllers
             _shipperService = shipperService;
         }
 
-       /* [HttpPut("{shipperId:int}/status")]
+        [HttpPut("status")]
         public async Task<ActionResult<ShipperResponse>> UpdateShipperStatus(int shipperId, [FromBody] UpdateShipperStatusRequest request)
         {
             try
             {
 
-                // int agentId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
                 var response = await _shipperService.UpdateShipperStatus(shipperId, request);
 
 
@@ -40,7 +39,7 @@ namespace LSAPI.Controllers
             {
                 return BadRequest($"Cập nhật trạng thái người giao hàng thất bại: {ex.Message}");
             }
-        }*/
+        }
 
 
         [HttpGet()]
