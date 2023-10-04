@@ -25,6 +25,7 @@ namespace LocalShipper.Data.Models
         public string CustomerName { get; set; }
         public string CustomerEmail { get; set; }
         public string CancelReason { get; set; }
+        public decimal? PackagePrice { get; set; }
         public decimal DistancePrice { get; set; }
         public decimal SubtotalPrice { get; set; }
         public decimal? TotalPrice { get; set; }
