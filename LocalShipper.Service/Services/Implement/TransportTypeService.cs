@@ -140,6 +140,7 @@ namespace LocalShipper.Service.Services.Implement
 
             return new MessageResponse
             {
+                id = id,
                 Message = "Xóa phương tiện thành công",
             };
         }

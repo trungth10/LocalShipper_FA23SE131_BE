@@ -197,6 +197,7 @@ namespace LocalShipper.Service.Services.Implement
 
             return new MessageResponse
             {
+                id = id,
                 Message = "Xóa lịch sử thành công",
             };
         }

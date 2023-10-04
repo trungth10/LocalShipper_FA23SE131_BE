@@ -298,6 +298,7 @@ namespace LocalShipper.Service.Services.Implement
 
             return new MessageResponse
             {
+                id = id,
                 Message = "Xóa đánh giá thành công",
             };
         }
