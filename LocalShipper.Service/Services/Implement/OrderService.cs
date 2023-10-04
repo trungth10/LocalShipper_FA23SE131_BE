@@ -281,8 +281,7 @@ namespace LocalShipper.Service.Services.Implement
                 Shipper = order.Shipper != null ? new ShipperResponse
                 {
                     Id = order.Shipper.Id,
-                    FirstName = order.Shipper.FirstName,
-                    LastName = order.Shipper.LastName,
+                    FullName = order.Shipper.FullName,
                     EmailShipper = order.Shipper.EmailShipper,
                     PhoneShipper = order.Shipper.PhoneShipper,
                     AddressShipper = order.Shipper.AddressShipper,
@@ -474,8 +473,7 @@ namespace LocalShipper.Service.Services.Implement
                 Shipper = order.Shipper != null ? new ShipperResponse
                 {
                     Id = order.Shipper.Id,
-                    FirstName = order.Shipper.FirstName,
-                    LastName = order.Shipper.LastName,
+                    FullName = order.Shipper.FullName,
                     EmailShipper = order.Shipper.EmailShipper,
                     PhoneShipper = order.Shipper.PhoneShipper,
                     AddressShipper = order.Shipper.AddressShipper,
@@ -563,8 +561,7 @@ namespace LocalShipper.Service.Services.Implement
                 Shipper = order.Shipper != null ? new ShipperResponse
                 {
                     Id = order.Shipper.Id,
-                    FirstName = order.Shipper.FirstName,
-                    LastName = order.Shipper.LastName,
+                    FullName = order.Shipper.FullName,
                     EmailShipper = order.Shipper.EmailShipper,
                     PhoneShipper = order.Shipper.PhoneShipper,
                     AddressShipper = order.Shipper.AddressShipper,

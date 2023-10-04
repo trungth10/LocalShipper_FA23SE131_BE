@@ -11,7 +11,7 @@ namespace LocalShipper.Data.Models
         public int PriceId { get; set; }
         public int ZoneId { get; set; }
 
-        public virtual Price Price { get; set; }
+        public virtual PriceL Price { get; set; }
         public virtual Zone Zone { get; set; }
     }
 }

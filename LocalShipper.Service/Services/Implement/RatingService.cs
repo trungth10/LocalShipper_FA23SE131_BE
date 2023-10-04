@@ -42,7 +42,7 @@ namespace LocalShipper.Service.Services.Implement
             {
                 Id = rating.Id,
                 ShipperId = rating.ShipperId,
-                ShipperName = rating.Shipper.LastName + " " + rating.Shipper.FirstName,
+                ShipperName = rating.Shipper.FullName,
                 RatingValue = rating.RatingValue,
                 Comment = rating.Comment,
                 RatingTime = rating.RatingTime,
@@ -50,8 +50,7 @@ namespace LocalShipper.Service.Services.Implement
                 Shipper = rating.Shipper != null ? new ShipperResponse
                 {
                     Id = rating.Shipper.Id,
-                    FirstName = rating.Shipper.FirstName,
-                    LastName = rating.Shipper.LastName,
+                    FullName = rating.Shipper.FullName,
                     EmailShipper = rating.Shipper.EmailShipper,
                     PhoneShipper = rating.Shipper.PhoneShipper,
                     AddressShipper = rating.Shipper.AddressShipper,
@@ -176,8 +175,7 @@ namespace LocalShipper.Service.Services.Implement
                 Shipper = rating.Shipper != null ? new ShipperResponse
                 {
                     Id = rating.Shipper.Id,
-                    FirstName = rating.Shipper.FirstName,
-                    LastName = rating.Shipper.LastName,
+                    FullName = rating.Shipper.FullName,
                     EmailShipper = rating.Shipper.EmailShipper,
                     PhoneShipper = rating.Shipper.PhoneShipper,
                     AddressShipper = rating.Shipper.AddressShipper,
@@ -254,8 +252,7 @@ namespace LocalShipper.Service.Services.Implement
                 Shipper = rating.Shipper != null ? new ShipperResponse
                 {
                     Id = rating.Shipper.Id,
-                    FirstName = rating.Shipper.FirstName,
-                    LastName = rating.Shipper.LastName,
+                    FullName = rating.Shipper.FullName,
                     EmailShipper = rating.Shipper.EmailShipper,
                     PhoneShipper = rating.Shipper.PhoneShipper,
                     AddressShipper = rating.Shipper.AddressShipper,

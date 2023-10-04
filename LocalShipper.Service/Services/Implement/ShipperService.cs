@@ -98,8 +98,7 @@ namespace LocalShipper.Service.Services.Implement
 
             Shipper shipper = new Shipper
             {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
+                FullName = request.FullName,
                 EmailShipper = request.EmailShipper,
                 PhoneShipper = request.PhoneShipper,
                 AddressShipper = request.AddressShipper,
@@ -116,8 +115,7 @@ namespace LocalShipper.Service.Services.Implement
             var createdShipperResponse = new ShipperResponse
             {
                 Id = shipper.Id,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
+                FullName = request.FullName,
                 EmailShipper = request.EmailShipper,
                 PhoneShipper = request.PhoneShipper,
                 AddressShipper = request.AddressShipper,
@@ -132,7 +130,7 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //GET
-        public async Task<List<ShipperResponse>> GetShipper(int? id, string? firstName, string? lastName, string? email, string? phone,
+        public async Task<List<ShipperResponse>> GetShipper(int? id, string? fullName, string? email, string? phone,
             string? address, int? transportId, int? accountId, int? zoneId, int? status, string? fcmToken, int? walletId, int? pageNumber, int? pageSize)
         {
 
@@ -141,8 +139,7 @@ namespace LocalShipper.Service.Services.Implement
                                                               .Include(t => t.Zone)
                                                               .Include(t => t.Wallet)
                                                               .Where(t => id == 0 || t.Id == id)
-                                                              .Where(t => string.IsNullOrWhiteSpace(firstName) || t.FirstName.Contains(firstName))
-                                                              .Where(t => string.IsNullOrWhiteSpace(lastName) || t.LastName.Contains(lastName))
+                                                              .Where(t => string.IsNullOrWhiteSpace(fullName) || t.FullName.Contains(fullName))
                                                               .Where(t => string.IsNullOrWhiteSpace(email) || t.EmailShipper.Contains(email))
                                                               .Where(t => string.IsNullOrWhiteSpace(phone) || t.PhoneShipper.Contains(phone))
                                                               .Where(t => string.IsNullOrWhiteSpace(address) || t.AddressShipper.Contains(address))
@@ -170,8 +167,7 @@ namespace LocalShipper.Service.Services.Implement
             var shipperResponses = shipperList.Select(shipper => new ShipperResponse
             {
                 Id = shipper.Id,
-                FirstName = shipper.FirstName,
-                LastName = shipper.LastName,
+                FullName = shipper.FullName,
                 EmailShipper = shipper.EmailShipper,
                 PhoneShipper = shipper.PhoneShipper,
                 AddressShipper = shipper.AddressShipper,
@@ -324,8 +320,7 @@ namespace LocalShipper.Service.Services.Implement
             // Check RoleId ở Account có = 5 hay không
             if (shipper.Account != null && shipper.Account.RoleId == 5)
             {
-                shipper.FirstName = shipperRequest.FirstName;
-                shipper.LastName = shipperRequest.LastName;
+                shipper.FullName = shipperRequest.FullName;
                 shipper.EmailShipper = shipperRequest.EmailShipper;
                 shipper.PhoneShipper = shipperRequest.PhoneShipper;
                 shipper.AddressShipper = shipperRequest.AddressShipper;
@@ -386,8 +381,7 @@ namespace LocalShipper.Service.Services.Implement
                 var updatedShipperResponse = new ShipperResponse
                 {
                     Id = shipper.Id,
-                    FirstName = shipper.FirstName,
-                    LastName = shipper.LastName,
+                    FullName = shipper.FullName,
                     EmailShipper = shipper.EmailShipper,
                     PhoneShipper = shipper.PhoneShipper,
                     AddressShipper = shipper.AddressShipper,

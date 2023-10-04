@@ -13,10 +13,10 @@ namespace LocalShipper.Data.Models
         public decimal MinAmount { get; set; }
         public decimal MaxAmount { get; set; }
         public decimal Price { get; set; }
-        public DateTime ApplyFrom { get; set; }
-        public DateTime ApplyTo { get; set; }
+        public DateTime? ApplyFrom { get; set; }
+        public DateTime? ApplyTo { get; set; }
         public int PriceId { get; set; }
 
-        public virtual Price PriceNavigation { get; set; }
+        public virtual PriceL PriceNavigation { get; set; }
     }
 }

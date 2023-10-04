@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LSAPI", "LSAPI\LSAPI.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalShipper.Service", "LocalShipper.Service\LocalShipper.Service.csproj", "{12544738-E8BD-461A-8964-0D734D1B16BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocalShipper.Data", "LocalShipper.Data\LocalShipper.Data.csproj", "{911868DD-09C6-45C4-9785-C2636BA99588}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocalShipper.Data", "LocalShipper.Data\LocalShipper.Data.csproj", "{B7CBC246-9619-4C7E-816E-8D0E90882BD0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{12544738-E8BD-461A-8964-0D734D1B16BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12544738-E8BD-461A-8964-0D734D1B16BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12544738-E8BD-461A-8964-0D734D1B16BB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{911868DD-09C6-45C4-9785-C2636BA99588}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{911868DD-09C6-45C4-9785-C2636BA99588}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{911868DD-09C6-45C4-9785-C2636BA99588}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{911868DD-09C6-45C4-9785-C2636BA99588}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7CBC246-9619-4C7E-816E-8D0E90882BD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7CBC246-9619-4C7E-816E-8D0E90882BD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7CBC246-9619-4C7E-816E-8D0E90882BD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7CBC246-9619-4C7E-816E-8D0E90882BD0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

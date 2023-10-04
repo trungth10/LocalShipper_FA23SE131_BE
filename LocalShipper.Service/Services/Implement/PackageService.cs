@@ -29,7 +29,9 @@ namespace LocalShipper.Service.Services.Implement
         }
 
 
-        public async Task<List<PackageResponse>> GetPackage(int? batchId,int? id, int? status,int? actionId, int? typeId, int? storeId, string? customerName,string? customerAddress, string? customerPhome, string? custommerEmail,decimal? totalPrice)
+        public async Task<List<PackageResponse>> GetPackage(int? batchId,int? id, int? status,
+            int? actionId, int? typeId, int? storeId, string? customerName,string? customerAddress,
+            string? customerPhome, string? custommerEmail,decimal? totalPrice, int? pageNumber, int? pageSize)
         {
             var packages =  _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch).Include(b => b.Store)
                 .Where(f => f.BatchId == batchId || batchId == 0)
@@ -39,27 +41,22 @@ namespace LocalShipper.Service.Services.Implement
                 .Where(f => typeId == id || typeId == 0)
                 .Where(f => f.StoreId == storeId || storeId == 0)
                 .Where(f => string.IsNullOrWhiteSpace(customerName) || f.CustomerName.Contains(customerName));
-                
 
-            //var packageResponses = packages.Select(package => new PackageResponse
-            //{
-            //    Id = package.Id,
-            //    BatchId = package.BatchId,
-            //    Capacity= package.Capacity,
-            //    PackageWeight = package.PackageWeight,
-            //    PackageWidth= package.PackageWidth,
-            //    PackageHeight= package.PackageHeight,
-            //    PackageLength= package.PackageLength,
-            //    Status= package.Status,
-            //    CustomerAddress= package.CustomerAddress,
-            //    CustomerName= package.CustomerName,
-            //    CustomerEmail= package.CustomerEmail,
-            //    CancelReason= package.CancelReason,
-            //    SubtotalPrice= package.SubtotalPrice,
-            //    DistancePrice= package.DistancePrice,
-            //    TotalPrice = package.TotalPrice,
-            //    ActionId= package.ActionId,
-            //    TypeId= package.TypeId,
+
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                packages = packages.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var packageActionList = await packages.ToListAsync();
+            if (packageActionList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Package không có hoặc không tồn tại", id.ToString());
+            }
 
             var packageList = await packages.ToListAsync();
             if (packageList == null)

@@ -27,9 +27,9 @@ namespace LocalShipper.Data.Models
         public virtual DbSet<PackageAction> PackageActions { get; set; }
         public virtual DbSet<PackageType> PackageTypes { get; set; }
         public virtual DbSet<Payment> Payments { get; set; }
-        public virtual DbSet<Price> Prices { get; set; }
         public virtual DbSet<PriceInZone> PriceInZones { get; set; }
         public virtual DbSet<PriceItem> PriceItems { get; set; }
+        public virtual DbSet<PriceL> PriceLs { get; set; }
         public virtual DbSet<Rating> Ratings { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<Shipper> Shippers { get; set; }
@@ -396,35 +396,6 @@ namespace LocalShipper.Data.Models
                     .HasConstraintName("FK_Payment_Package");
             });
 
-            modelBuilder.Entity<Price>(entity =>
-            {
-                entity.ToTable("Price");
-
-                entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.Datefilter).HasColumnName("datefilter");
-
-                entity.Property(e => e.Hourfilter).HasColumnName("hourfilter");
-
-                entity.Property(e => e.Mode).HasColumnName("mode");
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .HasColumnName("name");
-
-                entity.Property(e => e.PriceInZoneId).HasColumnName("priceInZoneId");
-
-                entity.Property(e => e.Status).HasColumnName("status");
-
-                entity.Property(e => e.StoreId).HasColumnName("storeId");
-
-                entity.HasOne(d => d.Store)
-                    .WithMany(p => p.Prices)
-                    .HasForeignKey(d => d.StoreId)
-                    .HasConstraintName("FK_Price_Store");
-            });
-
             modelBuilder.Entity<PriceInZone>(entity =>
             {
                 entity.ToTable("PriceInZone");
@@ -485,6 +456,40 @@ namespace LocalShipper.Data.Models
                     .HasForeignKey(d => d.PriceId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_PriceItem_Price");
+            });
+
+            modelBuilder.Entity<PriceL>(entity =>
+            {
+                entity.ToTable("PriceLS");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreateAt)
+                    .HasColumnType("date")
+                    .HasColumnName("create_at")
+                    .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.Datefilter).HasColumnName("datefilter");
+
+                entity.Property(e => e.Hourfilter).HasColumnName("hourfilter");
+
+                entity.Property(e => e.Mode).HasColumnName("mode");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnName("name");
+
+                entity.Property(e => e.Priority).HasColumnName("priority");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.StoreId).HasColumnName("storeId");
+
+                entity.HasOne(d => d.Store)
+                    .WithMany(p => p.PriceLs)
+                    .HasForeignKey(d => d.StoreId)
+                    .HasConstraintName("FK_Price_Store");
             });
 
             modelBuilder.Entity<Rating>(entity =>
@@ -553,13 +558,9 @@ namespace LocalShipper.Data.Models
                     .HasMaxLength(255)
                     .HasColumnName("fcmtoken");
 
-                entity.Property(e => e.FirstName)
-                    .HasMaxLength(50)
-                    .HasColumnName("first_name");
-
-                entity.Property(e => e.LastName)
-                    .HasMaxLength(50)
-                    .HasColumnName("last_name");
+                entity.Property(e => e.FullName)
+                    .HasMaxLength(100)
+                    .HasColumnName("full_name");
 
                 entity.Property(e => e.PhoneShipper)
                     .HasMaxLength(50)

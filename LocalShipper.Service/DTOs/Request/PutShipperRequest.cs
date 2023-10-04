@@ -8,8 +8,7 @@ namespace LocalShipper.Service.DTOs.Request
 {
     public class PutShipperRequest
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        public string FullName { get; set; }
         public string EmailShipper { get; set; }
         public string PhoneShipper { get; set; }
         public string AddressShipper { get; set; }
