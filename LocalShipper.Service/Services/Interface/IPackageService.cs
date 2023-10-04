@@ -10,8 +10,8 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IPackageService
     {
-        Task<List<PackageResponse>> GetPackage(int? batchId, int? id, int? status, int? actionId, int? typeId, 
-            string? customerName, string? customerAddress, string? customerPhome, string? custommerEmail, decimal? totalPrice, int? storeId, int? pageNumber, int? pageSize);
+
+        Task<List<PackageResponse>> GetPackage(int? batchId, int? id, int? status, int? actionId, int? typeId, int? storeId, string? customerName, string? customerAddress, string? customerPhome, string? custommerEmail, decimal? totalPrice);
         Task<PackageResponse> CreatePackage(PackageRequestForCreate request);
         Task<PackageResponse> UpdatePackage(int id, PackageRequest packageRequest);
 
