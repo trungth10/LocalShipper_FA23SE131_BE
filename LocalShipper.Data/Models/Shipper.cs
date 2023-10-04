@@ -17,12 +17,12 @@ namespace LocalShipper.Data.Models
         public string FullName { get; set; }
         public string EmailShipper { get; set; }
         public string PhoneShipper { get; set; }
-        public string AddressShipper { get; set; }
-        public int TransportId { get; set; }
+        public string? AddressShipper { get; set; }
+        public int? TransportId { get; set; }
         public int AccountId { get; set; }
-        public int ZoneId { get; set; }
+        public int? ZoneId { get; set; }
         public int? Status { get; set; }
-        public string Fcmtoken { get; set; }
+        public string? Fcmtoken { get; set; }
         public int? WalletId { get; set; }
         public int? StoreId { get; set; }
         public int Type { get; set; }

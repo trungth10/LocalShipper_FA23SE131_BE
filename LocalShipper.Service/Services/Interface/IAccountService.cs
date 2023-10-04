@@ -18,5 +18,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<AccountResponse> DeleteAccount(int id);
         Task<bool> VerifyOTP(string email, string otp);
         Task<bool> SendOTPAgain(string email);
+        Task<AccountResponse> RegisterShipperPrivate(int storeId, RegisterRequest request);
     }
 }

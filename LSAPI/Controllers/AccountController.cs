@@ -19,7 +19,7 @@ using System.Collections.Generic;
 namespace LSAPI.Controllers
 {
     [ApiController]
-    [Route("api/accounts")]
+    
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
@@ -28,7 +28,7 @@ namespace LSAPI.Controllers
             _accountService = accountService;           
         }
 
-        [HttpGet()]
+        [HttpGet("api/accounts")]
         public async Task<ActionResult<AccountResponse>> GetAccount(int id, string phone, string email, int role, string fcm_token, int? pageNumber, int? pageSize)
         {
             try
@@ -45,7 +45,7 @@ namespace LSAPI.Controllers
 
         
 
-        [HttpGet("count")]
+        [HttpGet("api/accounts/count")]
         public async Task<ActionResult<AccountResponse>> GetCountAccount()
         {
             try
@@ -62,7 +62,7 @@ namespace LSAPI.Controllers
         }
 
 
-        [HttpPost("register-shipper-account")]
+        [HttpPost("api/accounts/register-shipper-account")]
         public async Task<ActionResult<AccountResponse>> RegisterShipperAccount([FromBody] RegisterRequest request)
         {
             try
@@ -76,7 +76,21 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpPut()]
+        [HttpPost("store/api/accounts/add-shipper")]
+        public async Task<ActionResult<AccountResponse>> RegisterShippePrivate(int storeId ,[FromBody] RegisterRequest request)
+        {
+            try
+            {
+                var rs = await _accountService.RegisterShipperPrivate(storeId,request);
+                return Ok(rs);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpPut("api/accounts")]
         public async Task<ActionResult<AccountResponse>> UpdateAccount(int id, [FromBody] AccountRequest request)
         {
             try
@@ -91,7 +105,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpDelete("")]
+        [HttpDelete("api/accounts")]
         public async Task<ActionResult<AccountResponse>> DeleteAccount(int id)
         {
             try
@@ -108,7 +122,7 @@ namespace LSAPI.Controllers
 
 
 
-        [HttpPost("verify-otp")]
+        [HttpPost("api/accounts/verify-otp")]
         public async Task<ActionResult> VerifyOTP(string email, string otp)
         {
             try
@@ -130,7 +144,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpPost("verify-otp-again")]
+        [HttpPost("api/accounts/verify-otp-again")]
         public async Task<ActionResult> SendOTPAgain(string email)
         {
             try

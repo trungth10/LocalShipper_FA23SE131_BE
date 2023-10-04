@@ -63,13 +63,15 @@ namespace LocalShipper.Service.Services.Implement
                 Active = false,
                 Phone = request.Phone,
                 FcmToken = otp,
-                RoleId = 5,
+                RoleId = 5,               
                 Password = passwordHash
             };
+
             await _unitOfWork.Repository<Account>().InsertAsync(account);
             await _unitOfWork.CommitAsync();
 
-            await SendOTPEmail(request.Email, otp);
+
+            //await SendOTPEmail(request.Email, otp);
 
             return new AccountResponse
             {
@@ -81,10 +83,8 @@ namespace LocalShipper.Service.Services.Implement
                 Active = account.Active,
                 FcmToken = account.FcmToken,
                 CreateDate = account.CreateDate,
-                ImageUrl = account.ImageUrl,                                                                            
-                
-            };
-            
+                ImageUrl = account.ImageUrl,                                                                                       
+            };           
         }
 
         public async Task<bool> SendOTPAgain (string email)
@@ -303,7 +303,76 @@ namespace LocalShipper.Service.Services.Implement
             return accountResponse;
         }
 
-        
+
+        //Store Add Shipper
+        public async Task<AccountResponse> RegisterShipperPrivate(int storeId,RegisterRequest request)
+        {
+            var emailExisted = _unitOfWork.Repository<Account>().Find(x => x.Email == request.Email);          
+
+            if (emailExisted != null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Email đã tồn tại", request.Email.ToString());
+            }
+            string otp = GenerateOTP();
+            CreatePasswordHash(request.Password, out string passwordHash);
+
+
+
+            Account account = new Account
+            {
+                Fullname = request.FullName,
+                Email = request.Email,
+                Active = true,
+                Phone = request.Phone,
+                FcmToken = otp,
+                RoleId = 5,
+                Password = passwordHash
+            };
+            await _unitOfWork.Repository<Account>().InsertAsync(account);
+            await _unitOfWork.CommitAsync();
+
+            Shipper shipper = new Shipper
+            {
+                FullName = account.Fullname,
+                EmailShipper = account.Email,
+                PhoneShipper = account.Phone,
+                AccountId = account.Id,
+                Status = (int)ShipperStatusEnum.Offline,
+                StoreId = storeId,
+                Type = (int)ShipperTypeEnum.PRIVATE,
+            };
+
+            await _unitOfWork.Repository<Shipper>().InsertAsync(shipper);
+            await _unitOfWork.CommitAsync();
+
+            await SendAccountShipper(request.Email, request.Password);
+
+            return new AccountResponse
+            {
+                Id = account.Id,
+                Fullname = account.Fullname,
+                Phone = account.Phone,
+                Email = account.Email,
+                RoleId = account.RoleId,
+                Active = account.Active,
+                FcmToken = account.FcmToken,
+                CreateDate = account.CreateDate,
+                ImageUrl = account.ImageUrl,
+
+            };
+
+        }
+
+        public async Task SendAccountShipper(string email, string password)
+        {
+            string subject = "Tài khoản LocalShipper";
+            string content = $"Welcome to LocalShipper. Login email: {email}. Password: {password}. Please download the app:";
+
+            var message = new Message(new List<string> { email }, subject, content);
+            _emailService.SendEmail(message);
+        }
+
+
 
     }
 }
