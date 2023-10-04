@@ -26,15 +26,28 @@ namespace LocalShipper.Service.Services.Implement
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<TemplateResponse>> GetTemplate(int? id, string? templateName)
+        public async Task<List<TemplateResponse>> GetTemplate(int? id, string? templateName, int? pageNumber, int? pageSize)
         {
 
-            var templates = await _unitOfWork.Repository<Template>().GetAll()
+            var templates = _unitOfWork.Repository<Template>().GetAll()
                                                               .Where(b => id == 0 || b.Id == id)
 
-                                                              .Where(b => string.IsNullOrWhiteSpace(templateName) || b.TemplateName.Contains(templateName))
-                                                              .ToListAsync();
-            var templateRespnses = _mapper.Map<List<Template>, List<TemplateResponse>>(templates);
+                                                              .Where(b => string.IsNullOrWhiteSpace(templateName) || b.TemplateName.Contains(templateName));
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                templates = templates.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var templateList = await templates.ToListAsync();
+            if (templateList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Template không có hoặc không tồn tại", id.ToString());
+            }
+            var templateRespnses = _mapper.Map<List<Template>, List<TemplateResponse>>(templateList);
             return templateRespnses;
         }
         public async Task<TemplateResponse> CreateTemplate(TemplateRequest request)

@@ -200,10 +200,10 @@ namespace LocalShipper.Service.Services.Implement
         //GET Order
         public async Task<List<OrderResponse>> GetOrder(int? id, int? status, int? storeId, int? batchId, int? shipperId,
                                       string? tracking_number, string? cancel_reason, decimal? distance_price,
-                                     decimal? subtotal_price, decimal? totalPrice, string? other)
+                                     decimal? subtotal_price, decimal? totalPrice, string? other, int? pageNumber, int? pageSize)
         {
 
-            var orders = await _unitOfWork.Repository<Order>().GetAll()
+            var orders = _unitOfWork.Repository<Order>().GetAll()
                                                       .Include(o => o.Store)
                                                       .Include(o => o.Batch)
                                                       .Include(o => o.Shipper)
@@ -217,14 +217,25 @@ namespace LocalShipper.Service.Services.Implement
                                                       .Where(a => (distance_price == null || distance_price == 0) || a.DistancePrice == distance_price)
                                                       .Where(a => (subtotal_price == null || subtotal_price == 0) || a.SubtotalPrice == subtotal_price)
                                                       .Where(a => (totalPrice == null || totalPrice == 0) || a.TotalPrice == totalPrice)
-                                                      .Where(a => string.IsNullOrWhiteSpace(other) || a.Other.Contains(other))
-                                                      .ToListAsync();
-            if (orders == null)
+                                                      .Where(a => string.IsNullOrWhiteSpace(other) || a.Other.Contains(other));
+
+
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                orders = orders.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var orderList = await orders.ToListAsync();
+            if (orderList == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Order không có hoặc không tồn tại", id.ToString());
             }
 
-            var orderResponses = orders.Select(order => new OrderResponse
+            var orderResponses = orderList.Select(order => new OrderResponse
             {
                 Id = order.Id,
                 storeId = order.StoreId,

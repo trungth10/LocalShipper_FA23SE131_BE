@@ -27,18 +27,32 @@ namespace LocalShipper.Service.Services.Implement
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<StoreResponse>> GetStore(int? id, string? storeName, int? status, int? zoneId, int? walletId, int? accountId)
+        public async Task<List<StoreResponse>> GetStore(int? id, string? storeName, int? status, int? zoneId, int? walletId, int? accountId, int? pageNumber, int? pageSize)
         {
 
-            var stores = await _unitOfWork.Repository<Store>().GetAll().Include(b => b.Wallet).Include(b => b.Account).Include(b => b.Zone).Include(b => b.Template)
+            var stores = _unitOfWork.Repository<Store>().GetAll().Include(b => b.Wallet).Include(b => b.Account).Include(b => b.Zone).Include(b => b.Template)
                                                               .Where(b => id == 0 || b.Id == id)
-                                                              .Where(b => status ==0 || b.Status == status)
-                                                              .Where(b => zoneId ==0 || b.ZoneId == zoneId)
-                                                              .Where(b => walletId ==0 || b.WalletId == walletId)
-                                                              .Where(b => accountId ==0 || b.AccountId == accountId)
-                                                              .Where(b => string.IsNullOrWhiteSpace(storeName) || b.StoreName.Contains(storeName))
-                                                              .ToListAsync();
-            var storeResponses = _mapper.Map<List<Store>, List<StoreResponse>>(stores);
+                                                              .Where(b => status == 0 || b.Status == status)
+                                                              .Where(b => zoneId == 0 || b.ZoneId == zoneId)
+                                                              .Where(b => walletId == 0 || b.WalletId == walletId)
+                                                              .Where(b => accountId == 0 || b.AccountId == accountId)
+                                                              .Where(b => string.IsNullOrWhiteSpace(storeName) || b.StoreName.Contains(storeName));
+
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                stores = stores.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var storeList = await stores.ToListAsync();
+            if (storeList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Cửa hàng không có hoặc không tồn tại", id.ToString());
+            }
+            var storeResponses = _mapper.Map<List<Store>, List<StoreResponse>>(storeList);
 
             return storeResponses;
         }

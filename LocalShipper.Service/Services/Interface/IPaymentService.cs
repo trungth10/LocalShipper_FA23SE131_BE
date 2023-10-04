@@ -11,7 +11,7 @@ namespace LocalShipper.Service.Services.Interface
     public interface IPaymentService
     {
         Task<List<PaymentResponse>> GetPayment(int? id, string? paymentMethod, int? status, string? paymentCode
-            , string? paymentImage, int? packageId);
+            , string? paymentImage, int? packageId, int? pageNumber, int? pageSize);
         Task<int> GetTotalPaymentCount();
         Task<PaymentResponse> CreatePayment(PaymentRequest request);
         Task<PaymentResponse> UpdatePayment(int id, PutPaymentRequest request);

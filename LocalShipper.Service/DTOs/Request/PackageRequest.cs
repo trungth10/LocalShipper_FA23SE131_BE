@@ -46,5 +46,6 @@ namespace LocalShipper.Service.DTOs.Request
         public decimal SubtotalPrice { get; set; }
         public int ActionId { get; set; }
         public int? TypeId { get; set; }
+        public int StoreId { get; set; }
     }
 }

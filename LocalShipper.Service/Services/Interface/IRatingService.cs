@@ -12,7 +12,7 @@ namespace LocalShipper.Service.Services.Interface
     {
         Task<List<RatingResponse>> GetRatingByShipperId(int shipperId);
         Task<decimal> GetAverageRatingByShipperId(int shipperId);
-        Task<List<RatingResponse>> GetRating(int? id, int? shipperId, int? ratingValue, int? byStoreId);
+        Task<List<RatingResponse>> GetRating(int? id, int? shipperId, int? ratingValue, int? byStoreId, int? pageNumber, int? pageSize);
 
 
         Task<int> GetTotalRatingCount();

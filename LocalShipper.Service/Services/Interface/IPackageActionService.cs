@@ -10,7 +10,7 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IPackageActionService
     {
-        Task<List<PackageActionResponse>> GetPackageAction(int? id, string? actionType);
+        Task<List<PackageActionResponse>> GetPackageAction(int? id, string? actionType, int? pageNumber, int? pageSize);
         Task<PackageActionResponse> CreatePackageAction(PackageActionRequest request);
         Task<PackageActionResponse> UpdatePackageAction(int id, PackageActionRequest packageActionRequest);
         Task<MessageResponse> DeletePackageAction(int id);

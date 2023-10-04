@@ -19,7 +19,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<decimal> GetReceiveRateByShipperId(int shipperId);
         Task<List<OrderResponse>> GetOrder(int? id, int? status, int? storeId, int? batchId, int? shipperId,
             string? tracking_number, string? cancel_reason, decimal? distance_price,
-            decimal? subtotal_price, decimal? totalPrice, string? other);
+            decimal? subtotal_price, decimal? totalPrice, string? other, int? pageNumber, int? pageSize);
         Task<int> GetTotalOrderCount(int? storeId, int? shipperId);
         Task<MessageResponse> CreateOrder(OrderRequest request);
         Task<OrderResponse> UpdateOrder(int id, PutOrderRequest orderRequest);

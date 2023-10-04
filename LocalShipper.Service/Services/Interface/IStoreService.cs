@@ -10,7 +10,7 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IStoreService
     {
-        Task<List<StoreResponse>> GetStore(int? id, string? storeName, int? status, int? zoneId, int? walletId, int? accountId);
+        Task<List<StoreResponse>> GetStore(int? id, string? storeName, int? status, int? zoneId, int? walletId, int? accountId, int? pageNumber, int? pageSize);
         Task<StoreResponse> CreateStore(StoreRequest request);
         Task<StoreResponse> UpdateStore(int id, StoreRequest storeRequest);
         Task<MessageResponse> DeleteStore(int id);

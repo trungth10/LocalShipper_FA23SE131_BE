@@ -26,15 +26,27 @@ namespace LocalShipper.Service.Services.Implement
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<PackageActionResponse>> GetPackageAction(int? id, string? actionType)
+        public async Task<List<PackageActionResponse>> GetPackageAction(int? id, string? actionType, int? pageNumber, int? pageSize)
         {
 
-            var packageAction = await _unitOfWork.Repository<PackageAction>().GetAll()
+            var packageAction = _unitOfWork.Repository<PackageAction>().GetAll()
                                                               .Where(b => id == 0 || b.Id == id)
+                                                              .Where(b => string.IsNullOrWhiteSpace(actionType) || b.ActionType.Contains(actionType));
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                packageAction = packageAction.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
 
-                                                              .Where(b => string.IsNullOrWhiteSpace(actionType) || b.ActionType.Contains(actionType))
-                                                              .ToListAsync();
-            var packageActionResponses = _mapper.Map<List<PackageAction>, List<PackageActionResponse>>(packageAction);
+            var packageActionList = await packageAction.ToListAsync();
+            if (packageActionList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Package không có hoặc không tồn tại", id.ToString());
+            }
+            var packageActionResponses = _mapper.Map<List<PackageAction>, List<PackageActionResponse>>(packageActionList);
             return packageActionResponses;
         }
 

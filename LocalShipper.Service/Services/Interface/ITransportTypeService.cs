@@ -10,7 +10,7 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface ITransportTypeService
     {
-        Task<List<TransportTypeResponse>> GetTransportType(int? id, string? transportType);
+        Task<List<TransportTypeResponse>> GetTransportType(int? id, string? transportType, int? pageNumber, int? pageSize);
         Task<int> GetTotalTransportTypeCount();
         Task<TransportTypeResponse> CreateTransportType(RegisterTransportTypeRequest request);
         Task<TransportTypeResponse> UpdateTransportType(int id, PutTransportTypeRequest transportTypeRequest);

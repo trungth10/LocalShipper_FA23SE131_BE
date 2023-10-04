@@ -10,7 +10,7 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IPackageTypeService
     {
-        Task<List<PackageTypeResponse>> GetPackageType(int? id, string? packageType);
+        Task<List<PackageTypeResponse>> GetPackageType(int? id, string? packageType, int? pageNumber, int? pageSize);
         Task<PackageTypeResponse> CreatePackageType(PackageTypeRequest request);
         Task<PackageTypeResponse> UpdatePackageType(int id, PackageTypeRequest packageTypeRequest);
 

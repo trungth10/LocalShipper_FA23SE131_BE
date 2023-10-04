@@ -15,6 +15,7 @@ using System.Net;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -66,23 +67,34 @@ namespace LocalShipper.Service.Services.Implement
         }
         //GET
         public async Task<List<TransportResponse>> GetTransport(int? id, int? typeId, string? licencePlate, string? transportColor,
-                                                string? transportImage, string? transportRegistration)
+                                                string? transportImage, string? transportRegistration, int? pageNumber, int? pageSize)
         {
+            var transports = _unitOfWork.Repository<Transport>().GetAll().Include(t => t.Type)
+                                                          .Where(t => !id.HasValue || t.Id == id)
+                                                          .Where(t => !typeId.HasValue || t.TypeId == typeId)
+                                                          .Where(t => string.IsNullOrWhiteSpace(licencePlate) || t.LicencePlate.Contains(licencePlate))
+                                                          .Where(t => string.IsNullOrWhiteSpace(transportColor) || t.TransportColor.Contains(transportColor))
+                                                          .Where(t => string.IsNullOrWhiteSpace(transportImage) || t.TransportImage.Contains(transportImage))
+                                                          .Where(t => string.IsNullOrWhiteSpace(transportRegistration) || t.TransportRegistration.Contains(transportRegistration));
 
-            var transports = await _unitOfWork.Repository<Transport>().GetAll().Include(t => t.Type)
-                                                              .Where(t => id == 0 || t.Id == id)
-                                                              .Where(t => id == 0 || t.TypeId == typeId)
-                                                              .Where(t => string.IsNullOrWhiteSpace(licencePlate) || t.LicencePlate.Contains(licencePlate))
-                                                              .Where(t => string.IsNullOrWhiteSpace(transportColor) || t.TransportColor.Contains(transportColor))
-                                                              .Where(t => string.IsNullOrWhiteSpace(transportImage) || t.TransportImage.Contains(transportImage))
-                                                              .Where(t => string.IsNullOrWhiteSpace(transportRegistration) || t.TransportRegistration.Contains(transportRegistration))
-                                                              .ToListAsync();
-            if (transports == null)
+
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                transports = transports.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var transportList = await transports.ToListAsync();
+
+            if (transportList == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Phương tiện không có hoặc không tồn tại", id.ToString());
             }
 
-            var transportResponses = transports.Select(transport => new TransportResponse
+            var transportResponses = transportList.Select(transport => new TransportResponse
             {
                 Id = transport.Id,
                 TypeId = transport.TypeId,
@@ -100,6 +112,7 @@ namespace LocalShipper.Service.Services.Implement
             }).ToList();
             return transportResponses;
         }
+
 
 
 

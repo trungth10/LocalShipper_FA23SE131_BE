@@ -19,11 +19,11 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("")]
-        public async Task<ActionResult<ZoneResponse>> GetZones(int id, string zoneName, decimal latitude, decimal longtitude, decimal radius)
+        public async Task<ActionResult<ZoneResponse>> GetZones(int id, string zoneName, decimal latitude, decimal longtitude, decimal radius, int? pageNumber, int? pageSize)
         {
             try
             {
-                var rs = await _zoneService.GetZones(id, zoneName, latitude, longtitude, radius);
+                var rs = await _zoneService.GetZones(id, zoneName, latitude, longtitude, radius, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)

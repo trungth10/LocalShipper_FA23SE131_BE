@@ -28,6 +28,7 @@ namespace LocalShipper.Service.Services.Implement
             _unitOfWork = unitOfWork;
         }
 
+
         public async Task<List<PackageResponse>> GetPackage(int? batchId,int? id, int? status,int? actionId, int? typeId, int? storeId, string? customerName,string? customerAddress, string? customerPhome, string? custommerEmail,decimal? totalPrice)
         {           
             var packages = await _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch).Include(b => b.Store)
@@ -60,8 +61,12 @@ namespace LocalShipper.Service.Services.Implement
             //    ActionId= package.ActionId,
             //    TypeId= package.TypeId,
 
-            //}).ToList();
-            var packageResponses = _mapper.Map<List<Package>, List<PackageResponse>>(packages);
+            var packageList = await packages.ToListAsync();
+            if (packageList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Package không có hoặc không tồn tại", id.ToString());
+            }
+            var packageResponses = _mapper.Map<List<Package>, List<PackageResponse>>(packageList);
             return packageResponses;
         }
 
@@ -94,7 +99,8 @@ namespace LocalShipper.Service.Services.Implement
                 SubtotalPrice = request.SubtotalPrice,
                 TotalPrice = distancePrice+ request.SubtotalPrice,
                 ActionId = request.ActionId,
-                TypeId = request.TypeId ?? 0, 
+                TypeId = request.TypeId ?? 0,
+                StoreId = request.StoreId,
             };
 
           

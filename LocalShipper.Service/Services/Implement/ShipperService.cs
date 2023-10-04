@@ -133,10 +133,10 @@ namespace LocalShipper.Service.Services.Implement
 
         //GET
         public async Task<List<ShipperResponse>> GetShipper(int? id, string? firstName, string? lastName, string? email, string? phone,
-            string? address, int? transportId, int? accountId, int? zoneId, int? status, string? fcmToken, int? walletId)
+            string? address, int? transportId, int? accountId, int? zoneId, int? status, string? fcmToken, int? walletId, int? pageNumber, int? pageSize)
         {
 
-            var shippers = await _unitOfWork.Repository<Shipper>().GetAll().Include(t => t.Transport)
+            var shippers = _unitOfWork.Repository<Shipper>().GetAll().Include(t => t.Transport)
                                                               .Include(t => t.Account)
                                                               .Include(t => t.Zone)
                                                               .Include(t => t.Wallet)
@@ -151,9 +151,23 @@ namespace LocalShipper.Service.Services.Implement
                                                               .Where(t => zoneId == 0 || t.ZoneId == zoneId)
                                                               .Where(t => status == 0 || t.Status == status)
                                                               .Where(t => string.IsNullOrWhiteSpace(fcmToken) || t.Fcmtoken.Contains(fcmToken))
-                                                              .Where(t => walletId == 0 || t.WalletId == walletId)
-                                                              .ToListAsync();
-            var shipperResponses = shippers.Select(shipper => new ShipperResponse
+                                                              .Where(t => walletId == 0 || t.WalletId == walletId);
+
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                shippers = shippers.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var shipperList = await shippers.ToListAsync();
+            if (shipperList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Shipper không có hoặc không tồn tại", id.ToString());
+            }
+            var shipperResponses = shipperList.Select(shipper => new ShipperResponse
             {
                 Id = shipper.Id,
                 FirstName = shipper.FirstName,

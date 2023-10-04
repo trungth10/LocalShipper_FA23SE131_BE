@@ -31,24 +31,33 @@ namespace LocalShipper.Service.Services.Implement
 
         //GET WalletTransaction
         public async Task<List<WalletTransactionResponse>> GetWalletTrans(int? id, string? transactionType, int? fromWallet, int? toWallet,
-            decimal? amount)
+            decimal? amount, int? pageNumber, int? pageSize)
         {
 
-            var walletTrans = await _unitOfWork.Repository<WalletTransaction>().GetAll()
+            var walletTrans = _unitOfWork.Repository<WalletTransaction>().GetAll()
                                                               .Include(w => w.FromWallet)
                                                               .Include(w => w.ToWallet)
                                                               .Where(w => id == 0 || w.Id == id)
                                                               .Where(w => string.IsNullOrWhiteSpace(transactionType) || w.TransactionType.Contains(transactionType))
                                                               .Where(w => fromWallet == 0 || w.FromWalletId == fromWallet)
                                                               .Where(w => toWallet == 0 || w.ToWalletId == toWallet)
-                                                              .Where(w => amount == 0 || w.Amount == amount)
-                                                              .ToListAsync();
-            if (walletTrans == null)
+                                                              .Where(w => amount == 0 || w.Amount == amount);
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                walletTrans = walletTrans.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var walletTransList = await walletTrans.ToListAsync();
+            if (walletTransList == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Giao dịch trên ví không có hoặc không tồn tại", id.ToString());
             }
 
-            var walletTransResponses = walletTrans.Select(walletTransaction => new WalletTransactionResponse
+            var walletTransResponses = walletTransList.Select(walletTransaction => new WalletTransactionResponse
             {
                 Id = walletTransaction.Id,
                 TransactionType = walletTransaction.TransactionType,

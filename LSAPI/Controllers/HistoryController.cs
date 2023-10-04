@@ -20,11 +20,11 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<List<HistoryResponse>>> GetHistory(int id, string action, int storeId)
+        public async Task<ActionResult<List<HistoryResponse>>> GetHistory(int id, string action, int storeId, int? pageNumber, int? pageSize)
         {
             try
             {
-                var rs = await _historyService.GetHistory(id, action, storeId);
+                var rs = await _historyService.GetHistory(id, action, storeId, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)

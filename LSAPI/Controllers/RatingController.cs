@@ -60,11 +60,11 @@ namespace LSAPI.Controllers
 
 
         [HttpGet()]
-        public async Task<ActionResult<List<RatingResponse>>> GetRating(int id, int shipperId, int ratingValue, int byStoreId)
+        public async Task<ActionResult<List<RatingResponse>>> GetRating(int id, int shipperId, int ratingValue, int byStoreId, int? pageNumber, int? pageSize)
         {
             try
             {
-                var rs = await _ratingService.GetRating(id, shipperId, ratingValue, byStoreId);
+                var rs = await _ratingService.GetRating(id, shipperId, ratingValue, byStoreId, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)
