@@ -17,5 +17,7 @@ namespace LocalShipper.Service.DTOs.Response
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdateAt { get; set; }
         public bool? Active { get; set; }
+        public int? PriceInZoneId { get; set; }
+
     }
 }

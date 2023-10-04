@@ -134,6 +134,9 @@ namespace LSAPI
             services.AddScoped<IWalletTransactionService, WalletTransactionService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IZoneService, ZoneService>();
+            services.AddScoped<IPriceLSService, PriceService>();
+            services.AddScoped<IPriceItemService, PriceItemService>();
+            services.AddScoped<IPriceInZoneService, PriceInZoneService>();
 
             services.AddAutoMapper(typeof(Startup));
 

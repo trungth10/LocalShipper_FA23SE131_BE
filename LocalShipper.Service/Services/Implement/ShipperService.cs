@@ -463,6 +463,7 @@ namespace LocalShipper.Service.Services.Implement
 
             return new MessageResponse
             {
+                id = id,
                 Message = "Xóa shipper thành công",
             };
         }
