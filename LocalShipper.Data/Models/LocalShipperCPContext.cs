@@ -304,6 +304,10 @@ namespace LocalShipper.Data.Models
                     .HasColumnType("decimal(10, 2)")
                     .HasColumnName("total_price");
 
+                entity.Property(e => e.PackagePrice)
+                   .HasColumnType("decimal(10, 2)")
+                   .HasColumnName("package_price");
+
                 entity.Property(e => e.TypeId).HasColumnName("typeId");
 
                 entity.HasOne(d => d.Action)

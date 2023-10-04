@@ -11,7 +11,8 @@ namespace LocalShipper.Service.Helpers
     public enum PackageStatusEnum
     {
         IDLE = 1,
-        ACCEPTED = 2,
+        COMPLETED = 2,
         CANCELLED = 3,
+        RETURN = 4,
     }
 }
