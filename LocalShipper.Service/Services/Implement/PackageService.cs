@@ -29,11 +29,11 @@ namespace LocalShipper.Service.Services.Implement
         }
 
 
-        public async Task<List<PackageResponse>> GetPackage(int? batchId,int? id, int? status,
-            int? actionId, int? typeId, int? storeId, string? customerName,string? customerAddress,
-            string? customerPhome, string? custommerEmail,decimal? totalPrice, int? pageNumber, int? pageSize)
+        public async Task<List<PackageResponse>> GetPackage(int? batchId, int? id, int? status,
+            int? actionId, int? typeId, int? storeId, string? customerName, string? customerAddress,
+            string? customerPhome, string? custommerEmail, decimal? totalPrice, int? pageNumber, int? pageSize)
         {
-            var packages =  _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch).Include(b => b.Store)
+            var packages = _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch).Include(b => b.Store)
                 .Where(f => f.BatchId == batchId || batchId == 0)
                 .Where(f => f.Id == id || id == 0)
                 .Where(f => f.Status == status || status == 0)
@@ -70,41 +70,61 @@ namespace LocalShipper.Service.Services.Implement
         public async Task<PackageResponse> CreatePackage(PackageRequestForCreate request)
         {
             decimal distancePrice = 0;
-            if (request.DistancePrice == 3)
-            {
-                distancePrice = 18;
 
-            }
-            else if (request.DistancePrice > 3)
+            if (request.StoreId.HasValue) // Kiểm tra nếu StoreId có giá trị
             {
-                distancePrice = 18 + (request.DistancePrice - 3) * 4;
+
+                var priceL = await _unitOfWork.Repository<PriceL>().GetAll()
+                                                                   .FirstOrDefaultAsync(pl => pl.StoreId == request.StoreId);
+
+                if (priceL != null)
+                {
+                    if (request.DistancePrice < 1)
+                    {
+                        distancePrice = 3;
+                    }
+                    else if (request.DistancePrice >= 1 && request.DistancePrice <= 3)
+                    {
+                        distancePrice = request.DistancePrice * 3;
+                    }
+                    else if (request.DistancePrice >= 4 && request.DistancePrice <= 10)
+                    {
+                        distancePrice = 3 * 3 + (request.DistancePrice - 3) * 2;
+                    }
+                    else
+                    {
+                        distancePrice = 35;
+                    }
+
+                }               
             }
-          
+
+    
             var newPackage = new Package
             {
+                StoreId = request.StoreId.HasValue ? request.StoreId.Value : 0,
                 Capacity = request.Capacity,
                 PackageWeight = request.PackageWeight,
                 PackageWidth = request.PackageWidth,
                 PackageHeight = request.PackageHeight,
                 PackageLength = request.PackageLength,
-                Status =(int)PackageStatusEnum.IDLE,
+                Status = (int)PackageStatusEnum.IDLE,
                 CustomerAddress = request.CustomerAddress,
                 CustomerPhone = request.CustomerPhone,
                 CustomerName = request.CustomerName,
-                CustomerEmail = request.CustomerEmail,  
+                CustomerEmail = request.CustomerEmail,
+                PackagePrice = request.PackagePrice,
                 DistancePrice = distancePrice,
                 SubtotalPrice = request.SubtotalPrice,
-                TotalPrice = distancePrice+ request.SubtotalPrice,
+                TotalPrice = distancePrice + request.SubtotalPrice,
                 ActionId = request.ActionId,
                 TypeId = request.TypeId ?? 0,
-                StoreId = request.StoreId,
+
             };
 
-          
             await _unitOfWork.Repository<Package>().InsertAsync(newPackage);
             await _unitOfWork.CommitAsync();
 
-            
             var packageResponse = _mapper.Map<PackageResponse>(newPackage);
             return packageResponse;
         }
@@ -132,9 +152,9 @@ namespace LocalShipper.Service.Services.Implement
             package.CustomerPhone = packageRequest.CustomerPhone;
             package.CustomerName = packageRequest.CustomerName;
             package.CustomerEmail = packageRequest.CustomerEmail;
-          
 
-         
+
+
             package.DistancePrice = CalculateTotalPrice(packageRequest.DistancePrice);
             package.SubtotalPrice = packageRequest.SubtotalPrice;
             package.TotalPrice = CalculateTotalPrice(packageRequest.DistancePrice) + packageRequest.SubtotalPrice;
@@ -156,9 +176,9 @@ namespace LocalShipper.Service.Services.Implement
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy gói hàng", id.ToString());
             }
-   
+
             package.Status = (int)status;
- 
+
             await _unitOfWork.Repository<Package>().Update(package, id);
             await _unitOfWork.CommitAsync();
 

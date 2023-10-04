@@ -54,9 +54,9 @@ namespace LocalShipper.Service.Services.Implement
                     EmailShipper = rating.Shipper.EmailShipper,
                     PhoneShipper = rating.Shipper.PhoneShipper,
                     AddressShipper = rating.Shipper.AddressShipper,
-                    TransportId = rating.Shipper.TransportId,
+                    TransportId = (int)rating.Shipper.TransportId,
                     AccountId = rating.Shipper.AccountId,
-                    ZoneId = rating.Shipper.ZoneId,
+                    ZoneId = (int)rating.Shipper.ZoneId,
                     Status = (Helpers.ShipperStatusEnum)rating.Shipper.Status,
                     Fcmtoken = rating.Shipper.Fcmtoken,
                     WalletId = rating.Shipper.WalletId,
@@ -179,9 +179,9 @@ namespace LocalShipper.Service.Services.Implement
                     EmailShipper = rating.Shipper.EmailShipper,
                     PhoneShipper = rating.Shipper.PhoneShipper,
                     AddressShipper = rating.Shipper.AddressShipper,
-                    TransportId = rating.Shipper.TransportId,
+                    TransportId = (int)rating.Shipper.TransportId,
                     AccountId = rating.Shipper.AccountId,
-                    ZoneId = rating.Shipper.ZoneId,
+                    ZoneId = (int)rating.Shipper.ZoneId,
                 } : null,
                 Store = rating.ByStore != null ? new StoreResponse
                 {
@@ -256,9 +256,9 @@ namespace LocalShipper.Service.Services.Implement
                     EmailShipper = rating.Shipper.EmailShipper,
                     PhoneShipper = rating.Shipper.PhoneShipper,
                     AddressShipper = rating.Shipper.AddressShipper,
-                    TransportId = rating.Shipper.TransportId,
+                    TransportId = (int)rating.Shipper.TransportId,
                     AccountId = rating.Shipper.AccountId,
-                    ZoneId = rating.Shipper.ZoneId,
+                    ZoneId = (int)rating.Shipper.ZoneId,
                 } : null,
                 Store = rating.ByStore != null ? new StoreResponse
                 {

@@ -40,6 +40,10 @@ namespace LocalShipper.Service.Services.Implement
              .GetAll()
              .FirstOrDefaultAsync(a => a.Id == id && string.IsNullOrWhiteSpace(cancelReason));
 
+            var orderCancel = await _unitOfWork.Repository<Order>()
+             .GetAll()
+             .FirstOrDefaultAsync(a => a.Id == id);
+
             var shipper = await _unitOfWork.Repository<Shipper>()
              .GetAll()
              .FirstOrDefaultAsync(a => a.Id == shipperId);
@@ -54,7 +58,7 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Shipper đang ngoại tuyến", order.ToString());
             }
 
-            if (order == null)
+            if (order == null & orderCancel == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy đơn hàng", order.ToString());
             }
@@ -89,13 +93,18 @@ namespace LocalShipper.Service.Services.Implement
 
             if (status == OrderStatusEnum.CANCELLED)
             {
-                order.Status = (int)status;
-                order.CancelTime = DateTime.Now;
-                order.CancelReason = cancelReason;
+                orderCancel.Status = (int)status;
+                orderCancel.CancelTime = DateTime.Now;
+                orderCancel.CancelReason = cancelReason;
+                await _unitOfWork.Repository<Order>().Update(orderCancel, id);
+                await _unitOfWork.CommitAsync();
+
+                return _mapper.Map<Order, OrderResponse>(orderCancel);
             }
 
             await _unitOfWork.Repository<Order>().Update(order, id);
             await _unitOfWork.CommitAsync();
+
 
 
             return _mapper.Map<Order, OrderResponse>(order);
@@ -285,9 +294,9 @@ namespace LocalShipper.Service.Services.Implement
                     EmailShipper = order.Shipper.EmailShipper,
                     PhoneShipper = order.Shipper.PhoneShipper,
                     AddressShipper = order.Shipper.AddressShipper,
-                    TransportId = order.Shipper.TransportId,
+                    TransportId = (int)order.Shipper.TransportId,
                     AccountId = order.Shipper.AccountId,
-                    ZoneId = order.Shipper.ZoneId,
+                    ZoneId = (int)order.Shipper.ZoneId,
                     Status = (ShipperStatusEnum)order.Shipper.Status,
                     Fcmtoken = order.Shipper.Fcmtoken,
                     WalletId = order.Shipper.WalletId
@@ -477,9 +486,9 @@ namespace LocalShipper.Service.Services.Implement
                     EmailShipper = order.Shipper.EmailShipper,
                     PhoneShipper = order.Shipper.PhoneShipper,
                     AddressShipper = order.Shipper.AddressShipper,
-                    TransportId = order.Shipper.TransportId,
+                    TransportId = (int)order.Shipper.TransportId,
                     AccountId = order.Shipper.AccountId,
-                    ZoneId = order.Shipper.ZoneId,
+                    ZoneId = (int)order.Shipper.ZoneId,
                     Status = (ShipperStatusEnum)order.Shipper.Status,
                     Fcmtoken = order.Shipper.Fcmtoken,
                     WalletId = order.Shipper.WalletId
@@ -565,9 +574,9 @@ namespace LocalShipper.Service.Services.Implement
                     EmailShipper = order.Shipper.EmailShipper,
                     PhoneShipper = order.Shipper.PhoneShipper,
                     AddressShipper = order.Shipper.AddressShipper,
-                    TransportId = order.Shipper.TransportId,
+                    TransportId = (int)order.Shipper.TransportId,
                     AccountId = order.Shipper.AccountId,
-                    ZoneId = order.Shipper.ZoneId,
+                    ZoneId = (int)order.Shipper.ZoneId,
                     Status = (ShipperStatusEnum)order.Shipper.Status,
                     Fcmtoken = order.Shipper.Fcmtoken,
                     WalletId = order.Shipper.WalletId

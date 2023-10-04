@@ -21,10 +21,10 @@ namespace LocalShipper.Service.DTOs.Request
         public string CustomerPhone { get; set; }
         public string CustomerName { get; set; }
         public string CustomerEmail { get; set; }
-
+        public decimal? PackagePrice { get; set; }
         public decimal DistancePrice { get; set; }
         public decimal SubtotalPrice { get; set; }
-
+        
         public int ActionId { get; set; }
         public int? TypeId { get; set; }
 
@@ -33,6 +33,8 @@ namespace LocalShipper.Service.DTOs.Request
 
     public class PackageRequestForCreate
     {
+       
+        public int? StoreId { get; set; }
         public int Capacity { get; set; }
         public float PackageWeight { get; set; }
         public float PackageWidth { get; set; }
@@ -42,10 +44,11 @@ namespace LocalShipper.Service.DTOs.Request
         public string CustomerPhone { get; set; }
         public string CustomerName { get; set; }
         public string CustomerEmail { get; set; }
+        public decimal? PackagePrice { get; set; }
         public decimal DistancePrice { get; set; }
         public decimal SubtotalPrice { get; set; }
         public int ActionId { get; set; }
         public int? TypeId { get; set; }
-        public int StoreId { get; set; }
+       
     }
 }
