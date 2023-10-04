@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace LocalShipper.Service.DTOs.Response
+{
+    public class PriceInZoneResponse
+    {
+        public int Id { get; set; }
+        public int PriceId { get; set; }
+        public int ZoneId { get; set; }
+        public PriceLSResponse PriceLS { get; set; }
+        public ZoneResponse Zone { get; set; }
+    }
+}
