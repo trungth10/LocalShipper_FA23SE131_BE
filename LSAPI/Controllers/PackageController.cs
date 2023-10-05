@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace LSAPI.Controllers
 {
     [ApiController]
-    [Route("api/packages")]
+    [Route("store/api/packages")]
     //[Authorize(Roles = Roles.Shipper + "," + Roles.Store)]
     public class PackageController : Controller
     {
