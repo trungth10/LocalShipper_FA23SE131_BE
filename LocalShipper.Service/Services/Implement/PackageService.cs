@@ -7,6 +7,9 @@ using LocalShipper.Service.Exceptions;
 using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Interface;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Crmf;
+using Org.BouncyCastle.Asn1.Ocsp;
+using Org.BouncyCastle.Math;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,40 +69,169 @@ namespace LocalShipper.Service.Services.Implement
             var packageResponses = _mapper.Map<List<Package>, List<PackageResponse>>(packageList);
             return packageResponses;
         }
+        private int? GetPriceItemId(List<PriceItem> priceItems, double distancePrice)
+        {
+            foreach (var priceItem in priceItems)
+            {
 
+                if (distancePrice >= priceItem.MinDistance && distancePrice <= priceItem.MaxDistance)
+                {
+
+                    return priceItem.Id;
+                }
+            }
+
+            // Nếu không tìm thấy PriceItem phù hợp, trả về null
+            return null;
+        }
+        public async Task<decimal?> GetMaxDistance(int? storeId)
+        {
+            var priceL = await _unitOfWork.Repository<PriceL>().GetAll()
+                .FirstOrDefaultAsync(b => b.StoreId == storeId);
+
+            if (priceL != null)
+            {
+                var maxDistance = await _unitOfWork.Repository<PriceItem>().GetAll()
+                    .Where(b => b.PriceId == priceL.Id)
+                    .Select(b => b.MaxDistance)
+                    .MaxAsync();
+
+                return (decimal)maxDistance;
+            }
+
+            return null; // Trả về null nếu không tìm thấy PriceL
+        }
         public async Task<PackageResponse> CreatePackage(PackageRequestForCreate request)
         {
             decimal distancePrice = 0;
+            decimal distancePriceMax1 = 0;
 
-            if (request.StoreId.HasValue) // Kiểm tra nếu StoreId có giá trị
+            decimal max1;
+            decimal min1;
+            decimal max2;
+            decimal min2;
+            decimal minAmount1;
+            decimal minAmount2;
+            decimal maxAmount1;
+            decimal maxAmount2;
+            decimal price1;
+            if (request.StoreId.HasValue)
             {
-
                 var priceL = await _unitOfWork.Repository<PriceL>().GetAll()
-                                                                   .FirstOrDefaultAsync(pl => pl.StoreId == request.StoreId);
+                    .FirstOrDefaultAsync(b => b.StoreId == request.StoreId);
 
-                if (priceL != null)
+                decimal? maxDistance = await GetMaxDistance(priceL.StoreId);
+
+                if (priceL != null )
                 {
-                    if (request.DistancePrice < 1)
+                    var priceItems = await _unitOfWork.Repository<PriceItem>().GetAll()
+                        .Where(b => b.PriceId == priceL.Id)
+                        .ToListAsync();
+                    var id = priceItems.Select(b => b.Id).ToList();
+
+                    var firstId = id.FirstOrDefault();
+
+                    var secondItem = id.Skip(1).FirstOrDefault();
+                    if (GetPriceItemId(priceItems, (double)request.DistancePrice) == priceItems.FirstOrDefault().Id)
                     {
-                        distancePrice = 3;
-                    }
-                    else if (request.DistancePrice >= 1 && request.DistancePrice <= 3)
-                    {
-                        distancePrice = request.DistancePrice * 3;
-                    }
-                    else if (request.DistancePrice >= 4 && request.DistancePrice <= 10)
-                    {
-                        distancePrice = 3 * 3 + (request.DistancePrice - 3) * 2;
-                    }
-                    else
-                    {
-                        distancePrice = 35;
+
+                        price1 = priceItems
+                       .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                       .Select(b => (decimal)b.Price)
+                       .FirstOrDefault();
+                        max1 = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice && firstId == priceItems.FirstOrDefault().Id)
+                                .Select(b => (decimal)b.MaxDistance)
+                                .FirstOrDefault();
+                        maxAmount1 = priceItems
+                                .Where(b =>b.MaxDistance < (double)request.DistancePrice)
+                                .Select(b => (decimal)b.MaxAmount)
+                                .FirstOrDefault();
+                        min1 = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice && firstId == priceItems.FirstOrDefault().Id)
+                                .Select(b => (decimal)b.MinDistance)
+                                .FirstOrDefault();
+                        minAmount1 = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice && firstId == priceItems.FirstOrDefault().Id)
+                                .Select(b => (decimal)b.MinAmount)
+                                .FirstOrDefault();
+                        if (request.DistancePrice >= min1 && request.DistancePrice <= max1)
+                        {
+                            distancePrice = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                                .Select(b => b.Price)
+                                .FirstOrDefault();
+                            distancePriceMax1 = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                                .Select(b => (decimal)b.MaxDistance)
+                                .FirstOrDefault();
+                            if (request.DistancePrice <= distancePriceMax1 && request.DistancePrice >= 1)
+                            {
+                                distancePrice = request.DistancePrice * distancePrice;
+
+
+                            }
+                            else if (request.DistancePrice < 1)
+                            {
+                                distancePrice = minAmount1;
+                            }
+                            else if (request.DistancePrice > max1)
+                            {
+                                distancePrice = maxAmount1;
+
+                            }
+
+                        }
+
                     }
 
-                }               
-            }
+                    else if(GetPriceItemId(priceItems, (double)request.DistancePrice) == priceItems.Skip(1).FirstOrDefault().Id || request.DistancePrice > maxDistance.Value)
+                    {
 
-    
+                        max2 = priceItems
+                            .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                            .Select(b => (decimal)b.MaxDistance)
+                            .FirstOrDefault();
+                        maxAmount2 = priceItems
+                               .Where (b => b.MaxDistance < (double)request.DistancePrice)
+                               .Select(b => (decimal)b.MaxAmount)
+                               .FirstOrDefault();
+                        min2 = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                                .Select(b => (decimal)b.MinDistance)
+                                .FirstOrDefault();
+                        minAmount2 = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                                .Select(b => (decimal)b.MinAmount)
+                                .FirstOrDefault();
+
+                        decimal max = (decimal)priceItems.FirstOrDefault().MaxDistance;
+                        decimal price = (decimal)priceItems.FirstOrDefault().Price;
+                        if (request.DistancePrice >= min2 && request.DistancePrice <= max2)
+                        {
+                            var distancePrice2 = priceItems
+                                .Where(b => b.MinDistance >= (double)min2 && b.MaxDistance <= (double)max2)
+                                .Select(b => b.Price)
+                                .FirstOrDefault();
+                            distancePrice = max * price + (request.DistancePrice - max) * distancePrice2;
+                        }
+                        else if (request.DistancePrice > max2 && request.DistancePrice <= min2)
+                        {
+                            distancePrice = minAmount2;
+                        }
+                        else if (request.DistancePrice > max2)
+                        {
+                            distancePrice = maxAmount2;
+                        }
+
+
+
+                    }
+                }
+            }                   
+                           
+
+
             var newPackage = new Package
             {
                 StoreId = request.StoreId.HasValue ? request.StoreId.Value : 0,
@@ -130,41 +262,170 @@ namespace LocalShipper.Service.Services.Implement
         }
 
 
-        public async Task<PackageResponse> UpdatePackage(int id, PackageRequest packageRequest)
+        public async Task<PackageResponse> UpdatePackage(int id, PackageRequestForCreate request)
         {
+
             var package = await _unitOfWork.Repository<Package>()
-                .GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch)
-                .FirstOrDefaultAsync(p => p.Id == id);
+           .GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch)
+           .FirstOrDefaultAsync(p => p.Id == id);
+            #region price
+            decimal distancePrice = 0;
+            decimal distancePriceMax1 = 0;
+
+            decimal max1;
+            decimal min1;
+            decimal max2;
+            decimal min2;
+            decimal minAmount1;
+            decimal minAmount2;
+            decimal maxAmount1;
+            decimal maxAmount2;
+            decimal price1;
+
+            if (request.StoreId.HasValue)
+            {
+                var priceL = await _unitOfWork.Repository<PriceL>().GetAll()
+                    .FirstOrDefaultAsync(b => b.StoreId == request.StoreId);
+
+                if (priceL != null)
+                {
+                    var priceItems = await _unitOfWork.Repository<PriceItem>().GetAll()
+                        .Where(b => b.PriceId == priceL.Id)
+                        .ToListAsync();
+                    var ids = priceItems.Select(b => b.Id).ToList();
+
+                    var firstId = ids.FirstOrDefault();
+
+                    var secondItem = ids.Skip(1).FirstOrDefault();
+                    if (GetPriceItemId(priceItems, (double)request.DistancePrice) == priceItems.FirstOrDefault().Id)
+                    {
+
+                        price1 = priceItems
+                       .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                       .Select(b => (decimal)b.Price)
+                       .FirstOrDefault();
+                        max1 = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice && firstId == priceItems.FirstOrDefault().Id)
+                                .Select(b => (decimal)b.MaxDistance)
+                                .FirstOrDefault();
+                        maxAmount1 = priceItems
+                                .Where(b => b.MaxDistance < (double)request.DistancePrice )
+                                .Select(b => (decimal)b.MaxAmount)
+                                .FirstOrDefault();
+                        min1 = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice && firstId == priceItems.FirstOrDefault().Id)
+                                .Select(b => (decimal)b.MinDistance)
+                                .FirstOrDefault();
+                        minAmount1 = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice && firstId == priceItems.FirstOrDefault().Id)
+                                .Select(b => (decimal)b.MinAmount)
+                                .FirstOrDefault();
+                        if (request.DistancePrice >= min1 && request.DistancePrice <= max1)
+                        {
+                            distancePrice = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                                .Select(b => b.Price)
+                                .FirstOrDefault();
+                            distancePriceMax1 = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                                .Select(b => (decimal)b.MaxDistance)
+                                .FirstOrDefault();
+                            if (request.DistancePrice <= distancePriceMax1 && request.DistancePrice >= 1)
+                            {
+                                distancePrice = request.DistancePrice * distancePrice;
+
+
+                            }
+                            else if (request.DistancePrice < 1)
+                            {
+                                distancePrice = minAmount1;
+                            }
+                            else if (request.DistancePrice > max1)
+                            {
+                                distancePrice = maxAmount1;
+
+                            }
+
+                        }
+
+                    }
+
+                    else
+                    {
+                        max2 = priceItems
+                       .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice && secondItem == priceItems.Skip(1).FirstOrDefault().Id)
+                       .Select(b => (decimal)b.MaxDistance)
+                       .FirstOrDefault();
+                        maxAmount2 = priceItems
+                               .Where(b => b.MaxDistance < (double)request.DistancePrice )
+                               .Select(b => (decimal)b.MaxAmount)
+                               .FirstOrDefault();
+                        min2 = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice && secondItem == priceItems.Skip(1).FirstOrDefault().Id)
+                                .Select(b => (decimal)b.MinDistance)
+                                .FirstOrDefault();
+                        minAmount2 = priceItems
+                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice && secondItem == priceItems.Skip(1).FirstOrDefault().Id)
+                                .Select(b => (decimal)b.MinAmount)
+                                .FirstOrDefault();
+
+                        decimal max = (decimal)priceItems.FirstOrDefault().MaxDistance;
+                        decimal price = (decimal)priceItems.FirstOrDefault().Price;
+                        if (request.DistancePrice >= min2 && request.DistancePrice <= max2)
+                        {
+                            var distancePrice2 = priceItems
+                                .Where(b => b.MinDistance >= (double)min2 && b.MaxDistance <= (double)max2)
+                                .Select(b => b.Price)
+                                .FirstOrDefault();
+                            distancePrice = max * price + (request.DistancePrice - max) * distancePrice2;
+                        }
+                        else if (request.DistancePrice > max2 && request.DistancePrice <= min2)
+                        {
+                            distancePrice = minAmount2;
+                        }
+                        else if (request.DistancePrice > max2)
+                        {
+                            distancePrice = maxAmount2;
+                        }
+
+                    }
+                }
+
+
+            }
+            #endregion
+
+
 
             if (package == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy gói hàng", id.ToString());
             }
 
-            package.BatchId = packageRequest.BatchId;
-            package.Capacity = packageRequest.Capacity;
-            package.PackageWeight = packageRequest.PackageWeight;
-            package.PackageWidth = packageRequest.PackageWidth;
-            package.PackageHeight = packageRequest.PackageHeight;
-            package.PackageLength = packageRequest.PackageLength;
-            package.Status = packageRequest.Status ?? 0;
-            package.CustomerAddress = packageRequest.CustomerAddress;
-            package.CustomerPhone = packageRequest.CustomerPhone;
-            package.CustomerName = packageRequest.CustomerName;
-            package.CustomerEmail = packageRequest.CustomerEmail;
+            package.StoreId = request.StoreId ?? 0;
+            package.Capacity = request.Capacity;
+            package.PackageWeight = request.PackageWeight;
+            package.PackageWidth = request.PackageWidth;
+            package.PackageHeight = request.PackageHeight;
+            package.PackageLength = request.PackageLength;
 
-
-
-            package.DistancePrice = CalculateTotalPrice(packageRequest.DistancePrice);
-            package.SubtotalPrice = packageRequest.SubtotalPrice;
-            package.TotalPrice = CalculateTotalPrice(packageRequest.DistancePrice) + packageRequest.SubtotalPrice;
-
+            package.CustomerAddress = request.CustomerAddress;
+            package.CustomerPhone = request.CustomerPhone;
+            package.CustomerName = request.CustomerName;
+            package.CustomerEmail = request.CustomerEmail;
+            package.PackagePrice = request.PackagePrice;
+            package.DistancePrice = distancePrice;
+            package.SubtotalPrice = request.SubtotalPrice;
+            package.TotalPrice = distancePrice + request.SubtotalPrice;
             await _unitOfWork.Repository<Package>().Update(package, id);
             await _unitOfWork.CommitAsync();
 
             var updatedPackageResponse = _mapper.Map<PackageResponse>(package);
+
+            //var updatedPackageResponse = new 
             return updatedPackageResponse;
         }
+ 
 
         public async Task<PackageResponse> UpdateStatusPackage(int id, PackageStatusEnum status)
         {
@@ -186,21 +447,6 @@ namespace LocalShipper.Service.Services.Implement
             return updatedPackageResponse;
         }
 
-        private decimal CalculateTotalPrice(decimal distancePrice)
-        {
-            if (distancePrice == 3)
-            {
-                return 18;
-            }
-            else if (distancePrice > 3)
-            {
-                return 18 + (distancePrice - 3) * 4;
-            }
-            else
-            {
-                return 0;
-            }
-        }
 
         public async Task<MessageResponse> DeletePackage(int id)
         {

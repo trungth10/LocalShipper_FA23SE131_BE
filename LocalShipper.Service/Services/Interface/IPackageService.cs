@@ -16,7 +16,7 @@ namespace LocalShipper.Service.Services.Interface
             int? actionId, int? typeId, int? storeId, string? customerName,
             string? customerAddress, string? customerPhome, string? custommerEmail, decimal? totalPrice, int? pageNumber, int? pageSize);
         Task<PackageResponse> CreatePackage(PackageRequestForCreate request);
-        Task<PackageResponse> UpdatePackage(int id, PackageRequest packageRequest);
+        Task<PackageResponse> UpdatePackage(int id, PackageRequestForCreate request);
 
         Task<MessageResponse> DeletePackage(int id);
         Task<int> GetTotalPackageCount();
