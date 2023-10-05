@@ -56,11 +56,15 @@ namespace LSAPI.Controllers
 
         }
         [HttpPut()]
-        public async Task<ActionResult<PackageResponse>> PutPackage(int id, PackageRequest packageRequest)
+        public async Task<ActionResult<PackageResponse>> PutPackage(int id, PackageRequestForCreate request)
         {
             try
             {
-                var rs = await _packageService.UpdatePackage(id, packageRequest);
+                if (request.StoreId.HasValue)
+                {
+                    request.StoreId = null;
+                }
+                var rs = await _packageService.UpdatePackage(id, request);
                 return Ok(rs);
             }
             catch (Exception ex)
