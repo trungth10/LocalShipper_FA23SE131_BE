@@ -84,12 +84,18 @@ namespace LSAPI.Controllers
 
                 var regex = new Regex("^[0-9]+$");
                 var regex2 = new Regex("^[a-zA-Z]+$");
+                var regex3 = new Regex(@"^\w+@gmail\.com$");
                 if (!regex.IsMatch(request.FullName))
                 {
                     return BadRequest("Tên không hợp lệ");
-                }if (!regex2.IsMatch(request.Phone))
+                }
+                if (!regex2.IsMatch(request.Phone))
                 {
                     return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (!regex3.IsMatch(request.Email))
+                {
+                    return BadRequest("Email phải có dạng example@gmail.com");
                 }
                 var rs = await _accountService.RegisterShipperAccount(request);                              
                 return Ok(rs);
@@ -107,6 +113,7 @@ namespace LSAPI.Controllers
             {
                 var regex = new Regex("^[0-9]+$");
                 var regex2 = new Regex("^[a-zA-Z]+$");
+                var regex3 = new Regex(@"^\w+@gmail\.com$");
                 if (!regex.IsMatch(request.FullName))
                 {
                     return BadRequest("Tên không hợp lệ");
@@ -114,6 +121,10 @@ namespace LSAPI.Controllers
                 if (!regex2.IsMatch(request.Phone))
                 {
                     return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (!regex3.IsMatch(request.Email))
+                {
+                    return BadRequest("Email phải có dạng example@gmail.com");
                 }
                 var rs = await _accountService.RegisterShipperPrivate(storeId,request);
                 return Ok(rs);

@@ -83,7 +83,7 @@ namespace LSAPI.Controllers
                 }
                 if (priceRequest.Status <= 0)
                 {
-                    return BadRequest("Status phải là số nguyên dương");
+                    return BadRequest("Status không hợp lệ");
                 }
                 if (priceRequest.Priority <= 0)
                 {
@@ -115,7 +115,7 @@ namespace LSAPI.Controllers
                 }
                 if (request.Status <= 0)
                 {
-                    return BadRequest("Status phải là số nguyên dương");
+                    return BadRequest("Status không hợp lệ");
                 }
                 if (request.Priority <= 0)
                 {

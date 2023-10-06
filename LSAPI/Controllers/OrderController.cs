@@ -119,7 +119,7 @@ namespace LSAPI.Controllers
                 }
                 if (orderRequest.status <= 0)
                 {
-                    return BadRequest("Status phải là số nguyên dương");
+                    return BadRequest("Status không hợp lệ");
                 }
                 if (orderRequest.distancePrice <= 0)
                 {

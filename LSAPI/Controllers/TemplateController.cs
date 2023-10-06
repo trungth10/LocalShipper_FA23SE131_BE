@@ -25,14 +25,29 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("pageNumber phải là số dương");
+                }
+
+                if (pageSize.HasValue && pageSize < 0)
+                {
+                    return BadRequest("pageSize phải là số dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("id không hợp lệ");
+                }
+
+
                 var rs = await _templateService.GetTemplate(id, templateName, pageNumber, pageSize);
                 return Ok(rs);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest($"Xem Template thất bại: {ex.Message}");
             }
-            
+
         }
         [HttpPost()]
         public async Task<ActionResult<TemplateResponse>> PostTemplate(TemplateRequest request)
@@ -42,11 +57,11 @@ namespace LSAPI.Controllers
                 var rs = await _templateService.CreateTemplate(request);
                 return Ok(rs);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest($"tạo Template thất bại: {ex.Message}");
             }
-            
+
         }
         [HttpPut()]
         public async Task<ActionResult<TemplateResponse>> PutTemplate(int id, TemplateRequest templateRequest)
@@ -60,11 +75,11 @@ namespace LSAPI.Controllers
                 var rs = await _templateService.UpdateTemplate(id, templateRequest);
                 return Ok(rs);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest($"update Template thất bại: {ex.Message}");
             }
-            
+
         }
 
         [HttpDelete()]
@@ -72,18 +87,22 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id == 0)
+                {
+                    return BadRequest("làm ơn hãy nhập id");
+                }
                 if (id <= 0)
                 {
-                    return BadRequest("Id phải là số nguyên dương");
+                    return BadRequest("id phải là số dương");
                 }
                 var rs = await _templateService.DeleteTemplate(id);
                 return Ok(rs);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest($"xóa Template thất bại: {ex.Message}");
             }
-            
+
         }
 
         [HttpGet("api/templates/count")]

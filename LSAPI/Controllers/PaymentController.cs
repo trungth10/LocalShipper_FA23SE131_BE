@@ -93,7 +93,7 @@ namespace LSAPI.Controllers
                 }
                 if (request.Status <= 0)
                 {
-                    return BadRequest("Status phải là số nguyên dương");
+                    return BadRequest("Status không hợp lệ");
                 }
                 if (request.PackageId <= 0)
                 {

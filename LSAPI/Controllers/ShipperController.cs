@@ -122,6 +122,11 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Tên không hợp lệ");
                 }
+                var regex3 = new Regex(@"^\w+@gmail\.com$");
+                if (!regex3.IsMatch(request.EmailShipper))
+                {
+                    return BadRequest("Email phải có dạng example@gmail.com");
+                }
                 if (!regex2.IsMatch(request.PhoneShipper))
                 {
                     return BadRequest("Số điện thoại không hợp lệ");
@@ -169,6 +174,11 @@ namespace LSAPI.Controllers
                 if (!regex.IsMatch(shipperRequest.FullName))
                 {
                     return BadRequest("Tên không hợp lệ");
+                }
+                var regex3 = new Regex(@"^\w+@gmail\.com$");
+                if (!regex3.IsMatch(shipperRequest.EmailShipper))
+                {
+                    return BadRequest("Email phải có dạng example@gmail.com");
                 }
                 if (!regex2.IsMatch(shipperRequest.PhoneShipper))
                 {
