@@ -4,6 +4,7 @@ using LocalShipper.Data.UnitOfWork;
 using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
 using LocalShipper.Service.Exceptions;
+using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -31,7 +32,7 @@ namespace LocalShipper.Service.Services.Implement
 
             var packageAction = _unitOfWork.Repository<PackageAction>().GetAll()
                                                               .Where(b => id == 0 || b.Id == id)
-                                                              .Where(b => string.IsNullOrWhiteSpace(actionType) || b.ActionType.Contains(actionType));
+                                                              .Where(b => string.IsNullOrWhiteSpace(actionType) || b.ActionType.Contains(actionType.Trim()));
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
             // Áp dụng phân trang nếu có thông số pageNumber và pageSize
@@ -61,9 +62,9 @@ namespace LocalShipper.Service.Services.Implement
 
             var newPackageAction = new PackageAction
             {
-               ActionType= request.ActionType,
+               ActionType= request.ActionType.Trim(),
                CreatedAt= request.CreatedAt,
-               Deleted = request.Deleted,
+               Deleted =request.Deleted,
             };
 
             await _unitOfWork.Repository<PackageAction>().InsertAsync(newPackageAction);
@@ -85,7 +86,7 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy PackageAction", id.ToString());
             }
 
-            packageAction.ActionType = packageActionRequest.ActionType;
+            packageAction.ActionType = packageActionRequest.ActionType.Trim();
            packageAction.CreatedAt = DateTime.Now;
          
 

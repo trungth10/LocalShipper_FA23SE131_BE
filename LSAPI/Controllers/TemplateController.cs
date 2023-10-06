@@ -25,6 +25,21 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("pageNumber phải là số dương");
+                }
+
+                if (pageSize.HasValue && pageSize < 0)
+                {
+                    return BadRequest("pageSize phải là số dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("id không hợp lệ");
+                }
+
+
                 var rs = await _templateService.GetTemplate(id, templateName, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -68,6 +83,14 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id == 0)
+                {
+                    return BadRequest("làm ơn hãy nhập id");
+                }
+                if (id <= 0)
+                {
+                    return BadRequest("id phải là số dương");
+                }
                 var rs = await _templateService.DeleteTemplate(id);
                 return Ok(rs);
             }

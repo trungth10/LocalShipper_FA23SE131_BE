@@ -32,7 +32,7 @@ namespace LocalShipper.Service.Services.Implement
             var templates = _unitOfWork.Repository<Template>().GetAll()
                                                               .Where(b => id == 0 || b.Id == id)
 
-                                                              .Where(b => string.IsNullOrWhiteSpace(templateName) || b.TemplateName.Contains(templateName));
+                                                              .Where(b => string.IsNullOrWhiteSpace(templateName) || b.TemplateName.Contains(templateName.Trim()));
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
             // Áp dụng phân trang nếu có thông số pageNumber và pageSize
@@ -61,8 +61,8 @@ namespace LocalShipper.Service.Services.Implement
 
             var newTemplate = new Template
             {
-                TemplateName= request.TemplateName,
-                ImageUrl= request.ImageUrl,
+                TemplateName= request.TemplateName.Trim(),
+                ImageUrl= request.ImageUrl.Trim(),
                 CreateAt= DateTime.Now,
                 Deleted = request.Deleted,
             };
@@ -87,8 +87,8 @@ namespace LocalShipper.Service.Services.Implement
             }
 
             // Cập nhật thông tin Template
-            template.TemplateName = templateRequest.TemplateName;
-            template.ImageUrl = templateRequest.ImageUrl;
+            template.TemplateName = templateRequest.TemplateName.Trim();
+            template.ImageUrl = templateRequest.ImageUrl.Trim();
             template.CreateAt = DateTime.Now;
 
             // Lưu thay đổi vào cơ sở dữ liệu

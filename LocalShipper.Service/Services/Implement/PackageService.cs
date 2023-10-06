@@ -33,8 +33,8 @@ namespace LocalShipper.Service.Services.Implement
 
 
         public async Task<List<PackageResponse>> GetPackage(int? batchId, int? id, int? status,
-            int? actionId, int? typeId, int? storeId, string? customerName, string? customerAddress,
-            string? customerPhome, string? custommerEmail, decimal? totalPrice, int? pageNumber, int? pageSize)
+            int? actionId, int? typeId, int? storeId, string? customerName,
+             int? pageNumber, int? pageSize)
         {
             var packages = _unitOfWork.Repository<Package>().GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch).Include(b => b.Store)
                 .Where(f => f.BatchId == batchId || batchId == 0)
@@ -43,7 +43,7 @@ namespace LocalShipper.Service.Services.Implement
                 .Where(f => f.ActionId == actionId || actionId == 0)
                 .Where(f => typeId == id || typeId == 0)
                 .Where(f => f.StoreId == storeId || storeId == 0)
-                .Where(f => string.IsNullOrWhiteSpace(customerName) || f.CustomerName.Contains(customerName));
+                .Where(f => string.IsNullOrWhiteSpace(customerName) || f.CustomerName.Contains(customerName.Trim()));
 
 
             // Xác định giá trị cuối cùng của pageNumber
@@ -264,6 +264,8 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<PackageResponse> UpdatePackage(int id, PackageRequestForCreate request)
         {
+            var storeId = await _unitOfWork.Repository<Package>().GetAll().Where(b => b.Id == id).Select(b => b.StoreId).FirstOrDefaultAsync();
+              
 
             var package = await _unitOfWork.Repository<Package>()
            .GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch)
@@ -401,8 +403,8 @@ namespace LocalShipper.Service.Services.Implement
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy gói hàng", id.ToString());
             }
-
-            package.StoreId = request.StoreId ?? 0;
+             var storeId1 = request.StoreId = storeId;
+            package.StoreId = storeId1 ?? 0;
             package.Capacity = request.Capacity;
             package.PackageWeight = request.PackageWeight;
             package.PackageWidth = request.PackageWidth;
