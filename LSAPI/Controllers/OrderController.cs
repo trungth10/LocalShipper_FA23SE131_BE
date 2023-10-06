@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using LocalShipper.Service.Helpers;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace LSAPI.Controllers
 {
@@ -31,6 +32,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
 
                 var response = await _orderService.GetOrder(id, status, storeId, batchId, shipperId, 
                     tracking_number, cancel_reason, distance_price, subtotal_price, totalPrice, other, pageNumber, pageSize);
@@ -67,7 +81,14 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (request.storeId <= 0)
+                {
+                    return BadRequest("StoreId phải là số nguyên dương");
+                }
+                if (request.batchId <= 0)
+                {
+                    return BadRequest("BatchId phải là số nguyên dương");
+                }
                 var rs = await _orderService.CreateOrder(request);
                 return Ok(rs);
             }
@@ -84,6 +105,35 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
+                if (orderRequest.storeId <= 0)
+                {
+                    return BadRequest("StoreId phải là số nguyên dương");
+                }
+                if (orderRequest.batchId <= 0)
+                {
+                    return BadRequest("BatchId phải là số nguyên dương");
+                }
+                if (orderRequest.status <= 0)
+                {
+                    return BadRequest("Status không hợp lệ");
+                }
+                if (orderRequest.distancePrice <= 0)
+                {
+                    return BadRequest("Số tiền phải là số dương");
+                }
+                if (orderRequest.subTotalprice <= 0)
+                {
+                    return BadRequest("Số tiền phải là số dương");
+                }
+                if (orderRequest.totalPrice <= 0)
+                {
+                    return BadRequest("Số tiền phải là số dương");
+                }
+
                 var rs = await _orderService.UpdateOrder(id, orderRequest);
                 return Ok(rs);
             }
@@ -100,6 +150,10 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var rs = await _orderService.DeleteOrder(id);
                 return Ok(rs);
             }
@@ -118,6 +172,10 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var rs = await _orderService.ShipperToStatusOrder(id, shipperId, cancelReason, status);
                 return Ok(rs);
             }
@@ -136,7 +194,10 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Year and month are required.");
                 }
-
+                if (shipperId <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var rs = await _orderService.GetTotalPriceAndOrderCount(shipperId, month, year, day);
                 return Ok(rs);
             }
@@ -150,21 +211,33 @@ namespace LSAPI.Controllers
          [HttpGet("shipper/api/orders/statistical-price")]
          public async Task<ActionResult<TotalPriceResponse>> GetTotalPriceSumByShipperId(int shipperId)
          {
-             var rs = await _orderService.GetTotalPriceSumByShipperId(shipperId);
+            if (shipperId <= 0)
+            {
+                return BadRequest("Id phải là số nguyên dương");
+            }
+            var rs = await _orderService.GetTotalPriceSumByShipperId(shipperId);
              return Ok(rs);
          }
 
          [HttpGet("shipper/api/orders/rate-cancel")]
          public async Task<ActionResult<TotalPriceResponse>> GetCancelRateByShipperId(int shipperId)
          {
-             var rs = await _orderService.GetCancelRateByShipperId(shipperId);
+            if (shipperId <= 0)
+            {
+                return BadRequest("Id phải là số nguyên dương");
+            }
+            var rs = await _orderService.GetCancelRateByShipperId(shipperId);
              return Ok(rs);
          }
 
          [HttpGet("shipper/api/orders/rate-complete")]
          public async Task<ActionResult<TotalPriceResponse>> GetReceiveRateByShipperId(int shipperId)
          {
-             var rs = await _orderService.GetReceiveRateByShipperId(shipperId);
+            if (shipperId <= 0)
+            {
+                return BadRequest("Id phải là số nguyên dương");
+            }
+            var rs = await _orderService.GetReceiveRateByShipperId(shipperId);
              return Ok(rs);
          }         
     }

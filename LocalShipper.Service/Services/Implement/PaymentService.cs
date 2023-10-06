@@ -35,10 +35,10 @@ namespace LocalShipper.Service.Services.Implement
             var payments = _unitOfWork.Repository<Payment>().GetAll()
                                                               .Include(o => o.Package)
                                                               .Where(a => id == 0 || a.Id == id)
-                                                              .Where(a => string.IsNullOrWhiteSpace(paymentMethod) || a.PaymentMethod.Contains(paymentMethod))
+                                                              .Where(a => string.IsNullOrWhiteSpace(paymentMethod) || a.PaymentMethod.Contains(paymentMethod.Trim()))
                                                               .Where(a => status == 0 || a.Status == status)
-                                                              .Where(a => string.IsNullOrWhiteSpace(paymentCode) || a.PaymentCode.Contains(paymentCode))
-                                                              .Where(a => string.IsNullOrWhiteSpace(paymentImage) || a.PaymentImage.Contains(paymentImage))
+                                                              .Where(a => string.IsNullOrWhiteSpace(paymentCode) || a.PaymentCode.Contains(paymentCode.Trim()))
+                                                              .Where(a => string.IsNullOrWhiteSpace(paymentImage) || a.PaymentImage.Contains(paymentImage.Trim()))
                                                               .Where(a => packageId == 0 || a.PackageId == packageId);
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;

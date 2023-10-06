@@ -27,6 +27,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
                 var rs = await _walletTransService.GetWalletTrans(id, transactionType, fromWallet, toWallet, amount, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -56,6 +69,18 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (request.FromWalletId <= 0)
+                {
+                    return BadRequest("FromWalletId phải là số nguyên dương");
+                }
+                if (request.ToWalletId <= 0)
+                {
+                    return BadRequest("ToWalletId phải là số nguyên dương");
+                }
+                if (request.Amount <= 0)
+                {
+                    return BadRequest("Amount phải > 0");
+                }
                 var rs = await _walletTransService.CreateWalletTrans(request);
                 return Ok(rs);
             }
@@ -70,7 +95,22 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
+                if (request.FromWalletId <= 0)
+                {
+                    return BadRequest("FromWalletId phải là số nguyên dương");
+                }
+                if (request.ToWalletId <= 0)
+                {
+                    return BadRequest("ToWalletId phải là số nguyên dương");
+                }
+                if (request.Amount <= 0)
+                {
+                    return BadRequest("Amount phải > 0");
+                }
                 var response = await _walletTransService.UpdateWalletTrans(id, request);
                 return Ok(response);
             }
@@ -85,7 +125,10 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var response = await _walletTransService.DeleteWalletTrans(id);
                 return Ok(response);
             }
@@ -129,6 +172,10 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (request.Balance < 0)
+                {
+                    return BadRequest("Balance phải >= 0");
+                }
                 var rs = await _walletService.CreateWallet(request);
                 return Ok(rs);
             }
@@ -143,7 +190,14 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
+                if (request.Balance < 0)
+                {
+                    return BadRequest("Balance phải >= 0");
+                }
                 var response = await _walletService.UpdateWallet(id, request);
                 return Ok(response);
             }

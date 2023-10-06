@@ -51,7 +51,7 @@ namespace LocalShipper.Service.Services.Implement
             }
             else if (account.RoleId == 4 && request.StoreId == null)
             {
-                throw new CrudException(HttpStatusCode.BadRequest, "StoreId không thể để trống khi RoleId là 4", accountId.ToString());
+                throw new CrudException(HttpStatusCode.BadRequest, "StoreId không thể để trống", accountId.ToString());
             }
 
             PriceL price = new PriceL
@@ -92,7 +92,7 @@ namespace LocalShipper.Service.Services.Implement
                 .GetAll()
                 .Include(t => t.Store)
                 .Where(a => (id == null || id == 0) || a.Id == id)
-                .Where(a => string.IsNullOrWhiteSpace(name) || a.Name.Contains(name))
+                .Where(a => string.IsNullOrWhiteSpace(name) || a.Name.Contains(name.Trim()))
                 .Where(a => (storeId == null || storeId == 0) || a.StoreId == storeId)
                 .Where(a => (hourFilter == null || hourFilter == 0) || a.Hourfilter == hourFilter)
                 .Where(a => (dateFilter == null || dateFilter == 0) || a.Datefilter == dateFilter)

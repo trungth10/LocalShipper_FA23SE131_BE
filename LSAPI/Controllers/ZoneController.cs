@@ -23,6 +23,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
                 var rs = await _zoneService.GetZones(id, zoneName, latitude, longtitude, radius, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -33,7 +46,7 @@ namespace LSAPI.Controllers
 
         }
 
-        [HttpGet("count")]
+        [HttpGet("api/zones/count")]
         public async Task<ActionResult<ZoneResponse>> GetCount()
         {
             try
@@ -68,6 +81,10 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var rs = await _zoneService.UpdateZone(id,request);
                 return Ok(rs);
             }
@@ -82,6 +99,10 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var rs = await _zoneService.DeleteZone(id);
                 return Ok(rs);
             }

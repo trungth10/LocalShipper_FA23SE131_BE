@@ -74,7 +74,7 @@ namespace LocalShipper.Service.Services.Implement
 
             if (priceInZoneList == null)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Danh sách không có hoặc không tồn tại", id.ToString());
+                throw new CrudException(HttpStatusCode.NotFound, "Bảng giá không có hoặc không tồn tại", id.ToString());
             }
 
 

@@ -221,12 +221,12 @@ namespace LocalShipper.Service.Services.Implement
                                                       .Where(a => (storeId == null || storeId == 0) || a.StoreId == storeId)
                                                       .Where(a => (batchId == null || batchId == 0) || a.BatchId == batchId)
                                                       .Where(a => (shipperId == null || shipperId == 0) || a.ShipperId == shipperId)
-                                                      .Where(a => string.IsNullOrWhiteSpace(tracking_number) || a.TrackingNumber.Contains(tracking_number))
-                                                      .Where(a => string.IsNullOrWhiteSpace(cancel_reason) || a.CancelReason.Contains(cancel_reason))
+                                                      .Where(a => string.IsNullOrWhiteSpace(tracking_number) || a.TrackingNumber.Contains(tracking_number.Trim()))
+                                                      .Where(a => string.IsNullOrWhiteSpace(cancel_reason) || a.CancelReason.Contains(cancel_reason.Trim()))
                                                       .Where(a => (distance_price == null || distance_price == 0) || a.DistancePrice == distance_price)
                                                       .Where(a => (subtotal_price == null || subtotal_price == 0) || a.SubtotalPrice == subtotal_price)
                                                       .Where(a => (totalPrice == null || totalPrice == 0) || a.TotalPrice == totalPrice)
-                                                      .Where(a => string.IsNullOrWhiteSpace(other) || a.Other.Contains(other));
+                                                      .Where(a => string.IsNullOrWhiteSpace(other) || a.Other.Contains(other.Trim()));
 
 
             // Xác định giá trị cuối cùng của pageNumber

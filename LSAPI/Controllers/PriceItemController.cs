@@ -25,6 +25,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
                 var rs = await _priceItemService.GetPriceItem(id, minAmount, maxAmount, price, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -34,7 +47,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpGet("count")]
+        [HttpGet("api/price-items/count")]
         public async Task<ActionResult<PriceItemResponse>> GetCountPriceItem()
         {
             try
@@ -56,6 +69,30 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (request.MinDistance < 0)
+                {
+                    return BadRequest("MinDistance phải >= 0");
+                }
+                if (request.MaxDistance <= 0 || request.MaxDistance <= request.MinDistance)
+                {
+                    return BadRequest("MaxDistance phải lớn hơn MinDistance");
+                }
+                if (request.MinAmount <= 0)
+                {
+                    return BadRequest("MinAmount phải > 0");
+                }
+                if (request.MaxAmount <= 0 || request.MaxAmount <= request.MinAmount)
+                {
+                    return BadRequest("MaxAmount phải lớn hơn MinAmount");
+                }
+                if (request.Price <= 0)
+                {
+                    return BadRequest("Price phải > 0");
+                }
+                if (request.PriceId <= 0)
+                {
+                    return BadRequest("PriceId phải là số nguyên dương");
+                }
                 var rs = await _priceItemService.CreatePriceItem(request);
                 return Ok(rs);
             }
@@ -70,7 +107,34 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
+                if (request.MinDistance < 0)
+                {
+                    return BadRequest("MinDistance phải >= 0");
+                }
+                if (request.MaxDistance <= 0 || request.MaxDistance <= request.MinDistance)
+                {
+                    return BadRequest("MaxDistance phải lớn hơn MinDistance");
+                }
+                if (request.MinAmount <= 0)
+                {
+                    return BadRequest("MinAmount phải > 0");
+                }
+                if (request.MaxAmount <= 0 || request.MaxAmount <= request.MinAmount)
+                {
+                    return BadRequest("MaxAmount phải lớn hơn MinAmount");
+                }
+                if (request.Price <= 0)
+                {
+                    return BadRequest("Price phải > 0");
+                }
+                if (request.PriceId <= 0)
+                {
+                    return BadRequest("PriceId phải là số nguyên dương");
+                }
                 var response = await _priceItemService.UpdatePriceItem(id, request);
                 return Ok(response);
             }
@@ -85,7 +149,10 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var response = await _priceItemService.DeletePriceItem(id);
                 return Ok(response);
             }

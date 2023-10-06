@@ -26,6 +26,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
                 var rs = await _priceInZoneService.GetPriceInZone(id, priceId, zoneId, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -35,7 +48,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpGet("count")]
+        [HttpGet("api/price-in-zones/count")]
         public async Task<ActionResult<PriceInZoneResponse>> GetCountPriceInZone()
         {
             try
@@ -57,6 +70,14 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (request.priceId <= 0)
+                {
+                    return BadRequest("PriceId phải là số nguyên dương");
+                }
+                if (request.zoneId <= 0)
+                {
+                    return BadRequest("ZoneId phải là số nguyên dương");
+                }
                 var rs = await _priceInZoneService.CreatePriceInZone(request);
                 return Ok(rs);
             }
@@ -71,7 +92,18 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
+                if (priceInZonerequest.priceId <= 0)
+                {
+                    return BadRequest("PriceId phải là số nguyên dương");
+                }
+                if (priceInZonerequest.zoneId <= 0)
+                {
+                    return BadRequest("ZoneId phải là số nguyên dương");
+                }
                 var response = await _priceInZoneService.UpdatePriceInZone(id, priceInZonerequest);
                 return Ok(response);
             }
@@ -86,7 +118,10 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var response = await _priceInZoneService.DeletePriceInZone(id);
                 return Ok(response);
             }

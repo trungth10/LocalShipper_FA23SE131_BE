@@ -39,36 +39,38 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("id phải là số dương");
                 }
-                if(status< 0)
+                
+                if (status < 0)
                 {
                     return BadRequest("status phải là số dương");
                 }
-                if(zoneId < 0)
+                if (zoneId < 0)
                 {
                     return BadRequest("zoneId phải là số dương");
                 }
-                if(walletId< 0)
+                if (walletId < 0)
                 {
                     return BadRequest("walletId phải là số dương");
                 }
-                if(accountId< 0)
+                if (accountId < 0)
                 {
                     return BadRequest("accountId phải là số dương");
                 }
                 var rs = await _storeService.GetStore(id, storeName, status, zoneId, walletId, accountId, pageNumber, pageSize);
                 return Ok(rs);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest($"Xem Store thất bại: {ex.Message}");
             }
-           
+
         }
         [HttpPost()]
         public async Task<ActionResult<StoreResponse>> PostStore(StoreRequest request)
         {
             try
             {
+
 
                 if (request.Status <0)
                 {
@@ -115,11 +117,11 @@ namespace LSAPI.Controllers
                 var rs = await _storeService.CreateStore(request);
                 return Ok(rs);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest($"tạo Store thất bại: {ex.Message}");
             }
-            
+
         }
         [HttpPut()]
         public async Task<ActionResult<StoreResponse>> PutStore(int id, StoreRequest storeRequest)
@@ -162,11 +164,11 @@ namespace LSAPI.Controllers
                 var rs = await _storeService.UpdateStore(id, storeRequest);
                 return Ok(rs);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest($"update Store thất bại: {ex.Message}");
             }
-            
+
         }
         [HttpDelete()]
         public async Task<ActionResult<StoreResponse>> DeleteStore(int id)
@@ -184,11 +186,11 @@ namespace LSAPI.Controllers
                 var rs = await _storeService.DeleteStore(id);
                 return Ok(rs);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest($"Xóa Store thất bại: {ex.Message}");
             }
-            
+
         }
 
         [HttpGet("count")]

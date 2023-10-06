@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System;
 using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.Services.Implement;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace LSAPI.Controllers
 {
@@ -25,6 +26,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
                 var rs = await _priceService.GetPrice(id, name, storeId, hourFilter, dateFilter, mode, status, priority, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -34,7 +48,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpGet("count")]
+        [HttpGet("api/prices/count")]
         public async Task<ActionResult<PriceInZoneResponse>> GetCountPrice()
         {
             try
@@ -55,7 +69,26 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
+                if (accountId <= 0)
+                {
+                    return BadRequest("AccountId phải là số nguyên dương");
+                }
+                if (priceRequest.Mode <= 0)
+                {
+                    return BadRequest("Mode phải là số nguyên dương");
+                }
+                if (priceRequest.Status <= 0)
+                {
+                    return BadRequest("Status không hợp lệ");
+                }
+                if (priceRequest.Priority <= 0)
+                {
+                    return BadRequest("Priority phải là số nguyên dương");
+                }
                 var response = await _priceService.UpdatePrice(id, priceRequest, accountId);
                 return Ok(response);
             }
@@ -72,6 +105,22 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (accountId <= 0)
+                {
+                    return BadRequest("AccountId phải là số nguyên dương");
+                }
+                if (request.Mode <= 0)
+                {
+                    return BadRequest("Mode phải là số nguyên dương");
+                }
+                if (request.Status <= 0)
+                {
+                    return BadRequest("Status không hợp lệ");
+                }
+                if (request.Priority <= 0)
+                {
+                    return BadRequest("Priority phải là số nguyên dương");
+                }
                 var rs = await _priceService.CreatePrice(request, accountId);
                 return Ok(rs);
             }
@@ -86,7 +135,10 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var response = await _priceService.DeletePrice(id);
                 return Ok(response);
             }

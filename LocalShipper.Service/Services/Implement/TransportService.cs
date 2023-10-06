@@ -72,10 +72,10 @@ namespace LocalShipper.Service.Services.Implement
             var transports = _unitOfWork.Repository<Transport>().GetAll().Include(t => t.Type)
                                                           .Where(t => !id.HasValue || t.Id == id)
                                                           .Where(t => !typeId.HasValue || t.TypeId == typeId)
-                                                          .Where(t => string.IsNullOrWhiteSpace(licencePlate) || t.LicencePlate.Contains(licencePlate))
-                                                          .Where(t => string.IsNullOrWhiteSpace(transportColor) || t.TransportColor.Contains(transportColor))
-                                                          .Where(t => string.IsNullOrWhiteSpace(transportImage) || t.TransportImage.Contains(transportImage))
-                                                          .Where(t => string.IsNullOrWhiteSpace(transportRegistration) || t.TransportRegistration.Contains(transportRegistration));
+                                                          .Where(t => string.IsNullOrWhiteSpace(licencePlate) || t.LicencePlate.Contains(licencePlate.Trim()))
+                                                          .Where(t => string.IsNullOrWhiteSpace(transportColor) || t.TransportColor.Contains(transportColor.Trim()))
+                                                          .Where(t => string.IsNullOrWhiteSpace(transportImage) || t.TransportImage.Contains(transportImage.Trim()))
+                                                          .Where(t => string.IsNullOrWhiteSpace(transportRegistration) || t.TransportRegistration.Contains(transportRegistration.Trim()));
 
 
             // Xác định giá trị cuối cùng của pageNumber

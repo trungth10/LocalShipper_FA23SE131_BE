@@ -38,7 +38,7 @@ namespace LocalShipper.Service.Services.Implement
                                                               .Include(w => w.FromWallet)
                                                               .Include(w => w.ToWallet)
                                                               .Where(w => id == 0 || w.Id == id)
-                                                              .Where(w => string.IsNullOrWhiteSpace(transactionType) || w.TransactionType.Contains(transactionType))
+                                                              .Where(w => string.IsNullOrWhiteSpace(transactionType) || w.TransactionType.Contains(transactionType.Trim()))
                                                               .Where(w => fromWallet == 0 || w.FromWalletId == fromWallet)
                                                               .Where(w => toWallet == 0 || w.ToWalletId == toWallet)
                                                               .Where(w => amount == 0 || w.Amount == amount);

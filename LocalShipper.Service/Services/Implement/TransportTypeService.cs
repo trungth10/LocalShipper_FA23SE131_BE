@@ -54,7 +54,7 @@ namespace LocalShipper.Service.Services.Implement
             var transportTypes = _unitOfWork.Repository<TransportType>()
                 .GetAll()
                 .Where(b => id == 0 || b.Id == id)
-                .Where(b => string.IsNullOrWhiteSpace(transportType) || b.TransportType1.Contains(transportType));
+                .Where(b => string.IsNullOrWhiteSpace(transportType) || b.TransportType1.Contains(transportType.Trim()));
 
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;

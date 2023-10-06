@@ -15,6 +15,7 @@ using LocalShipper.Data.UnitOfWork;
 using LocalShipper.Service.Services.Implement;
 using MailKit.Search;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace LSAPI.Controllers
 {
@@ -33,6 +34,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
                 var rs = await _accountService.GetAccount(id, phone, email, role, fcm_token, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -67,6 +81,22 @@ namespace LSAPI.Controllers
         {
             try
             {
+
+                var regex = new Regex("^[0-9]+$");
+                var regex2 = new Regex("^[a-zA-Z]+$");
+                var regex3 = new Regex(@"^\w+@gmail\.com$");
+                if (!regex.IsMatch(request.FullName))
+                {
+                    return BadRequest("Tên không hợp lệ");
+                }
+                if (!regex2.IsMatch(request.Phone))
+                {
+                    return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (!regex3.IsMatch(request.Email))
+                {
+                    return BadRequest("Email phải có dạng example@gmail.com");
+                }
                 var rs = await _accountService.RegisterShipperAccount(request);                              
                 return Ok(rs);
             }
@@ -81,6 +111,21 @@ namespace LSAPI.Controllers
         {
             try
             {
+                var regex = new Regex("^[0-9]+$");
+                var regex2 = new Regex("^[a-zA-Z]+$");
+                var regex3 = new Regex(@"^\w+@gmail\.com$");
+                if (!regex.IsMatch(request.FullName))
+                {
+                    return BadRequest("Tên không hợp lệ");
+                }
+                if (!regex2.IsMatch(request.Phone))
+                {
+                    return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (!regex3.IsMatch(request.Email))
+                {
+                    return BadRequest("Email phải có dạng example@gmail.com");
+                }
                 var rs = await _accountService.RegisterShipperPrivate(storeId,request);
                 return Ok(rs);
             }
@@ -95,13 +140,27 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
+                var regex = new Regex("^[0-9]+$");
+                var regex2 = new Regex("^[a-zA-Z]+$");
+                if (!regex.IsMatch(request.FullName))
+                {
+                    return BadRequest("Tên không hợp lệ");
+                }
+                if (!regex2.IsMatch(request.Phone))
+                {
+                    return BadRequest("Số điện thoại không hợp lệ");
+                }
 
                 var response = await _accountService.UpdateAccount(id, request);
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                return BadRequest($"Cập nhật đơn hàng thất bại: {ex.Message}");
+                return BadRequest($"Cập nhật tài khoản thất bại: {ex.Message}");
             }
         }
 
@@ -110,13 +169,16 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var response = await _accountService.DeleteAccount(id);
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                return BadRequest($"Xóa đơn hàng thất bại: {ex.Message}");
+                return BadRequest($"Xóa tài khoản thất bại: {ex.Message}");
             }
         }
 
@@ -165,10 +227,6 @@ namespace LSAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
-
-
-
 
     }
 }
