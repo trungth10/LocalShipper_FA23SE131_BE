@@ -113,7 +113,7 @@ namespace LSAPI.Controllers
             {
                 var regex = new Regex("^[a-zA-Z ]+$");
                 var regex2 = new Regex("^[0-9]+$");            
-                var regex3 = new Regex(@"^\w+@gmail\.com$");
+                var regexEmail = new Regex(@"^\w+@gmail\.com$");
                 if (!regex.IsMatch(request.FullName))
                 {
                     return BadRequest("Tên không hợp lệ");
@@ -122,7 +122,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Số điện thoại không hợp lệ");
                 }
-                if (!regex3.IsMatch(request.Email))
+                if (!regexEmail.IsMatch(request.Email))
                 {
                     return BadRequest("Email phải có dạng example@gmail.com");
                 }
