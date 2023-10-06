@@ -52,6 +52,7 @@ namespace LSAPI.Controllers
                     return BadRequest("walletId phải là số dương");
                 }
                 if (accountId < 0)
+
                 {
                     return BadRequest("accountId phải là số dương");
                 }
@@ -70,7 +71,7 @@ namespace LSAPI.Controllers
             try
             {
 
-                if (request.Status <0)
+                if (request.Status < 0)
                 {
                     return BadRequest("Status phải là số dương");
                 }
