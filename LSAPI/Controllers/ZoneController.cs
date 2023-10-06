@@ -23,7 +23,7 @@ namespace LSAPI.Controllers
         {
             try
             {
-                if (pageNumber.HasValue && pageNumber < 0)
+                if (pageNumber.HasValue && pageNumber <= 0)
                 {
                     return BadRequest("Số trang phải là số nguyên dương");
                 }

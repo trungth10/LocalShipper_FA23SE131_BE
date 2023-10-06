@@ -58,7 +58,7 @@ namespace LSAPI.Controllers
         {
             try
             {
-                if (pageNumber.HasValue && pageNumber < 0)
+                if (pageNumber.HasValue && pageNumber <= 0)
                 {
                     return BadRequest("Số trang phải là số nguyên dương");
                 }
@@ -116,8 +116,10 @@ namespace LSAPI.Controllers
         {
             try
             {
-                var regex = new Regex("^[0-9]+$");
-                var regex2 = new Regex("^[a-zA-Z]+$");
+
+                var regex = new Regex("^[a-zA-Z ]+$");
+                var regex2 = new Regex("^[0-9]+$");
+
                 if (!regex.IsMatch(request.FullName))
                 {
                     return BadRequest("Tên không hợp lệ");
@@ -169,8 +171,8 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Id phải là số nguyên dương");
                 }
-                var regex = new Regex("^[0-9]+$");
-                var regex2 = new Regex("^[a-zA-Z]+$");
+                var regex2 = new Regex("^[0-9]+$");
+                var regex = new Regex("^[a-zA-Z ]+$");
                 if (!regex.IsMatch(shipperRequest.FullName))
                 {
                     return BadRequest("Tên không hợp lệ");
