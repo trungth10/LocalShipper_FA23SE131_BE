@@ -3,8 +3,10 @@ using LocalShipper.Service.DTOs.Response;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace LSAPI.Controllers
@@ -38,12 +40,42 @@ namespace LSAPI.Controllers
         {
             try
             {
+                var regex = new Regex("^[0-9]+$");
+                var regex2 = new Regex("^[a-zA-Z]+$");
+                if (!regex.IsMatch(request.StoreName))
+                {
+                    return BadRequest("Tên cửa hàng không hợp lệ");
+                }
+                if (!regex2.IsMatch(request.StorePhone))
+                {
+                    return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (request.TemplateId <= 0)
+                {
+                    return BadRequest("TemplateId phải là số nguyên dương");
+                }
+                if (request.AccountId <= 0)
+                {
+                    return BadRequest("AccountId phải là số nguyên dương");
+                }
+                if (request.ZoneId <= 0)
+                {
+                    return BadRequest("ZoneId phải là số nguyên dương");
+                }
+                if (request.Status <= 0)
+                {
+                    return BadRequest("Status không hợp lệ");
+                }
+                if (request.WalletId <= 0)
+                {
+                    return BadRequest("WalletId phải là số nguyên dương");
+                }
                 var rs = await _storeService.CreateStore(request);
                 return Ok(rs);
             }
             catch(Exception ex)
             {
-                return BadRequest($"tạo Store thất bại: {ex.Message}");
+                return BadRequest($"Tạo Store thất bại: {ex.Message}");
             }
             
         }
@@ -52,20 +84,60 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
+                var regex = new Regex("^[0-9]+$");
+                var regex2 = new Regex("^[a-zA-Z]+$");
+                if (!regex.IsMatch(storeRequest.StoreName))
+                {
+                    return BadRequest("Tên cửa hàng không hợp lệ");
+                }
+                if (!regex2.IsMatch(storeRequest.StorePhone))
+                {
+                    return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (storeRequest.TemplateId <= 0)
+                {
+                    return BadRequest("TemplateId phải là số nguyên dương");
+                }
+                if (storeRequest.AccountId <= 0)
+                {
+                    return BadRequest("AccountId phải là số nguyên dương");
+                }
+                if (storeRequest.ZoneId <= 0)
+                {
+                    return BadRequest("ZoneId phải là số nguyên dương");
+                }
+                if (storeRequest.Status <= 0)
+                {
+                    return BadRequest("Status không hợp lệ");
+                }
+                if (storeRequest.WalletId <= 0)
+                {
+                    return BadRequest("WalletId phải là số nguyên dương");
+                }
                 var rs = await _storeService.UpdateStore(id, storeRequest);
                 return Ok(rs);
             }
             catch(Exception ex)
             {
-                return BadRequest($"update Store thất bại: {ex.Message}");
+                return BadRequest($"Update Store thất bại: {ex.Message}");
             }
             
         }
+
+
         [HttpDelete()]
         public async Task<ActionResult<StoreResponse>> DeleteStore(int id)
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var rs = await _storeService.DeleteStore(id);
                 return Ok(rs);
             }
@@ -76,7 +148,7 @@ namespace LSAPI.Controllers
             
         }
 
-        [HttpGet("count")]
+        [HttpGet("api/stores/count")]
         public async Task<ActionResult<StoreResponse>> GetCountStore()
         {
             try

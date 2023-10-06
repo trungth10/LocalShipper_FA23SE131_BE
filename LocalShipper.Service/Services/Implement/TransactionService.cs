@@ -73,7 +73,7 @@ namespace LocalShipper.Service.Services.Implement
 
             var transactions = _unitOfWork.Repository<Transaction>().GetAll()
                                                               .Where(t => id == 0 || t.Id == id)
-                                                              .Where(t => string.IsNullOrWhiteSpace(transactionMethod) || t.TransactionMethod.Contains(transactionMethod))
+                                                              .Where(t => string.IsNullOrWhiteSpace(transactionMethod) || t.TransactionMethod.Contains(transactionMethod.Trim()))
                                                               .Where(t => orderId == 0 || t.OrderId == orderId)
                                                               .Where(t => walletId == 0 || t.WalletId == walletId)
                                                               .Where(t => amount == 0 || t.Amount == amount);

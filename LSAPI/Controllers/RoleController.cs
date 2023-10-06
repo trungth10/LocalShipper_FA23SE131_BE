@@ -24,6 +24,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
                 var rs = await _roleService.GetRole(id, name, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -33,7 +46,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpGet("count")]
+        [HttpGet("api/roles/count")]
         public async Task<ActionResult<RoleResponse>> GetCountRole()
         {
             try
@@ -69,7 +82,10 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var response = await _roleService.UpdateRole(id, roleRequest);
                 return Ok(response);
             }

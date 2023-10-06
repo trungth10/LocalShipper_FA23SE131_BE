@@ -33,7 +33,7 @@ namespace LocalShipper.Service.Services.Implement
 
             var zones = _unitOfWork.Repository<Zone>().GetAll()
                                                               .Where(a => id == 0 || a.Id == id)
-                                                              .Where(a => string.IsNullOrWhiteSpace(zoneName) || a.ZoneName.Contains(zoneName))
+                                                              .Where(a => string.IsNullOrWhiteSpace(zoneName) || a.ZoneName.Contains(zoneName.Trim()))
                                                               .Where(a => latitude == 0 || a.Latitude == latitude)
                                                               .Where(a => longtitude == 0 || a.Longitude == longtitude)
                                                               .Where(a => radius == 0 || a.Radius == radius);

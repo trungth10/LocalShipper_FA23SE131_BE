@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
+using MailKit;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace LSAPI.Controllers
 {
@@ -24,6 +26,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
                 var rs = await _historyService.GetHistory(id, action, storeId, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -33,7 +48,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpGet("count")]
+        [HttpGet("api/histories/count")]
         public async Task<ActionResult<HistoryResponse>> GetCountHistory()
         {
             try
@@ -50,11 +65,16 @@ namespace LSAPI.Controllers
         }
 
 
-        [HttpPost("register-history")]
+
+        [HttpPost("api/histories/create-history")]
         public async Task<ActionResult<HistoryResponse>> CreateHistory([FromBody] RegisterHistoryRequest request)
         {
             try
             {
+                if (request.StoreId <= 0)
+                {
+                    return BadRequest("StoreId phải là số nguyên dương");
+                }
                 var rs = await _historyService.CreateHistory(request);
                 return Ok(rs);
             }
@@ -64,12 +84,19 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpPut()]
+        [HttpPut("api/histories")]
         public async Task<ActionResult<HistoryResponse>> UpdateHistory(int id, PutHistoryRequest historyRequest)
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
+                if (historyRequest.StoreId <= 0)
+                {
+                    return BadRequest("StoreId phải là số nguyên dương");
+                }
                 var response = await _historyService.UpdateHistory(id, historyRequest);
                 return Ok(response);
             }
@@ -79,12 +106,15 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpDelete()]
+        [HttpDelete("api/histories")]
         public async Task<ActionResult<MessageResponse>> DeleteHistory(int id)
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var response = await _historyService.DeleteHistory(id);
                 return Ok(response);
             }

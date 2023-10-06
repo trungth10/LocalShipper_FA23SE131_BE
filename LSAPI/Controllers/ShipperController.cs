@@ -8,6 +8,8 @@ using LocalShipper.Service.Services.Implement;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using LocalShipper.Data.Models;
+using System.Text.RegularExpressions;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace LSAPI.Controllers
 {
@@ -29,7 +31,14 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (shipperId <= 0)
+                {
+                    return BadRequest("ShipperId phải là số nguyên dương");
+                }
+                if (request.status <= 0)
+                {
+                    return BadRequest("Status chỉ từ 1 đến 4");
+                }
                 var response = await _shipperService.UpdateShipperStatus(shipperId, request);
 
 
@@ -49,6 +58,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
                 var rs = await _shipperService.GetShipper(id, fullName, email, phone, address, transportId, accountId, zoneId, status, fcmToken, walletId, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -72,7 +94,7 @@ namespace LSAPI.Controllers
         //    }
         //}
 
-        [HttpGet("count")]
+        [HttpGet("api/shippers/count")]
         public async Task<ActionResult<ShipperResponse>> GetCountShipper()
         {
             try
@@ -94,6 +116,36 @@ namespace LSAPI.Controllers
         {
             try
             {
+                var regex = new Regex("^[0-9]+$");
+                var regex2 = new Regex("^[a-zA-Z]+$");
+                if (!regex.IsMatch(request.FullName))
+                {
+                    return BadRequest("Tên không hợp lệ");
+                }
+                if (!regex2.IsMatch(request.PhoneShipper))
+                {
+                    return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (request.TransportId <= 0)
+                {
+                    return BadRequest("TransportId phải là số nguyên dương");
+                }
+                if (request.AccountId <= 0)
+                {
+                    return BadRequest("AccountId phải là số nguyên dương");
+                }
+                if (request.ZoneId <= 0)
+                {
+                    return BadRequest("ZoneId phải là số nguyên dương");
+                }
+                if (request.Status <= 0)
+                {
+                    return BadRequest("Status không hợp lệ");
+                }
+                if (request.WalletId <= 0)
+                {
+                    return BadRequest("WalletId phải là số nguyên dương");
+                }
                 var rs = await _shipperService.RegisterShipperInformation(request);
                 return Ok(rs);
             }
@@ -108,7 +160,40 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
+                var regex = new Regex("^[0-9]+$");
+                var regex2 = new Regex("^[a-zA-Z]+$");
+                if (!regex.IsMatch(shipperRequest.FullName))
+                {
+                    return BadRequest("Tên không hợp lệ");
+                }
+                if (!regex2.IsMatch(shipperRequest.PhoneShipper))
+                {
+                    return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (shipperRequest.TransportId <= 0)
+                {
+                    return BadRequest("TransportId phải là số nguyên dương");
+                }
+                if (shipperRequest.AccountId <= 0)
+                {
+                    return BadRequest("AccountId phải là số nguyên dương");
+                }
+                if (shipperRequest.ZoneId <= 0)
+                {
+                    return BadRequest("ZoneId phải là số nguyên dương");
+                }
+                if (shipperRequest.Status <= 0)
+                {
+                    return BadRequest("Status không hợp lệ");
+                }
+                if (shipperRequest.WalletId <= 0)
+                {
+                    return BadRequest("WalletId phải là số nguyên dương");
+                }
                 var response = await _shipperService.UpdateShipper(id, shipperRequest);
                 return Ok(response);
             }
@@ -123,7 +208,10 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var response = await _shipperService.DeleteShipper(id);
                 return Ok(response);
             }

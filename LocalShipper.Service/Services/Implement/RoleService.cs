@@ -59,7 +59,7 @@ namespace LocalShipper.Service.Services.Implement
 
             var roles = _unitOfWork.Repository<Role>().GetAll()
             .Where(t => !id.HasValue || t.Id == id)
-            .Where(r => string.IsNullOrWhiteSpace(name) || r.Name.Contains(name));
+            .Where(r => string.IsNullOrWhiteSpace(name) || r.Name.Contains(name.Trim()));
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
             // Áp dụng phân trang nếu có thông số pageNumber và pageSize

@@ -27,6 +27,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
                 var rs = await _transportService.GetTransport(id, typeId, licencePlate, transportColor, transportImage, transportRegistration, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -50,7 +63,7 @@ namespace LSAPI.Controllers
         //    }
         //}
 
-        [HttpGet("count")]
+        [HttpGet("api/transports/count")]
         public async Task<ActionResult<TransportResponse>> GetCountTransport()
         {
             try
@@ -72,6 +85,10 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (request.TypeId <= 0)
+                {
+                    return BadRequest("TypeId phải là số nguyên dương");
+                }
                 var rs = await _transportService.CreateTransport(request);
                 return Ok(rs);
             }
@@ -86,7 +103,14 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
+                if (request.TypeId <= 0)
+                {
+                    return BadRequest("TypeId phải là số nguyên dương");
+                }
                 var response = await _transportService.UpdateTransport(id, request);
                 return Ok(response);
             }
@@ -101,7 +125,10 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var response = await _transportService.DeleteTransport(id);
                 return Ok(response);
             }

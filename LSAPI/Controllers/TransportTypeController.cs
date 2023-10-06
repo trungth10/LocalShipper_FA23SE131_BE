@@ -26,6 +26,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
                 var rs = await _transportTypeService.GetTransportType(id, transportType, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -35,7 +48,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [HttpGet("count")]
+        [HttpGet("api/transport-types/count")]
         public async Task<ActionResult<TransportTypeResponse>> GetCountTransportType()
         {
             try
@@ -71,7 +84,10 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var response = await _transportTypeService.UpdateTransportType(id, request);
                 return Ok(response);
             }
@@ -86,7 +102,10 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var response = await _transportTypeService.DeleteTransportType(id);
                 return Ok(response);
             }

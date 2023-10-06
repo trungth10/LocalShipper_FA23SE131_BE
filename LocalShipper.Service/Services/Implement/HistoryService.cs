@@ -34,7 +34,7 @@ namespace LocalShipper.Service.Services.Implement
 
             if (storeIdExisted != null)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Cửa hàng không tồn tại", request.StoreId.ToString());
+                throw new CrudException(HttpStatusCode.NotFound, "Lịch sử không tồn tại", request.StoreId.ToString());
             }
             History history = new History
             {
@@ -67,7 +67,7 @@ namespace LocalShipper.Service.Services.Implement
             var histories = _unitOfWork.Repository<History>().GetAll()
             .Include(t => t.Store)
             .Where(t => id == 0 || t.Id == id)
-            .Where(t => string.IsNullOrWhiteSpace(action) || t.Action.Contains(action))
+            .Where(t => string.IsNullOrWhiteSpace(action) || t.Action.Contains(action.Trim()))
             .Where(t => storeId == 0 || t.StoreId == storeId);
 
             // Xác định giá trị cuối cùng của pageNumber

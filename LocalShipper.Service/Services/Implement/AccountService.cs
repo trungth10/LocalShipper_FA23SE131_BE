@@ -151,10 +151,10 @@ namespace LocalShipper.Service.Services.Implement
             var accounts = _unitOfWork.Repository<Account>().GetAll()
                                                               .Include(o => o.Role)
                                                               .Where(a => id == 0 || a.Id == id)
-                                                              .Where(a => string.IsNullOrWhiteSpace(phone) || a.Phone.Contains(phone))
-                                                              .Where(a => string.IsNullOrWhiteSpace(email) || a.Email.Contains(email))
+                                                              .Where(a => string.IsNullOrWhiteSpace(phone) || a.Phone.Contains(phone.Trim()))
+                                                              .Where(a => string.IsNullOrWhiteSpace(email) || a.Email.Contains(email.Trim()))
                                                               .Where(a => role == 0 || a.RoleId == role)
-                                                              .Where(a => string.IsNullOrWhiteSpace(fcm_token) || a.FcmToken.Contains(fcm_token));
+                                                              .Where(a => string.IsNullOrWhiteSpace(fcm_token) || a.FcmToken.Contains(fcm_token.Trim()));
 
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;

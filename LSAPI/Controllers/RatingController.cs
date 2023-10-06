@@ -64,6 +64,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
                 var rs = await _ratingService.GetRating(id, shipperId, ratingValue, byStoreId, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -74,7 +87,7 @@ namespace LSAPI.Controllers
         }
 
 
-        [HttpGet("count")]
+        [HttpGet("api/ratings/count")]
         public async Task<ActionResult<RatingResponse>> GetCountRating()
         {
             try
@@ -96,6 +109,18 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (request.ShipperId <= 0)
+                {
+                    return BadRequest("ShipperId phải là số nguyên dương");
+                }
+                if (request.RatingValue <= 0 || request.RatingValue < 1 && request.RatingValue > 5)
+                {
+                    return BadRequest("RatingValue chỉ từ 1 đến 5");
+                }
+                if (request.ByStoreId <= 0)
+                {
+                    return BadRequest("StoreId phải là số nguyên dương");
+                }
                 var rs = await _ratingService.CreateRating(request);
                 return Ok(rs);
             }
@@ -110,7 +135,22 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
+                if (ratingRequest.ShipperId <= 0)
+                {
+                    return BadRequest("ShipperId phải là số nguyên dương");
+                }
+                if (ratingRequest.RatingValue <= 0 || ratingRequest.RatingValue < 1 && ratingRequest.RatingValue > 5)
+                {
+                    return BadRequest("RatingValue chỉ từ 1 đến 5");
+                }
+                if (ratingRequest.ByStoreId <= 0)
+                {
+                    return BadRequest("StoreId phải là số nguyên dương");
+                }
                 var response = await _ratingService.UpdateRating(id, ratingRequest);
                 return Ok(response);
             }
@@ -125,7 +165,10 @@ namespace LSAPI.Controllers
         {
             try
             {
-
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var response = await _ratingService.DeleteRating(id);
                 return Ok(response);
             }

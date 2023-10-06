@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
 using LocalShipper.Service.DTOs.Request;
+using LocalShipper.Data.Models;
 
 namespace LSAPI.Controllers
 {
@@ -24,6 +25,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
                 var rs = await _paymentService.GetPayment(id, paymentMethod, status, paymentCode, paymentImage, packageId, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -35,7 +49,7 @@ namespace LSAPI.Controllers
 
 
 
-        [HttpGet("count")]
+        [HttpGet("api/payments/count")]
         public async Task<ActionResult<PaymentResponse>> GetCountPayment()
         {
             try
@@ -55,6 +69,10 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (request.PackageId <= 0)
+                {
+                    return BadRequest("PackageId phải là số nguyên dương");
+                }
                 var rs = await _paymentService.CreatePayment(request);
                 return Ok(rs);
             }
@@ -69,6 +87,18 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
+                if (request.Status <= 0)
+                {
+                    return BadRequest("Status phải là số nguyên dương");
+                }
+                if (request.PackageId <= 0)
+                {
+                    return BadRequest("PackageId phải là số nguyên dương");
+                }
                 var rs = await _paymentService.UpdatePayment(id, request);
                 return Ok(rs);
             }
@@ -83,6 +113,10 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var rs = await _paymentService.DeletePayment(id);
                 return Ok(rs);
             }

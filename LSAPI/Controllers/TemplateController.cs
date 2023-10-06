@@ -53,6 +53,10 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var rs = await _templateService.UpdateTemplate(id, templateRequest);
                 return Ok(rs);
             }
@@ -68,6 +72,10 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }
                 var rs = await _templateService.DeleteTemplate(id);
                 return Ok(rs);
             }
@@ -78,7 +86,7 @@ namespace LSAPI.Controllers
             
         }
 
-        [HttpGet("count")]
+        [HttpGet("api/templates/count")]
         public async Task<ActionResult<TemplateResponse>> GetCountTemplate()
         {
             try

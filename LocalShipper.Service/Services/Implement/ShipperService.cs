@@ -139,15 +139,15 @@ namespace LocalShipper.Service.Services.Implement
                                                               .Include(t => t.Zone)
                                                               .Include(t => t.Wallet)
                                                               .Where(t => id == 0 || t.Id == id)
-                                                              .Where(t => string.IsNullOrWhiteSpace(fullName) || t.FullName.Contains(fullName))
-                                                              .Where(t => string.IsNullOrWhiteSpace(email) || t.EmailShipper.Contains(email))
-                                                              .Where(t => string.IsNullOrWhiteSpace(phone) || t.PhoneShipper.Contains(phone))
-                                                              .Where(t => string.IsNullOrWhiteSpace(address) || t.AddressShipper.Contains(address))
+                                                              .Where(t => string.IsNullOrWhiteSpace(fullName) || t.FullName.Contains(fullName.Trim()))
+                                                              .Where(t => string.IsNullOrWhiteSpace(email) || t.EmailShipper.Contains(email.Trim()))
+                                                              .Where(t => string.IsNullOrWhiteSpace(phone) || t.PhoneShipper.Contains(phone.Trim()))
+                                                              .Where(t => string.IsNullOrWhiteSpace(address) || t.AddressShipper.Contains(address.Trim()))
                                                               .Where(t => transportId == 0 || t.TransportId == transportId)
                                                               .Where(t => accountId == 0 || t.AccountId == accountId)
                                                               .Where(t => zoneId == 0 || t.ZoneId == zoneId)
                                                               .Where(t => status == 0 || t.Status == status)
-                                                              .Where(t => string.IsNullOrWhiteSpace(fcmToken) || t.Fcmtoken.Contains(fcmToken))
+                                                              .Where(t => string.IsNullOrWhiteSpace(fcmToken) || t.Fcmtoken.Contains(fcmToken.Trim()))
                                                               .Where(t => walletId == 0 || t.WalletId == walletId);
 
             // Xác định giá trị cuối cùng của pageNumber
