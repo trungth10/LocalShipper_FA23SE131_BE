@@ -32,7 +32,7 @@ namespace LocalShipper.Service.Services.Implement
             var packageTypes = _unitOfWork.Repository<PackageType>().GetAll()
                                                               .Where(b => id == 0 || b.Id == id)
 
-                                                              .Where(b => string.IsNullOrWhiteSpace(packageType) || b.PackageType1.Contains(packageType));
+                                                              .Where(b => string.IsNullOrWhiteSpace(packageType) || b.PackageType1.Contains(packageType.Trim()));
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
             // Áp dụng phân trang nếu có thông số pageNumber và pageSize
@@ -62,7 +62,7 @@ namespace LocalShipper.Service.Services.Implement
 
             var newPackageType = new PackageType
             {
-                PackageType1 = request.PackageType,
+                PackageType1 = request.PackageType.Trim(),
                 CreatedAt = request.CreateAt,
 
             };
@@ -86,7 +86,7 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy loại gói hàng", id.ToString());
             }
 
-            packageType.PackageType1 = packageTypeRequest.PackageType;
+            packageType.PackageType1 = packageTypeRequest.PackageType.Trim();
             packageType.CreatedAt= DateTime.Now;
             // Cập nhật các thuộc tính khác tương tự
 

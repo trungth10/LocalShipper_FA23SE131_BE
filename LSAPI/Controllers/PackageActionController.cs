@@ -26,6 +26,19 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if(id < 0)
+                {
+                    return BadRequest("id phải là số dương");
+                }
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("pageNumber phải là số dương");
+                }
+
+                if (pageSize.HasValue && pageSize < 0)
+                {
+                    return BadRequest("pageSize phải là số dương");
+                }
                 var rs = await _packageActionService.GetPackageAction(id, actionType, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -39,7 +52,7 @@ namespace LSAPI.Controllers
         public async Task<ActionResult<PackageActionResponse>> PostPackageAction(PackageActionRequest request)
         {
             try
-            {
+            { 
                 var rs = await _packageActionService.CreatePackageAction(request);
                 return Ok(rs);
             }
@@ -54,6 +67,14 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id == 0)
+                {
+                    return BadRequest("làm ơn hãy nhập id");
+                }
+                if (id <= 0)
+                {
+                    return BadRequest("id phải là số dương");
+                }
                 var rs = await _packageActionService.UpdatePackageAction(id, packageActionRequest);
                 return Ok(rs);
             }
@@ -69,6 +90,15 @@ namespace LSAPI.Controllers
         {
             try
             {
+
+                if (id == 0)
+                {
+                    return BadRequest("làm ơn hãy nhập id");
+                }
+                if (id <= 0)
+                {
+                    return BadRequest("id phải là số dương");
+                }
                 var rs = await _packageActionService.DeletePackageAction(id);
                 return Ok(rs);
             }

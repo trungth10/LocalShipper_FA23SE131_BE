@@ -36,7 +36,7 @@ namespace LocalShipper.Service.Services.Implement
                                                               .Where(b => zoneId == 0 || b.ZoneId == zoneId)
                                                               .Where(b => walletId == 0 || b.WalletId == walletId)
                                                               .Where(b => accountId == 0 || b.AccountId == accountId)
-                                                              .Where(b => string.IsNullOrWhiteSpace(storeName) || b.StoreName.Contains(storeName));
+                                                              .Where(b => string.IsNullOrWhiteSpace(storeName) || b.StoreName.Contains(storeName.Trim()));
 
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
@@ -80,13 +80,13 @@ namespace LocalShipper.Service.Services.Implement
             }
             var newStore = new Store
             {
-                StoreName = request.StoreName,
-                StoreAddress = request.StoreAddress,
-                StorePhone = request.StorePhone,
-                StoreEmail = request.StoreEmail,
+                StoreName = request.StoreName.Trim(),
+                StoreAddress = request.StoreAddress.Trim(),
+                StorePhone = request.StorePhone.Trim(),
+                StoreEmail = request.StoreEmail.Trim(),
                 OpenTime = request.OpenTime,
                 CloseTime = request.CloseTime,
-                StoreDescription = request.StoreDescription,
+                StoreDescription = request.StoreDescription.Trim(),
                 Status = request.Status ?? 0, 
                 TemplateId = request.TemplateId,
                 ZoneId = request.ZoneId,
@@ -114,13 +114,13 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy cửa hàng", id.ToString());
             }
 
-            store.StoreName = storeRequest.StoreName;
-            store.StoreAddress = storeRequest.StoreAddress;
-            store.StorePhone = storeRequest.StorePhone;
-            store.StoreEmail = storeRequest.StoreEmail;
+            store.StoreName = storeRequest.StoreName.Trim();
+            store.StoreAddress = storeRequest.StoreAddress.Trim();
+            store.StorePhone = storeRequest.StorePhone.Trim();
+            store.StoreEmail = storeRequest.StoreEmail.Trim();
             store.OpenTime = storeRequest.OpenTime;
             store.CloseTime = storeRequest.CloseTime;
-            store.StoreDescription = storeRequest.StoreDescription;
+            store.StoreDescription = storeRequest.StoreDescription.Trim();
             store.Status = storeRequest.Status ?? 0; 
             store.TemplateId = storeRequest.TemplateId;
             store.ZoneId = storeRequest.ZoneId;

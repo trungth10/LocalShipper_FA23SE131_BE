@@ -36,8 +36,8 @@ namespace LocalShipper.Service.Services.Implement
         {
 
             var batchs = _unitOfWork.Repository<Batch>().GetAll()
-                                                              .Where(b => id == 0 || b.Id == id)
-                                                              .Where(b => string.IsNullOrWhiteSpace(batchName) || b.BatchName.Contains(batchName));
+                                                              .Where(b => id == 0 || b.Id == id )
+                                                              .Where(b => string.IsNullOrWhiteSpace(batchName) || b.BatchName.Contains(batchName.Trim()));
 
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
@@ -72,7 +72,7 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<BatchResponse> CreateBatch(BatchRequest request)
         {
-            var existingBatch = await _unitOfWork.Repository<Batch>().FindAsync(b => b.BatchName == request.BatchName);
+            var existingBatch = await _unitOfWork.Repository<Batch>().FindAsync(b => b.BatchName == request.BatchName.Trim());
             if (existingBatch != null)
             {
                 throw new CrudException(HttpStatusCode.BadRequest, "Batch đã tồn tại", request.BatchName);
@@ -81,8 +81,8 @@ namespace LocalShipper.Service.Services.Implement
 
             var newBatch = new Batch
             {
-                BatchName = request.BatchName,
-                BatchDescription = request.BatchDescription,
+                BatchName = request.BatchName.Trim(),
+                BatchDescription = request.BatchDescription.Trim(),
                 CreatedAt = DateTime.Now,
                 UpdateAt = DateTime.Now,
                 Status = request.Status,

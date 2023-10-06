@@ -39,6 +39,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("id phải là số dương");
                 }
+                
                 if (status < 0)
                 {
                     return BadRequest("status phải là số dương");
@@ -70,7 +71,8 @@ namespace LSAPI.Controllers
             try
             {
 
-                if (request.Status < 0)
+
+                if (request.Status <0)
                 {
                     return BadRequest("Status phải là số dương");
                 }
