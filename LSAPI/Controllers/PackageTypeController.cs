@@ -25,6 +25,21 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id < 0)
+                {
+                    return BadRequest("id phải là số dương");
+                }
+                if (pageNumber.HasValue && pageNumber < 0)
+                {
+                    return BadRequest("pageNumber phải là số dương");
+                }
+
+                if (pageSize.HasValue && pageSize < 0)
+                {
+                    return BadRequest("pageSize phải là số dương");
+                }
+
+
                 var rs = await _packageTypeService.GetPackageType(id, packageType, pageNumber, pageSize);
                 return Ok(rs);
             }
@@ -39,6 +54,8 @@ namespace LSAPI.Controllers
         {
             try
             {
+
+
                 var rs = await _packageTypeService.CreatePackageType(request);
                 return Ok(rs);
             }
@@ -54,6 +71,15 @@ namespace LSAPI.Controllers
         {
             try
             {
+                if (id == 0)
+                {
+                    return BadRequest("làm ơn hãy nhập id");
+                }
+                if (id <= 0)
+                {
+                    return BadRequest("id phải là số dương");
+                }
+                
                 var rs = await _packageTypeService.UpdatePackageType(id, packageTypeRequest);
                 return Ok(rs);
             }
