@@ -39,19 +39,19 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("id phải là số dương");
                 }
-                if(status< 0)
+                if (status < 0)
                 {
                     return BadRequest("status phải là số dương");
                 }
-                if(zoneId < 0)
+                if (zoneId < 0)
                 {
                     return BadRequest("zoneId phải là số dương");
                 }
-                if(walletId< 0)
+                if (walletId < 0)
                 {
                     return BadRequest("walletId phải là số dương");
                 }
-                if(accountId< 0)
+                if (accountId < 0)
                 {
                     return BadRequest("accountId phải là số dương");
                 }
@@ -117,7 +117,7 @@ namespace LSAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Tạo Store thất bại: {ex.Message}");
+                return BadRequest($"tạo Store thất bại: {ex.Message}");
             }
 
         }
@@ -164,7 +164,7 @@ namespace LSAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Update Store thất bại: {ex.Message}");
+                return BadRequest($"update Store thất bại: {ex.Message}");
             }
 
         }
@@ -191,7 +191,7 @@ namespace LSAPI.Controllers
 
         }
 
-        [HttpGet("api/stores/count")]
+        [HttpGet("count")]
         public async Task<ActionResult<StoreResponse>> GetCountStore()
         {
             try
