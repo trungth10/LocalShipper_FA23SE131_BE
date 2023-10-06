@@ -168,8 +168,6 @@ namespace LSAPI.Controllers
             }
 
         }
-
-
         [HttpDelete()]
         public async Task<ActionResult<StoreResponse>> DeleteStore(int id)
         {
