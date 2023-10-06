@@ -39,20 +39,20 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("id phải là số dương");
                 }
-                if (status < 0)
+
+                if(status< 0)
                 {
                     return BadRequest("status phải là số dương");
                 }
-                if (zoneId < 0)
+                if(zoneId < 0)
                 {
                     return BadRequest("zoneId phải là số dương");
                 }
-                if (walletId < 0)
+                if(walletId< 0)
                 {
                     return BadRequest("walletId phải là số dương");
                 }
-                if (accountId < 0)
-
+                if(accountId< 0)
                 {
                     return BadRequest("accountId phải là số dương");
                 }
