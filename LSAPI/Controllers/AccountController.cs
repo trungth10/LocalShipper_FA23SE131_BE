@@ -96,6 +96,10 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Số điện thoại không hợp lệ");
                 }
+                if (request.Phone.Length < 9 || request.Phone.Length > 11)
+                {
+                    return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
+                }
                 if (!regex3.IsMatch(request.Email))
                 {
                     return BadRequest("Email phải có dạng example@gmail.com");
@@ -125,6 +129,10 @@ namespace LSAPI.Controllers
                 if (!regex2.IsMatch(request.Phone))
                 {
                     return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (request.Phone.Length < 9 || request.Phone.Length > 11)
+                {
+                    return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
                 }
                 if (!regexEmail.IsMatch(request.Email))
                 {
@@ -159,7 +167,10 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Số điện thoại không hợp lệ");
                 }
-
+                if (request.Phone.Length < 9 || request.Phone.Length > 11)
+                {
+                    return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
+                }
                 var response = await _accountService.UpdateAccount(id, request);
                 return Ok(response);
             }
@@ -178,6 +189,7 @@ namespace LSAPI.Controllers
                 if (id == 0)
                 {
                     return BadRequest("Vui lòng nhập Id");
+
                 }
                 if (id < 0)
                 {

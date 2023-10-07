@@ -81,8 +81,16 @@ namespace LSAPI.Controllers
         {
             try
             {
+                var regex2 = new Regex("^[0-9]+$");
 
-
+                if (!regex2.IsMatch(request.CustomerPhone))
+                {
+                    return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (request.CustomerPhone.Length < 9 || request.CustomerPhone.Length > 11)
+                {
+                    return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
+                }
                 if (request.StoreId < 0)
                 {
                     return BadRequest("storeId phải là số nguyên dương");
@@ -147,6 +155,17 @@ namespace LSAPI.Controllers
         {
             try
             {
+                var regex2 = new Regex("^[0-9]+$");
+
+                if (!regex2.IsMatch(request.CustomerPhone))
+                {
+                    return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (request.CustomerPhone.Length < 9 || request.CustomerPhone.Length > 11)
+                {
+                    return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
+                }
+
                 if (id == 0)
                 {
                     return BadRequest("Vui lòng nhập Id");
