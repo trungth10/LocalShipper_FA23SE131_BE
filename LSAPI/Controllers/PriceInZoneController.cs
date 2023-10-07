@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
+using LocalShipper.Service.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LSAPI.Controllers
 {
@@ -21,6 +23,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<PriceInZoneResponse>>> GetPriceInZone(int? id, int? priceId,
             int? zoneId, int? pageNumber, int? pageSize)
         {
@@ -49,6 +52,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("api/price-in-zones/count")]
+        [Authorize]
         public async Task<ActionResult<PriceInZoneResponse>> GetCountPriceInZone()
         {
             try
@@ -66,6 +70,7 @@ namespace LSAPI.Controllers
 
 
         [HttpPost("register-price-in-zone")]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PriceInZoneResponse>> CreatePriceInZone([FromBody] RegisterPriceInZoneRequest request)
         {
             try
@@ -88,6 +93,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PriceInZoneResponse>> UpdatePriceInZone(int id, [FromBody] PutPriceInZoneRequest priceInZonerequest)
         {
             try
@@ -118,13 +124,14 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<MessageResponse>> DeletePriceItem(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
                 if (id < 0)
                 {

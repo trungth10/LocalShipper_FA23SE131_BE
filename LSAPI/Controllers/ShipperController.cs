@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using LocalShipper.Data.Models;
 using System.Text.RegularExpressions;
 using Org.BouncyCastle.Asn1.Ocsp;
+using LocalShipper.Service.Helpers;
 
 namespace LSAPI.Controllers
 {
@@ -27,6 +28,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut("status")]
+        [Authorize(Policy = "Shipper")]
         public async Task<ActionResult<ShipperResponse>> UpdateShipperStatus(int shipperId, [FromBody] UpdateShipperStatusRequest request)
         {
             try
@@ -53,6 +55,7 @@ namespace LSAPI.Controllers
 
 
         [HttpGet()]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<TransactionResponse>>> GetShipper(int id, string fullName,
                                             string email, string phone,
                                             string address, int transportId, int accountId, int zoneId, int status, string fcmToken, int walletId, int? pageNumber, int? pageSize)
@@ -96,6 +99,7 @@ namespace LSAPI.Controllers
         //}
 
         [HttpGet("api/shippers/count")]
+        [Authorize]
         public async Task<ActionResult<ShipperResponse>> GetCountShipper()
         {
             try
@@ -113,6 +117,7 @@ namespace LSAPI.Controllers
 
 
         [HttpPost("register-shipper-information")]
+        [Authorize(Policy = "Shipper")]
         public async Task<ActionResult<ShipperResponse>> CreateShipper([FromBody] ShipperInformationRequest request)
         {
             try
@@ -170,6 +175,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
+        [Authorize(Policy = "Shipper")]
         public async Task<ActionResult<ShipperResponse>> UpdateShipper(int id, [FromBody] PutShipperRequest shipperRequest)
         {
             try
@@ -227,13 +233,14 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<MessageResponse>> DeleteShipper(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
                 if (id < 0)
                 {

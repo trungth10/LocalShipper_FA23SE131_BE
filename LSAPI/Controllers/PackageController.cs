@@ -15,7 +15,6 @@ namespace LSAPI.Controllers
 {
     [ApiController]
     [Route("store/api/packages")]
-    //[Authorize(Roles = Roles.Shipper + "," + Roles.Store)]
     public class PackageController : Controller
     {
         private readonly IPackageService _packageService;
@@ -25,45 +24,45 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<PackageResponse>>> GetPackage(int batchId, int id,
             int status, int actionId, int typeId, int storeId, string customerName,
              int? pageNumber, int? pageSize)
         {
             try
             {
-                if (pageNumber.HasValue && pageNumber < 0)
+                if (pageNumber.HasValue && pageNumber <= 0)
                 {
-                    return BadRequest("pageNumber phải là số dương");
+                    return BadRequest("pageNumber phải là số nguyên dương");
                 }
 
-                if (pageSize.HasValue && pageSize < 0)
+                if (pageSize.HasValue && pageSize <= 0)
                 {
-                    return BadRequest("pageSize phải là số dương");
+                    return BadRequest("pageSize phải là số nguyên dương");
                 }
                 if (batchId < 0)
                 {
-                    return BadRequest("batchId phải là số dương");
+                    return BadRequest("batchId phải là số nguyên dương");
                 }
                 if (id < 0)
                 {
-                    return BadRequest("id phải là số dương");
+                    return BadRequest("Id phải là số nguyên dương");
                 }
                 if (status < 0)
                 {
-                    return BadRequest("status phải là số dương");
+                    return BadRequest("Status không hợp lệ");
                 }
                 if (actionId < 0)
                 {
-                    return BadRequest("actionId phải là số dương");
+                    return BadRequest("actionId phải là số nguyên dương");
                 }
                 if (typeId < 0)
                 {
-                    return BadRequest("typeOd phải là số dương");
+                    return BadRequest("typeOd phải là số nguyên dương");
                 }
                 if (storeId < 0)
                 {
-                    return BadRequest("storeId phải là số dương");
+                    return BadRequest("storeId phải là số nguyên dương");
                 }
                 var package = await _packageService.GetPackage(batchId, id, status, actionId, typeId, storeId,
                     customerName, pageNumber, pageSize);
@@ -77,6 +76,7 @@ namespace LSAPI.Controllers
 
         }
         [HttpPost()]
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PackageResponse>> PostPackage(PackageRequestForCreate request)
         {
             try
@@ -93,7 +93,7 @@ namespace LSAPI.Controllers
                 }
                 if (request.StoreId < 0)
                 {
-                    return BadRequest("storeId phải là số dương");
+                    return BadRequest("storeId phải là số nguyên dương");
                 }
                 if (request.Capacity < 0)
                 {
@@ -134,11 +134,11 @@ namespace LSAPI.Controllers
                 }
                 if (request.ActionId < 0)
                 {
-                    return BadRequest("ActionId phải là số dương");
+                    return BadRequest("ActionId phải là số nguyên dương");
                 }
                 if (request.TypeId < 0)
                 {
-                    return BadRequest("TypeId phải là số dương");
+                    return BadRequest("TypeId phải là số nguyên dương");
                 }
                 var rs = await _packageService.CreatePackage(request);
                 return Ok(rs);
@@ -150,6 +150,7 @@ namespace LSAPI.Controllers
 
         }
         [HttpPut()]
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PackageResponse>> PutPackage(int id, PackageRequestForCreate request)
         {
             try
@@ -167,11 +168,11 @@ namespace LSAPI.Controllers
 
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
                 if (id < 0)
                 {
-                    return BadRequest("id phải là số dương");
+                    return BadRequest("Id phải là số nguyên dương");
                 }
 
                 if (request.Capacity <= 0)
@@ -213,11 +214,11 @@ namespace LSAPI.Controllers
                 }
                 if (request.ActionId <= 0)
                 {
-                    return BadRequest("ActionId phải là số dương");
+                    return BadRequest("ActionId phải là số nguyên dương");
                 }
                 if (request.TypeId <=0)
                 {
-                    return BadRequest("TypeId phải là số dương");
+                    return BadRequest("TypeId phải là số nguyên dương");
                 }
 
 
@@ -232,6 +233,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut("status")]
+        [Authorize(Policy = "Shipper")]
         public async Task<ActionResult<PackageResponse>> PutStatusPackage(int id, PackageStatusEnum status)
         {
             try
@@ -239,11 +241,11 @@ namespace LSAPI.Controllers
 
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
                 if (id < 0)
                 {
-                    return BadRequest("id phải là số dương");
+                    return BadRequest("Id phải là số nguyên dương");
                 }
                 if(status <= 0)
                 {
@@ -260,17 +262,18 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PackageResponse>> DeletePackage(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
-                if (id <= 0)
+                if (id < 0)
                 {
-                    return BadRequest("id phải là số dương");
+                    return BadRequest("Id phải là số nguyên dương");
                 }
                 var rs = await _packageService.DeletePackage(id);
                 return Ok(rs);
@@ -283,6 +286,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("count")]
+        [Authorize]
         public async Task<ActionResult<PackageResponse>> GetCountPackage()
         {
             try

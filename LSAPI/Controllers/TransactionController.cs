@@ -9,6 +9,8 @@ using LocalShipper.Data.Models;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.DTOs.Request;
 using System.Text.RegularExpressions;
+using LocalShipper.Service.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LSAPI.Controllers
 {
@@ -21,7 +23,9 @@ namespace LSAPI.Controllers
         {
             _transactionService = transactionService;
         }
+
         [HttpGet()]
+        [Authorize]
         public async Task<ActionResult<List<TransactionResponse>>> GetTransaction(int id, string transactionMethod, int orderId, int walletId, decimal amount, int? pageNumber, int? pageSize)
         {
             try
@@ -63,6 +67,7 @@ namespace LSAPI.Controllers
         //}
 
         [HttpGet("api/transactions/count")]
+        [Authorize]
         public async Task<ActionResult<TransactionResponse>> GetCountTransaction()
         {
             try
@@ -80,6 +85,7 @@ namespace LSAPI.Controllers
 
 
         [HttpPost("register-transaction")]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<TransactionResponse>> CreateTransaction([FromBody] RegisterTransactionRequest request)
         {
             try
@@ -106,6 +112,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<TransactionResponse>> UpdateAccount(int id, [FromBody] PutTransactionRequest request)
         {
             try
@@ -140,13 +147,14 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store)]
         public async Task<ActionResult<MessageResponse>> DeleteAccount(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
                 if (id < 0)
                 {

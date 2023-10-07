@@ -2,6 +2,7 @@
 using LocalShipper.Service.DTOs.Response;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ namespace LSAPI.Controllers
 {
     [ApiController]
     [Route("api/templates")]
+    [Authorize]
     public class TemplateController : Controller
     {
 
@@ -25,18 +27,18 @@ namespace LSAPI.Controllers
         {
             try
             {
-                if (pageNumber.HasValue && pageNumber < 0)
+                if (pageNumber.HasValue && pageNumber <= 0)
                 {
                     return BadRequest("pageNumber phải là số dương");
                 }
 
-                if (pageSize.HasValue && pageSize < 0)
+                if (pageSize.HasValue && pageSize <= 0)
                 {
                     return BadRequest("pageSize phải là số dương");
                 }
                 if (id < 0)
                 {
-                    return BadRequest("id không hợp lệ");
+                    return BadRequest("Id không hợp lệ");
                 }
 
 
@@ -93,11 +95,11 @@ namespace LSAPI.Controllers
             {
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
-                if (id <= 0)
+                if (id < 0)
                 {
-                    return BadRequest("id phải là số dương");
+                    return BadRequest("Id phải là số nguyên dương");
                 }
                 var rs = await _templateService.DeleteTemplate(id);
                 return Ok(rs);

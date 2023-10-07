@@ -1,8 +1,10 @@
 ﻿using LocalShipper.Data.Models;
 using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
+using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -60,11 +62,12 @@ namespace LSAPI.Controllers
 
 
         [HttpGet()]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<RatingResponse>>> GetRating(int id, int shipperId, int ratingValue, int byStoreId, int? pageNumber, int? pageSize)
         {
             try
             {
-                if (pageNumber.HasValue && pageNumber < 0)
+                if (pageNumber.HasValue && pageNumber <= 0)
                 {
                     return BadRequest("Số trang phải là số nguyên dương");
                 }
@@ -88,6 +91,7 @@ namespace LSAPI.Controllers
 
 
         [HttpGet("api/ratings/count")]
+        [Authorize]
         public async Task<ActionResult<RatingResponse>> GetCountRating()
         {
             try
@@ -105,6 +109,7 @@ namespace LSAPI.Controllers
 
 
         [HttpPost("register-rating")]
+        [Authorize(Policy = "Store")]
         public async Task<ActionResult<RatingResponse>> CreateRating([FromBody] RegisterRatingRequest request)
         {
             try
@@ -131,6 +136,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
+        [Authorize(Policy = "Store")]
         public async Task<ActionResult<RatingResponse>> UpdateRating(int id, [FromBody] PutRatingRequest ratingRequest)
         {
             try
@@ -166,13 +172,14 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
+        [Authorize(Policy = "Store")]
         public async Task<ActionResult<MessageResponse>> DeleteRating(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
                 if (id <= 0)
                 {

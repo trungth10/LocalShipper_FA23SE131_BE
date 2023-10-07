@@ -1,7 +1,9 @@
 ﻿using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
+using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -22,6 +24,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
+        [Authorize]
         public async Task<ActionResult<List<TransportResponse>>> GetTransport(int? id, int? typeId, string? licencePlate, string? transportColor,
                                                         string? transportImage, string? transportRegistration, int? pageNumber, int? pageSize)
         {
@@ -64,6 +67,7 @@ namespace LSAPI.Controllers
         //}
 
         [HttpGet("api/transports/count")]
+        [Authorize]
         public async Task<ActionResult<TransportResponse>> GetCountTransport()
         {
             try
@@ -81,6 +85,7 @@ namespace LSAPI.Controllers
 
 
         [HttpPost("register-transport")]
+        [Authorize(Policy = "Shipper")]
         public async Task<ActionResult<TransportResponse>> CreateTransport([FromBody] RegisterTransportRequest request)
         {
             try
@@ -99,6 +104,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
+        [Authorize(Policy = "Shipper")]
         public async Task<ActionResult<TransportResponse>> UpdateAccount(int id, [FromBody] PutTransportRequest request)
         {
             try
@@ -125,13 +131,14 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<TransportResponse>> DeleteAccount(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
                 if (id < 0)
                 {
@@ -142,7 +149,7 @@ namespace LSAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Xóa phương tiện thất bại: {ex.Message}");
+                return BadRequest($"De-active phương tiện thất bại: {ex.Message}");
             }
         }
     }

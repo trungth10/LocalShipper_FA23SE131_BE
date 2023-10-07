@@ -1,7 +1,9 @@
 ﻿using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
+using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Org.BouncyCastle.Asn1.Ocsp;
 using System;
@@ -22,41 +24,40 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<StoreResponse>>> GetStore(int id, string storeName, int status, int zoneId, int walletId, int accountId, int? pageNumber, int? pageSize)
         {
             try
             {
-
-
-                if (pageNumber.HasValue && pageNumber < 0)
+                if (pageNumber.HasValue && pageNumber <= 0)
                 {
                     return BadRequest("pageNumber phải là số dương");
                 }
 
-                if (pageSize.HasValue && pageSize < 0)
+                if (pageSize.HasValue && pageSize <= 0)
                 {
                     return BadRequest("pageSize phải là số dương");
                 }
                 if (id < 0)
                 {
-                    return BadRequest("id phải là số dương");
+                    return BadRequest("Id phải là số nguyên dương");
                 }
                 
                 if (status < 0)
                 {
-                    return BadRequest("status phải là số dương");
+                    return BadRequest("Status không hợp lệ");
                 }
                 if (zoneId < 0)
                 {
-                    return BadRequest("zoneId phải là số dương");
+                    return BadRequest("zoneId phải là số nguyên dương");
                 }
                 if (walletId < 0)
                 {
-                    return BadRequest("walletId phải là số dương");
+                    return BadRequest("walletId phải là số nguyên dương");
                 }
                 if (accountId < 0)
                 {
-                    return BadRequest("accountId phải là số dương");
+                    return BadRequest("accountId phải là số nguyên dương");
                 }
                 var rs = await _storeService.GetStore(id, storeName, status, zoneId, walletId, accountId, pageNumber, pageSize);
                 return Ok(rs);
@@ -68,6 +69,7 @@ namespace LSAPI.Controllers
 
         }
         [HttpPost()]
+        [Authorize(Policy = "Store")]
         public async Task<ActionResult<StoreResponse>> PostStore(StoreRequest request)
         {
             try
@@ -85,23 +87,23 @@ namespace LSAPI.Controllers
                 }
                 if (request.Status <0)
                 {
-                    return BadRequest("Status phải là số dương");
+                    return BadRequest("Status phải là số nguyên dương");
                 }
                 if (request.ZoneId < 0)
                 {
-                    return BadRequest("zoneId phải là số dương");
+                    return BadRequest("zoneId phải là số nguyên dương");
                 }
                 if (request.WalletId < 0)
                 {
-                    return BadRequest("walletId phải là số dương");
+                    return BadRequest("walletId phải là số nguyên dương");
                 }
                 if (request.AccountId < 0)
                 {
-                    return BadRequest("accountId phải là số dương");
+                    return BadRequest("accountId phải là số nguyên dương");
                 }
                 if (request.TemplateId < 0)
                 {
-                    return BadRequest("TemplateId phải là số dương");
+                    return BadRequest("TemplateId phải là số nguyên dương");
                 }
                 var regex = new Regex(@"^\w+@gmail\.com$");
                 if (!regex.IsMatch(request.StoreEmail))
@@ -135,6 +137,7 @@ namespace LSAPI.Controllers
 
         }
         [HttpPut()]
+        [Authorize(Policy = "Store")]
         public async Task<ActionResult<StoreResponse>> PutStore(int id, StoreRequest storeRequest)
         {
             try
@@ -151,31 +154,31 @@ namespace LSAPI.Controllers
                 }
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
-                if (id <= 0)
+                if (id < 0)
                 {
-                    return BadRequest("id phải là số dương");
+                    return BadRequest("Id phải là số nguyên dương");
                 }
                 if (storeRequest.Status < 0)
                 {
-                    return BadRequest("Status phải là số dương");
+                    return BadRequest("Status không hợp lệ");
                 }
                 if (storeRequest.ZoneId < 0)
                 {
-                    return BadRequest("zoneId phải là số dương");
+                    return BadRequest("zoneId phải là số nguyên dương");
                 }
                 if (storeRequest.WalletId < 0)
                 {
-                    return BadRequest("walletId phải là số dương");
+                    return BadRequest("walletId phải là số nguyên dương");
                 }
                 if (storeRequest.AccountId < 0)
                 {
-                    return BadRequest("accountId phải là số dương");
+                    return BadRequest("accountId phải là số nguyên dương");
                 }
                 if (storeRequest.TemplateId < 0)
                 {
-                    return BadRequest("TemplateId phải là số dương");
+                    return BadRequest("TemplateId phải là số nguyên dương");
                 }
                 var regex = new Regex(@"^\w+@gmail\.com$");
                 if (!regex.IsMatch(storeRequest.StoreEmail))
@@ -192,17 +195,18 @@ namespace LSAPI.Controllers
 
         }
         [HttpDelete()]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<StoreResponse>> DeleteStore(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
-                if (id <= 0)
+                if (id < 0)
                 {
-                    return BadRequest("id phải là số dương");
+                    return BadRequest("Id phải là số nguyên dương");
                 }
                 var rs = await _storeService.DeleteStore(id);
                 return Ok(rs);
@@ -215,6 +219,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("count")]
+        [Authorize]
         public async Task<ActionResult<StoreResponse>> GetCountStore()
         {
             try

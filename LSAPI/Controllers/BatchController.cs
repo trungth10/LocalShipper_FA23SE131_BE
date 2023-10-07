@@ -1,5 +1,7 @@
-﻿using LocalShipper.Service.DTOs.Request;
+﻿using LocalShipper.Data.Models;
+using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
+using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
 using MailKit;
@@ -15,7 +17,7 @@ namespace LSAPI.Controllers
 {
     [ApiController]
     [Route("api/batchs")]
-    //[Authorize(Policy = "Shipper")]
+    
     public class BatchController : Controller
     {
         private readonly IBatchService _batchService;
@@ -25,22 +27,23 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<BatchResponse>>> GetBatch(int id, string batchName, int? pageNumber, int? pageSize)
         {
             try
             {
-                if (pageNumber.HasValue && pageNumber < 0)
+                if (pageNumber.HasValue && pageNumber <= 0)
                 {
-                    return BadRequest("pageNumber phải là số dương");
+                    return BadRequest("pageNumber phải là số nguyên dương");
                 }
 
-                if (pageSize.HasValue && pageSize < 0)
+                if (pageSize.HasValue && pageSize <= 0)
                 {
-                    return BadRequest("pageSize phải là số dương");
+                    return BadRequest("pageSize phải là số nguyên dương");
                 }
                 if (id < 0 )
                 {
-                    return BadRequest("id không hợp lệ");
+                    return BadRequest("Id không hợp lệ");
                 }
 
 
@@ -57,6 +60,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPost()]
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<BatchResponse>> PostBatch(BatchRequest request)
         {
             try
@@ -91,21 +95,22 @@ namespace LSAPI.Controllers
 
 
         [HttpPut()]
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<BatchResponse>> PutBatch(int id, BatchRequest batchRequest)
         {
             try
             {
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
-                if (id <= 0)
+                if (id < 0)
                 {
-                    return BadRequest("id phải là số dương");
+                    return BadRequest("Id phải là số nguyên dương");
                 }
                 if (batchRequest.StoreId <= 0)
                 {
-                    return BadRequest("storeId phải là 1 số dương");
+                    return BadRequest("storeId phải là 1 số nguyên dương");
                 }
 
                 var regex = new Regex("^[a-zA-Z0-9 ]+$");
@@ -119,30 +124,31 @@ namespace LSAPI.Controllers
                 }
                 if(batchRequest.Status <= 0)
                 {
-                    return BadRequest("status phải phải là 1 số dương");
+                    return BadRequest("Status không hợp lệ");
                 }
                 var rs = await _batchService.UpdateBatch(id, batchRequest);
                 return Ok(rs);
             }
             catch (Exception ex)
             {
-                return BadRequest($"cập nhật Batch thất bại: {ex.Message}");
+                return BadRequest($"Cập nhật Batch thất bại: {ex.Message}");
             }
 
         }
 
         [HttpDelete()]
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<BatchResponse>> DeleteBatch(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
-                if (id <= 0) 
+                if (id < 0) 
                 {
-                    return BadRequest("id phải là số dương");
+                    return BadRequest("Id phải là số nguyên dương");
                 }
                 var rs = await _batchService.DeleteBatch(id);
                 return Ok(rs);
@@ -157,6 +163,7 @@ namespace LSAPI.Controllers
 
 
         [HttpGet("count")]
+        [Authorize]
         public async Task<ActionResult<BatchResponse>> GetCountBatch()
         {
             try
