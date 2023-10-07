@@ -26,6 +26,8 @@ namespace LSAPI.Controllers
         {
             try
             {
+
+
                 if (pageNumber.HasValue && pageNumber < 0)
                 {
                     return BadRequest("pageNumber phải là số dương");
@@ -71,7 +73,16 @@ namespace LSAPI.Controllers
             try
             {
 
+                var regex2 = new Regex("^[0-9]+$");
 
+                if (!regex2.IsMatch(request.StorePhone))
+                {
+                    return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (request.StorePhone.Length < 9 || request.StorePhone.Length > 11)
+                {
+                    return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
+                }
                 if (request.Status <0)
                 {
                     return BadRequest("Status phải là số dương");
@@ -128,6 +139,16 @@ namespace LSAPI.Controllers
         {
             try
             {
+                var regex2 = new Regex("^[0-9]+$");
+
+                if (!regex2.IsMatch(storeRequest.StorePhone))
+                {
+                    return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (storeRequest.StorePhone.Length < 9 || storeRequest.StorePhone.Length > 11)
+                {
+                    return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
+                }
                 if (id == 0)
                 {
                     return BadRequest("làm ơn hãy nhập id");

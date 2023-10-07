@@ -107,7 +107,11 @@ namespace LSAPI.Controllers
         {
             try
             {
-                if (id <= 0)
+                if (id == 0)
+                {
+                    return BadRequest("làm ơn hãy nhập id");
+                }
+                if (id < 0)
                 {
                     return BadRequest("Id phải là số nguyên dương");
                 }
@@ -149,7 +153,11 @@ namespace LSAPI.Controllers
         {
             try
             {
-                if (id <= 0)
+                if (id == 0)
+                {
+                    return BadRequest("làm ơn hãy nhập id");
+                }
+                if (id < 0)
                 {
                     return BadRequest("Id phải là số nguyên dương");
                 }

@@ -31,6 +31,7 @@ namespace LSAPI.Controllers
         {
             try
             {
+               
                 if (shipperId <= 0)
                 {
                     return BadRequest("ShipperId phải là số nguyên dương");
@@ -124,6 +125,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Tên không hợp lệ");
                 }
+
                 var regex3 = new Regex(@"^\w+@gmail\.com$");
                 if (!regex3.IsMatch(request.EmailShipper))
                 {
@@ -132,6 +134,11 @@ namespace LSAPI.Controllers
                 if (!regex2.IsMatch(request.PhoneShipper))
                 {
                     return BadRequest("Số điện thoại không hợp lệ");
+                }
+               
+                if (request.PhoneShipper.Length < 9 || request.PhoneShipper.Length > 11)
+                {
+                    return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
                 }
                 if (request.TransportId <= 0)
                 {
@@ -185,6 +192,10 @@ namespace LSAPI.Controllers
                 if (!regex2.IsMatch(shipperRequest.PhoneShipper))
                 {
                     return BadRequest("Số điện thoại không hợp lệ");
+                }             
+                if (shipperRequest.PhoneShipper.Length < 9 || shipperRequest.PhoneShipper.Length > 11)
+                {
+                    return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
                 }
                 if (shipperRequest.TransportId <= 0)
                 {
@@ -220,7 +231,11 @@ namespace LSAPI.Controllers
         {
             try
             {
-                if (id <= 0)
+                if (id == 0)
+                {
+                    return BadRequest("làm ơn hãy nhập id");
+                }
+                if (id < 0)
                 {
                     return BadRequest("Id phải là số nguyên dương");
                 }

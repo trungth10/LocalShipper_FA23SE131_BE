@@ -464,6 +464,7 @@ namespace LocalShipper.Service.Services.Implement
 
             return new MessageResponse
             {
+                id= id,
                 Message = "Xóa gói hàng thành công",
             };
         }
