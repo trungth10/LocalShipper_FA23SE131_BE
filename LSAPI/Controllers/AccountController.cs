@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace LSAPI.Controllers
 {
     [ApiController]
-    
+    [Route("api/Account")]
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
@@ -29,8 +29,8 @@ namespace LSAPI.Controllers
         {
             _accountService = accountService;           
         }
-
-        [HttpGet("api/accounts")]
+       
+        [HttpGet()]
         [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<AccountResponse>> GetAccount(int id, string phone, string email, int role, string fcm_token, int? pageNumber, int? pageSize)
         {

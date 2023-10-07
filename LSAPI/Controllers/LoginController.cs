@@ -8,6 +8,7 @@ using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.DTOs.Request;
 using System;
+using LocalShipper.Service.Services.Interface;
 
 namespace LSAPI.Controllers
 {
@@ -16,11 +17,11 @@ namespace LSAPI.Controllers
     [Route("api/logins")]
     public class LoginController : ControllerBase
     {
-        private readonly LoginService _loginService;
+        private readonly ILoginService _iloginService;
 
-        public LoginController(LoginService loginService)
+        public LoginController(ILoginService loginService)
         {
-            _loginService = loginService;
+            _iloginService = loginService;
         }
 
 
@@ -33,7 +34,7 @@ namespace LSAPI.Controllers
                 return BadRequest("Invalid request.");
             }
 
-            var result = await _loginService.AuthenticateAsync(request.Email, request.Password);
+            var result = await _iloginService.AuthenticateAsync(request.Email, request.Password);
           
             dynamic dynamicResult = result;
 
@@ -44,10 +45,10 @@ namespace LSAPI.Controllers
                     return Ok(new
                     {
                         AccessToken = dynamicResult.AccessToken,
-                        ShipperId = result.IdShipper,
+                        id = result.Id,
                         UserName = result.UserName,
                         FullName = result.FullName,
-                       
+                        Role = result.Role,
                     });
                 }
                 else
@@ -68,7 +69,7 @@ namespace LSAPI.Controllers
                 var accessToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
                 // Gọi hàm GetUserRoleFromAccessTokenAsync từ LoginService
-                var userRole = await _loginService.GetUserRoleFromAccessTokenAsync(accessToken);
+                var userRole = await _iloginService.GetUserRoleFromAccessTokenAsync(accessToken);
 
                 if (userRole != null)
                 {
