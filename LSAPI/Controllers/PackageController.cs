@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace LSAPI.Controllers
 {
     [ApiController]
-    [Route("store/api/packages")]
+    [Route("api/packages")]
     public class PackageController : Controller
     {
         private readonly IPackageService _packageService;
