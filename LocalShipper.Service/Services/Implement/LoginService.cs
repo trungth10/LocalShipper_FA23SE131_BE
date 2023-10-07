@@ -1,6 +1,9 @@
-﻿using LocalShipper.Data.Models;
-using LocalShipper.Data.Repository;
+﻿using AutoMapper;
+using LocalShipper.Data.Models;
+
+using LocalShipper.Data.UnitOfWork;
 using LocalShipper.Service.DTOs.Response;
+using LocalShipper.Service.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -15,21 +18,22 @@ using System.Threading.Tasks;
 
 namespace LocalShipper.Service.Services.Implement
 {
-    public class LoginService
+    public class LoginService : ILoginService
     {
-        private readonly IGenericRepository<Account> _accountRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private IMapper _mapper;
+     
         private readonly IConfiguration _configuration;
         private readonly ILogger<LoginService> _logger;
 
-        public LoginService(
-            IGenericRepository<Account> accountRepository,
-            IConfiguration configuration,
-            ILogger<LoginService> logger)
+        public LoginService(IMapper mapper, IUnitOfWork unitOfWork,IConfiguration configuration,ILogger<LoginService> logger)
         {
-            _accountRepository = accountRepository;
+            _mapper = mapper;
+            _unitOfWork = unitOfWork;
             _configuration = configuration;
             _logger = logger;
         }
+
 
         public async Task<LoginResponse> AuthenticateAsync(string email, string password)
         {
@@ -44,9 +48,10 @@ namespace LocalShipper.Service.Services.Implement
 
             try
             {
-                var account = await _accountRepository
+                var account = await _unitOfWork.Repository<Account>()
                     .GetAll()
-                    .Where(a => a.Email == email).Include(a => a.Role).Include(p => p.Shippers)
+                    .Where(a => a.Email == email && a.Password == password)
+                    .Include(a => a.Role)
                     .FirstOrDefaultAsync();
 
                 if (account == null)
@@ -54,7 +59,7 @@ namespace LocalShipper.Service.Services.Implement
                     return new LoginResponse
                     {
                         Success = false,
-                        Message = "Tài khoản chưa xác thực"
+                        Message = "Invalid email or password."
                     };
                 }
 
@@ -63,48 +68,11 @@ namespace LocalShipper.Service.Services.Implement
                     return new LoginResponse
                     {
                         Success = false,
-                        Message = "Invalid email or password."
+                        Message = "Account is not active."
                     };
                 }
 
-                if (password == account.Password)
-
-
-                {
-                    int? shipperId = account.Shippers?.FirstOrDefault()?.Id;
-                    var claims = new List<Claim>
-                {
-                new Claim(ClaimTypes.Name, account.Email),
-                new Claim(ClaimTypes.Role, account.Role.Name),
-                };
-
-
-
-                    var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtAuth:Key"]));
-                    var issuer = _configuration["JwtAuth:Issuer"];
-                    var audience = _configuration["JwtAuth:Audience"];
-
-                    var token = new JwtSecurityToken(
-                        issuer: issuer,
-                        audience: audience,
-                        claims: claims,
-                        expires: DateTime.UtcNow.AddHours(1),
-                        signingCredentials: new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256)
-                    );
-
-                    var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-
-                    return new LoginResponse
-                    {
-                        Success = true,
-                        AccessToken = tokenString,
-                        IdShipper =(int) shipperId,
-                        UserName = account.Email,
-                        FullName = account.Fullname,
-                        Role = account.Role.Name
-                    };
-                }
-                else
+                if (password != account.Password)
                 {
                     return new LoginResponse
                     {
@@ -112,6 +80,36 @@ namespace LocalShipper.Service.Services.Implement
                         Message = "Invalid email or password."
                     };
                 }
+
+                var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, account.Email),
+            new Claim(ClaimTypes.Role, account.Role.Name),
+        };
+
+                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtAuth:Key"]));
+                var issuer = _configuration["JwtAuth:Issuer"];
+                var audience = _configuration["JwtAuth:Audience"];
+
+                var token = new JwtSecurityToken(
+                    issuer: issuer,
+                    audience: audience,
+                    claims: claims,
+                    expires: DateTime.UtcNow.AddHours(1),
+                    signingCredentials: new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256)
+                );
+
+                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+                return new LoginResponse
+                {
+                    Success = true,
+                    AccessToken = tokenString,
+                    Id = account.Id, 
+                    UserName = account.Email,
+                    FullName = account.Fullname,  
+                    Role = account.Role.Name
+                };
             }
             catch (Exception ex)
             {
@@ -123,6 +121,7 @@ namespace LocalShipper.Service.Services.Implement
                 };
             }
         }
+
 
         public async Task<string> GetUserRoleFromAccessTokenAsync(string accessToken)
         {

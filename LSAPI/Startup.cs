@@ -137,21 +137,22 @@ namespace LSAPI
             services.AddScoped<IPriceLSService, PriceService>();
             services.AddScoped<IPriceItemService, PriceItemService>();
             services.AddScoped<IPriceInZoneService, PriceInZoneService>();
+            services.AddScoped<ILoginService, LoginService>();
 
             services.AddAutoMapper(typeof(Startup));
 
             services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<LocalShipperCPContext>()
     .AddDefaultTokenProviders();
-            // Đăng ký LoginService
-            services.AddScoped<LoginService>();
+
+
 
             services.AddControllers();
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "LSAPI", Version = "v1" });
-     
+
 
                 // Thêm khai báo bảo mật Bearer
                 var securitySchema = new OpenApiSecurityScheme
@@ -190,8 +191,6 @@ namespace LSAPI
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //if (env.IsDevelopment())
-
             app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LSAPI v1"));
