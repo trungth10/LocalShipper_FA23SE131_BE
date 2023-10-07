@@ -27,7 +27,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<BatchResponse>>> GetBatch(int id, string batchName, int? pageNumber, int? pageSize)
         {
             try
@@ -60,7 +59,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpPost()]
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<BatchResponse>> PostBatch(BatchRequest request)
         {
             try
@@ -95,7 +93,6 @@ namespace LSAPI.Controllers
 
 
         [HttpPut()]
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<BatchResponse>> PutBatch(int id, BatchRequest batchRequest)
         {
             try
@@ -137,7 +134,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<BatchResponse>> DeleteBatch(int id)
         {
             try
@@ -163,7 +159,6 @@ namespace LSAPI.Controllers
 
 
         [HttpGet("count")]
-        [Authorize]
         public async Task<ActionResult<BatchResponse>> GetCountBatch()
         {
             try

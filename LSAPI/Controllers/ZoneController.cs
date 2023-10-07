@@ -11,7 +11,6 @@ namespace LSAPI.Controllers
 {
     [ApiController]
     [Route("api/zones")]
-    [Authorize(Roles = Roles.Staff + "," + Roles.Admin)]
     public class ZoneController : Controller
     {
         private readonly IZoneService _zoneService;
@@ -22,7 +21,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        [Authorize]
         public async Task<ActionResult<ZoneResponse>> GetZones(int id, string zoneName, decimal latitude, decimal longtitude, decimal radius, int? pageNumber, int? pageSize)
         {
             try
@@ -51,7 +49,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("api/zones/count")]
-        [Authorize]
         public async Task<ActionResult<ZoneResponse>> GetCount()
         {
             try
@@ -67,7 +64,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpPost()]
-        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<ZoneResponse>> Createzone([FromBody] ZoneRequest request)
         {
             try
@@ -83,7 +79,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
-        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<ZoneResponse>> UpdateZone(int id, [FromBody] ZoneRequest request)
         {
             try
@@ -106,7 +101,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
-        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<ZoneResponse>> DeleteZone(int id)
         {
             try

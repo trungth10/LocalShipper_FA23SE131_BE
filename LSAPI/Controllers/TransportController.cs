@@ -24,7 +24,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        [Authorize]
         public async Task<ActionResult<List<TransportResponse>>> GetTransport(int? id, int? typeId, string? licencePlate, string? transportColor,
                                                         string? transportImage, string? transportRegistration, int? pageNumber, int? pageSize)
         {
@@ -67,7 +66,6 @@ namespace LSAPI.Controllers
         //}
 
         [HttpGet("api/transports/count")]
-        [Authorize]
         public async Task<ActionResult<TransportResponse>> GetCountTransport()
         {
             try
@@ -85,7 +83,6 @@ namespace LSAPI.Controllers
 
 
         [HttpPost("register-transport")]
-        [Authorize(Policy = "Shipper")]
         public async Task<ActionResult<TransportResponse>> CreateTransport([FromBody] RegisterTransportRequest request)
         {
             try
@@ -104,7 +101,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
-        [Authorize(Policy = "Shipper")]
         public async Task<ActionResult<TransportResponse>> UpdateAccount(int id, [FromBody] PutTransportRequest request)
         {
             try
@@ -131,7 +127,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
-        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<TransportResponse>> DeleteAccount(int id)
         {
             try

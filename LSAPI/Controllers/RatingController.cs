@@ -62,7 +62,6 @@ namespace LSAPI.Controllers
 
 
         [HttpGet()]
-        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<RatingResponse>>> GetRating(int id, int shipperId, int ratingValue, int byStoreId, int? pageNumber, int? pageSize)
         {
             try
@@ -91,7 +90,6 @@ namespace LSAPI.Controllers
 
 
         [HttpGet("api/ratings/count")]
-        [Authorize]
         public async Task<ActionResult<RatingResponse>> GetCountRating()
         {
             try
@@ -109,7 +107,6 @@ namespace LSAPI.Controllers
 
 
         [HttpPost("register-rating")]
-        [Authorize(Policy = "Store")]
         public async Task<ActionResult<RatingResponse>> CreateRating([FromBody] RegisterRatingRequest request)
         {
             try
@@ -136,7 +133,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
-        [Authorize(Policy = "Store")]
         public async Task<ActionResult<RatingResponse>> UpdateRating(int id, [FromBody] PutRatingRequest ratingRequest)
         {
             try
@@ -172,7 +168,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
-        [Authorize(Policy = "Store")]
         public async Task<ActionResult<MessageResponse>> DeleteRating(int id)
         {
             try

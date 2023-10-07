@@ -27,7 +27,6 @@ namespace LSAPI.Controllers
 
 
         [HttpGet("api/orders")]
-        [Authorize]
         public async Task<ActionResult<OrderResponse>> GetOrder(int id, int status, int storeId, int batchId, int? shipperId,
             string tracking_number, string cancel_reason, decimal distance_price,
             decimal subtotal_price, decimal totalPrice, string other, int? pageNumber, int? pageSize)
@@ -62,7 +61,6 @@ namespace LSAPI.Controllers
 
 
         [HttpGet("api/orders/count")]
-        [Authorize]
         public async Task<ActionResult<OrderResponse>> GetCountOrder(int storeId, int shipperId)
         {
             try
@@ -80,7 +78,6 @@ namespace LSAPI.Controllers
 
 
         [HttpPost("api/orders")]
-        [Authorize(Policy = "Store")]
         public async Task<ActionResult<MessageResponse>> CreateOrder(OrderRequest request)
         {
             try
@@ -105,7 +102,6 @@ namespace LSAPI.Controllers
 
 
         [HttpPut("api/orders")]
-        [Authorize(Policy = "Store")]
         public async Task<ActionResult<MessageResponse>> UpdateOrder(int id, PutOrderRequest orderRequest)
         {
             try
@@ -155,7 +151,6 @@ namespace LSAPI.Controllers
 
 
         [HttpDelete("api/orders")]
-        [Authorize(Policy = "Store")]
         public async Task<ActionResult<MessageResponse>> DeleteOrder(int id)
         {
             try
@@ -186,7 +181,6 @@ namespace LSAPI.Controllers
         //SHIPPER
 
         [HttpPut("shipper/api/orders")]
-        [Authorize(Policy = "Shipper")]
         public async Task<ActionResult<MessageResponse>> ShipperToStatusOrder(int id, int shipperId, string cancelReason, OrderStatusEnum status)
         {
             try
@@ -209,7 +203,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("shipper/api/orders/statistical")]
-        [Authorize(Policy = "Shipper")]
         public async Task<ActionResult<TotalPriceResponse>> GetTotalPriceSumByShipperId(int shipperId, int? month, int? year, int? day)
         {
             try
@@ -233,7 +226,6 @@ namespace LSAPI.Controllers
         }
       
          [HttpGet("shipper/api/orders/statistical-price")]
-        [Authorize(Policy = "Shipper")]
         public async Task<ActionResult<TotalPriceResponse>> GetTotalPriceSumByShipperId(int shipperId)
          {
             if (shipperId == 0)
@@ -249,7 +241,6 @@ namespace LSAPI.Controllers
          }
 
          [HttpGet("shipper/api/orders/rate-cancel")]
-        [Authorize(Policy = "Shipper")]
         public async Task<ActionResult<TotalPriceResponse>> GetCancelRateByShipperId(int shipperId)
          {
             if (shipperId == 0)
@@ -265,7 +256,6 @@ namespace LSAPI.Controllers
          }
 
         [HttpGet("shipper/api/orders/rate-complete")]
-        [Authorize(Policy = "Shipper")]
         public async Task<ActionResult<TotalPriceResponse>> GetReceiveRateByShipperId(int shipperId)
          {
             if (shipperId == 0)

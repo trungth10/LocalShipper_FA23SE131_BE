@@ -21,7 +21,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<List<RoleResponse>>> GetRole(int? id, string? name, int? pageNumber, int? pageSize)
         {
             try
@@ -49,7 +48,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("api/roles/count")]
-        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<RoleResponse>> GetCountRole()
         {
             try
@@ -67,7 +65,6 @@ namespace LSAPI.Controllers
 
 
         [HttpPost("register-role")]
-        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<RoleResponse>> CreateRole([FromBody] RegisterRoleRequest request)
         {
             try
@@ -82,7 +79,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
-        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<RoleResponse>> UpdateRole(int id, PutRoleRequest roleRequest)
         {
             try

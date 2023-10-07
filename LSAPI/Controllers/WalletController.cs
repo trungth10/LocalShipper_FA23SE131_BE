@@ -25,7 +25,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("wallet-transaction")]
-        [Authorize]
         public async Task<ActionResult<WalletTransactionResponse>> GetWalletTrans(int id, string transactionType, int fromWallet, 
             int toWallet, decimal amount, int? pageNumber, int? pageSize)
         {
@@ -55,7 +54,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("count-wallet-transaction")]
-        [Authorize]
         public async Task<ActionResult<WalletTransactionResponse>> GetCountWalletTrans()
         {
             try
@@ -70,7 +68,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpPost("create-wallet-transaction")]
-        [Authorize]
         public async Task<ActionResult<WalletTransactionResponse>> CreateWalletTrans([FromBody] WalletTransactionRequest request)
         {
             try
@@ -97,7 +94,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut("update-wallet-transaction")]
-        [Authorize]
         public async Task<ActionResult<WalletTransactionResponse>> UpdateWalletTrans(int id, WalletTransactionRequest request)
         {
             try
@@ -132,7 +128,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete("delete-wallet-transaction")]
-        [Authorize]
         public async Task<ActionResult<MessageResponse>> DeleteWalletTrans(int id)
         {
             try
@@ -155,7 +150,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        [Authorize]
         public async Task<ActionResult<WalletResponse>> GetWallet(int id, decimal balance, int? pageNumber, int? pageSize)
         {
             try
@@ -171,7 +165,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("count")]
-        [Authorize]
         public async Task<ActionResult<WalletResponse>> GetCountWallet()
         {
             try
@@ -186,7 +179,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpPost()]
-        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<WalletResponse>> CreateWallet([FromBody] WalletRequest request)
         {
             try
@@ -205,7 +197,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
-        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<WalletResponse>> UpdateAccount(int id, [FromBody] WalletRequest request)
         {
             try

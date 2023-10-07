@@ -24,7 +24,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<PackageActionResponse>>> GetPackageAction(int id, string actionType, int? pageNumber, int? pageSize)
         {
             try
@@ -52,7 +51,6 @@ namespace LSAPI.Controllers
 
         }
         [HttpPost()]
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PackageActionResponse>> PostPackageAction(PackageActionRequest request)
         {
             try
@@ -67,7 +65,6 @@ namespace LSAPI.Controllers
            
         }
         [HttpPut()]
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PackageActionResponse>> PutPackageAction(int id, PackageActionRequest packageActionRequest)
         {
             try
@@ -91,7 +88,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PackageActionResponse>> DeletePackageAction(int id)
         {
             try
@@ -117,7 +113,6 @@ namespace LSAPI.Controllers
 
 
         [HttpGet("count")]
-        [Authorize]
         public async Task<ActionResult<PackageActionResponse>> GetCountPackageAction()
         {
             try

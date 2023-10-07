@@ -25,7 +25,6 @@ namespace LSAPI.Controllers
 
 
         [HttpGet()]
-        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<PriceLSResponse>>> GetPriceItem(int? id, string? name, int? storeId, int? hourFilter,
             int? dateFilter, int? mode, int? status, int? priority, int? pageNumber, int? pageSize)
         {
@@ -54,7 +53,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("api/prices/count")]
-        [Authorize]
         public async Task<ActionResult<PriceInZoneResponse>> GetCountPrice()
         {
             try
@@ -71,7 +69,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PriceLSResponse>> UpdatePrice(int id, [FromBody] PutPriceRequest priceRequest, int accountId)
         {
             try
@@ -112,7 +109,6 @@ namespace LSAPI.Controllers
 
 
         [HttpPost("register-price")]
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PriceLSResponse>> CreatePrice([FromBody] RegisterPriceRequest request, int accountId)
         {
             try
@@ -147,7 +143,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<MessageResponse>> DeletePrice(int id)
         {
             try

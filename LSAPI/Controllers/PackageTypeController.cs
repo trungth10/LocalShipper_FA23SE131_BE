@@ -23,7 +23,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<PackageTypeResponse>>> GetPackageType(int id, string packageType, int? pageNumber, int? pageSize)
         {
             try
@@ -53,7 +52,6 @@ namespace LSAPI.Controllers
             
         }
         [HttpPost()]
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PackageTypeResponse>> PostPackageType(PackageTypeRequest request)
         {
             try
@@ -71,7 +69,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PackageTypeResponse>> PutPackageType(int id, PackageTypeRequest packageTypeRequest)
         {
             try
@@ -96,7 +93,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("count")]
-        [Authorize]
         public async Task<ActionResult<PackageTypeResponse>> GetCountPackageType()
         {
             try

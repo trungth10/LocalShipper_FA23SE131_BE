@@ -12,7 +12,6 @@ namespace LSAPI.Controllers
 {
     [ApiController]
     [Route("api/templates")]
-    [Authorize]
     public class TemplateController : Controller
     {
 

@@ -24,7 +24,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<StoreResponse>>> GetStore(int id, string storeName, int status, int zoneId, int walletId, int accountId, int? pageNumber, int? pageSize)
         {
             try
@@ -69,7 +68,6 @@ namespace LSAPI.Controllers
 
         }
         [HttpPost()]
-        [Authorize(Policy = "Store")]
         public async Task<ActionResult<StoreResponse>> PostStore(StoreRequest request)
         {
             try
@@ -137,7 +135,6 @@ namespace LSAPI.Controllers
 
         }
         [HttpPut()]
-        [Authorize(Policy = "Store")]
         public async Task<ActionResult<StoreResponse>> PutStore(int id, StoreRequest storeRequest)
         {
             try
@@ -195,7 +192,6 @@ namespace LSAPI.Controllers
 
         }
         [HttpDelete()]
-        [Authorize(Roles = Roles.Admin + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<StoreResponse>> DeleteStore(int id)
         {
             try
@@ -219,7 +215,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("count")]
-        [Authorize]
         public async Task<ActionResult<StoreResponse>> GetCountStore()
         {
             try

@@ -25,7 +25,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
-        [Authorize]
         public async Task<ActionResult<List<TransactionResponse>>> GetTransaction(int id, string transactionMethod, int orderId, int walletId, decimal amount, int? pageNumber, int? pageSize)
         {
             try
@@ -67,7 +66,6 @@ namespace LSAPI.Controllers
         //}
 
         [HttpGet("api/transactions/count")]
-        [Authorize]
         public async Task<ActionResult<TransactionResponse>> GetCountTransaction()
         {
             try
@@ -85,7 +83,6 @@ namespace LSAPI.Controllers
 
 
         [HttpPost("register-transaction")]
-        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<TransactionResponse>> CreateTransaction([FromBody] RegisterTransactionRequest request)
         {
             try
@@ -112,7 +109,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
-        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<TransactionResponse>> UpdateAccount(int id, [FromBody] PutTransactionRequest request)
         {
             try
@@ -147,7 +143,6 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
-        [Authorize(Roles = Roles.Shipper + "," + Roles.Store)]
         public async Task<ActionResult<MessageResponse>> DeleteAccount(int id)
         {
             try
