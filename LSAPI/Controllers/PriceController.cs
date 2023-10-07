@@ -75,7 +75,7 @@ namespace LSAPI.Controllers
             {
                 if (id == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập id");
+                    return BadRequest("Vui lòng nhập Id");
                 }
                 if (id < 0)
                 {
@@ -115,7 +115,7 @@ namespace LSAPI.Controllers
             {
                 if (accountId == 0)
                 {
-                    return BadRequest("làm ơn hãy nhập AccountId");
+                    return BadRequest("Vui lòng nhập AccountId");
                 }
                 if (accountId < 0)
                 {
