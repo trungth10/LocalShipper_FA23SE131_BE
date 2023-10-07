@@ -250,5 +250,39 @@ namespace LSAPI.Controllers
             }
         }
 
+        [HttpPut("api/accounts/forgot-password")]
+        [Authorize]
+        public async Task<ActionResult<AccountResponse>> ForgotPassword(string email)
+        {
+            try
+            {
+
+                var rs = await _accountService.SendMailForgotPassword(email);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xem count thất bại: {ex.Message}");
+            }
+
+        }
+
+        [HttpGet("api/accounts/verify-forgot")]
+        [Authorize]
+        public async Task<ActionResult<AccountResponse>> VerifyForgotPassword(string email,string otp)
+        {
+            try
+            {
+
+                var rs = await _accountService.VerifyForgotPassword(email, otp);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xem count thất bại: {ex.Message}");
+            }
+
+        }
+
     }
 }

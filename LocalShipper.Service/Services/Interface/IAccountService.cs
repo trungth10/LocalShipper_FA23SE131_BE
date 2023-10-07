@@ -19,5 +19,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<bool> VerifyOTP(string email, string otp);
         Task<bool> SendOTPAgain(string email);
         Task<AccountResponse> RegisterShipperPrivate(int storeId, RegisterRequest request);
+        Task<AccountResponse> SendMailForgotPassword(string email);
+        Task<bool> VerifyForgotPassword(string email, string otp);
     }
 }

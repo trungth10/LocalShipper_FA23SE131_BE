@@ -20,4 +20,9 @@ namespace LocalShipper.Service.DTOs.Request
         public string? Fcm_token { get; set; } = null;
         public bool? Active { get; set; } = null;
     }
+
+    public class ForgotPasswordRequest
+    {
+        public string? Email { get; set; } = null;
+    }
 }

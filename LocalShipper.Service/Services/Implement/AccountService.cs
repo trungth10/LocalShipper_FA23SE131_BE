@@ -372,6 +372,58 @@ namespace LocalShipper.Service.Services.Implement
             _emailService.SendEmail(message);
         }
 
+        //FORGOT PASSWORD
+        public async Task<AccountResponse> SendMailForgotPassword(string email)
+        {
+            var account = _unitOfWork.Repository<Account>().Find(x => x.Email == email);
+
+            if (account == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Tài khoản không tồn tại", email);
+            }
+           
+
+            Random random = new Random();
+            int otp = random.Next(1, 99);
+
+            account.FcmToken = otp.ToString();
+            await _unitOfWork.Repository<Account>().Update(account, account.Id);
+            await _unitOfWork.CommitAsync();
+
+            string subject = "Local Shipper - Forgot Password";
+            string content = $"Mã số đặt lại mật khẩu của bạn là: {otp}";
+
+            var message = new Message(new List<string> { email }, subject, content);
+            _emailService.SendEmail(message);
+
+            return new AccountResponse
+            {
+                Id = account.Id,
+                Fullname = account.Fullname,
+                Phone = account.Phone,
+                Email = account.Email,
+                RoleId = account.RoleId,
+                Active = account.Active,
+                FcmToken = account.FcmToken,
+                CreateDate = account.CreateDate,
+                ImageUrl = account.ImageUrl,
+            };
+        }
+
+        public async Task<bool> VerifyForgotPassword(string email, string otp)
+        {
+            var account = _unitOfWork.Repository<Account>().Find(x => x.Email == email && x.FcmToken == otp);
+            if (account != null)
+            { 
+                return true;
+            }
+
+            return false;
+        }
+
+
+
+
 
 
     }
