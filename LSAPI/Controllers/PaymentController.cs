@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System;
 using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Data.Models;
+using LocalShipper.Service.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LSAPI.Controllers
 {
@@ -20,6 +22,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PaymentResponse>> GetPayment(int id, string paymentMethod, int status, string paymentCode
             , string paymentImage, int packageId, int? pageNumber, int? pageSize)
         {
@@ -50,6 +53,7 @@ namespace LSAPI.Controllers
 
 
         [HttpGet("api/payments/count")]
+        [Authorize]
         public async Task<ActionResult<PaymentResponse>> GetCountPayment()
         {
             try
@@ -65,6 +69,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPost()]
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PaymentResponse>> CreatePayment([FromBody] PaymentRequest request)
         {
             try
@@ -83,6 +88,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PaymentResponse>> UpdatePayment(int id,[FromBody] PutPaymentRequest request)
         {
             try
@@ -109,11 +115,16 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PaymentResponse>> DeletePayment(int id)
         {
             try
             {
-                if (id <= 0)
+                if (id == 0)
+                {
+                    return BadRequest("Vui lòng nhập Id");
+                }
+                if (id < 0)
                 {
                     return BadRequest("Id phải là số nguyên dương");
                 }

@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System;
 using MailKit;
 using Org.BouncyCastle.Asn1.Ocsp;
+using Microsoft.AspNetCore.Authorization;
+using LocalShipper.Service.Helpers;
 
 namespace LSAPI.Controllers
 {
@@ -22,6 +24,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet()]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<HistoryResponse>>> GetHistory(int id, string action, int storeId, int? pageNumber, int? pageSize)
         {
             try
@@ -49,6 +52,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("api/histories/count")]
+        [Authorize]
         public async Task<ActionResult<HistoryResponse>> GetCountHistory()
         {
             try
@@ -67,6 +71,7 @@ namespace LSAPI.Controllers
 
 
         [HttpPost("api/histories/create-history")]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<HistoryResponse>> CreateHistory([FromBody] RegisterHistoryRequest request)
         {
             try
@@ -85,6 +90,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut("api/histories")]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<HistoryResponse>> UpdateHistory(int id, PutHistoryRequest historyRequest)
         {
             try
@@ -107,11 +113,16 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete("api/histories")]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<MessageResponse>> DeleteHistory(int id)
         {
             try
             {
-                if (id <= 0)
+                if (id == 0)
+                {
+                    return BadRequest("Vui lòng nhập Id");
+                }
+                if (id < 0)
                 {
                     return BadRequest("Id phải là số nguyên dương");
                 }

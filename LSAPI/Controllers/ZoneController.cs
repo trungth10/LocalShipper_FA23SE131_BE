@@ -4,11 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
 using LocalShipper.Service.DTOs.Request;
+using LocalShipper.Service.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LSAPI.Controllers
 {
     [ApiController]
     [Route("api/zones")]
+    [Authorize(Roles = Roles.Staff + "," + Roles.Admin)]
     public class ZoneController : Controller
     {
         private readonly IZoneService _zoneService;
@@ -18,7 +21,8 @@ namespace LSAPI.Controllers
             _zoneService = zoneService;
         }
 
-        [HttpGet("")]
+        [HttpGet()]
+        [Authorize]
         public async Task<ActionResult<ZoneResponse>> GetZones(int id, string zoneName, decimal latitude, decimal longtitude, decimal radius, int? pageNumber, int? pageSize)
         {
             try
@@ -47,6 +51,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("api/zones/count")]
+        [Authorize]
         public async Task<ActionResult<ZoneResponse>> GetCount()
         {
             try
@@ -62,6 +67,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPost()]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<ZoneResponse>> Createzone([FromBody] ZoneRequest request)
         {
             try
@@ -77,6 +83,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<ZoneResponse>> UpdateZone(int id, [FromBody] ZoneRequest request)
         {
             try
@@ -95,11 +102,16 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<ZoneResponse>> DeleteZone(int id)
         {
             try
             {
-                if (id <= 0)
+                if (id == 0)
+                {
+                    return BadRequest("Vui lòng nhập Id");
+                }
+                if (id < 0)
                 {
                     return BadRequest("Id phải là số nguyên dương");
                 }

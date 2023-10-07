@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
+using LocalShipper.Service.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LSAPI.Controllers
 {
@@ -19,7 +21,9 @@ namespace LSAPI.Controllers
         {
             _priceItemService = priceItemService;
         }
+
         [HttpGet()]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<List<PriceItemResponse>>> GetPriceItem(int? id, decimal? minAmount,
             decimal? maxAmount, decimal? price, int? pageNumber, int? pageSize)
         {
@@ -48,6 +52,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("api/price-items/count")]
+        [Authorize]
         public async Task<ActionResult<PriceItemResponse>> GetCountPriceItem()
         {
             try
@@ -65,6 +70,7 @@ namespace LSAPI.Controllers
 
 
         [HttpPost("register-price-item")]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PriceItemResponse>> CreatePriceItem([FromBody] RegisterPriceItemRequest request)
         {
             try
@@ -103,6 +109,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut()]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<PriceItemResponse>> UpdatePriceItem(int id, [FromBody] PutPriceItemRequest request)
         {
             try
@@ -145,11 +152,15 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete()]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<MessageResponse>> DeletePriceItem(int id)
         {
             try
             {
-                if (id <= 0)
+                if (id == 0)
+                {
+                    return BadRequest("Vui lòng nhập Id");
+                }if (id < 0)
                 {
                     return BadRequest("Id phải là số nguyên dương");
                 }

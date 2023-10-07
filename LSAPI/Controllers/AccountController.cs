@@ -16,6 +16,7 @@ using LocalShipper.Service.Services.Implement;
 using MailKit.Search;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LSAPI.Controllers
 {
@@ -30,6 +31,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("api/accounts")]
+        [Authorize(Roles = Roles.Admin + "," + Roles.Staff)]
         public async Task<ActionResult<AccountResponse>> GetAccount(int id, string phone, string email, int role, string fcm_token, int? pageNumber, int? pageSize)
         {
             try
@@ -60,6 +62,7 @@ namespace LSAPI.Controllers
         
 
         [HttpGet("api/accounts/count")]
+        [Authorize]
         public async Task<ActionResult<AccountResponse>> GetCountAccount()
         {
             try
@@ -107,6 +110,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPost("store/api/accounts/add-shipper")]
+        [Authorize(Policy = "Store")]
         public async Task<ActionResult<AccountResponse>> RegisterShippePrivate(int storeId ,[FromBody] RegisterRequest request)
         {
             try
@@ -136,6 +140,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpPut("api/accounts")]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<AccountResponse>> UpdateAccount(int id, [FromBody] AccountRequest request)
         {
             try
@@ -165,11 +170,16 @@ namespace LSAPI.Controllers
         }
 
         [HttpDelete("api/accounts")]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store + "," + Roles.Staff)]
         public async Task<ActionResult<AccountResponse>> DeleteAccount(int id)
         {
             try
             {
-                if (id <= 0)
+                if (id == 0)
+                {
+                    return BadRequest("Vui lòng nhập Id");
+                }
+                if (id < 0)
                 {
                     return BadRequest("Id phải là số nguyên dương");
                 }
