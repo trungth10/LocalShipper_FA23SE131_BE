@@ -21,7 +21,6 @@ using Microsoft.AspNetCore.Authorization;
 namespace LSAPI.Controllers
 {
     [ApiController]
-    [Route("api/Account")]
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
