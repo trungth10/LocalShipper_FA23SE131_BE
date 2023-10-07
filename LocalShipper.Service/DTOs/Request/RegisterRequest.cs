@@ -11,7 +11,7 @@ namespace LocalShipper.Service.DTOs.Request
     {
         [Required, MinLength(6, ErrorMessage = "Xin nhập lớn hơn 6 ký tự")]
         public string FullName { get; set; } = string.Empty;
-        [Required, EmailAddress] 
+        [Required] 
         public string Email { get; set; } = string.Empty;
         [Required, Phone]
         public string Phone { get; set; } = string.Empty;
