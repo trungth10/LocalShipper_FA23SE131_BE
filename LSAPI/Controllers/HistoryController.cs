@@ -23,6 +23,7 @@ namespace LSAPI.Controllers
             _historyService = historyService;
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<HistoryResponse>>> GetHistory(int id, string action, int storeId, int? pageNumber, int? pageSize)
         {
@@ -50,6 +51,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/histories/count")]
         public async Task<ActionResult<HistoryResponse>> GetCountHistory()
         {
@@ -67,7 +69,7 @@ namespace LSAPI.Controllers
         }
 
 
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("api/histories/create-history")]
         public async Task<ActionResult<HistoryResponse>> CreateHistory([FromBody] RegisterHistoryRequest request)
         {
@@ -86,6 +88,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPut("api/histories")]
         public async Task<ActionResult<HistoryResponse>> UpdateHistory(int id, PutHistoryRequest historyRequest)
         {
@@ -112,6 +115,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpDelete("api/histories")]
         public async Task<ActionResult<MessageResponse>> DeleteHistory(int id)
         {

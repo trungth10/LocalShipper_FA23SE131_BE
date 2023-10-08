@@ -1,5 +1,6 @@
 ﻿using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
+using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
@@ -21,6 +22,7 @@ namespace LSAPI.Controllers
             _templateService = templateService;
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<TemplateResponse>>> GetTemplate(int id, string templateName, int? pageNumber, int? pageSize)
         {
@@ -28,12 +30,12 @@ namespace LSAPI.Controllers
             {
                 if (pageNumber.HasValue && pageNumber <= 0)
                 {
-                    return BadRequest("pageNumber phải là số dương");
+                    return BadRequest("Số trang phải là số nguyên dương");
                 }
 
                 if (pageSize.HasValue && pageSize <= 0)
                 {
-                    return BadRequest("pageSize phải là số dương");
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
                 }
                 if (id < 0)
                 {
@@ -50,6 +52,8 @@ namespace LSAPI.Controllers
             }
 
         }
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost()]
         public async Task<ActionResult<TemplateResponse>> PostTemplate(TemplateRequest request)
         {
@@ -64,6 +68,8 @@ namespace LSAPI.Controllers
             }
 
         }
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<TemplateResponse>> PutTemplate(int id, TemplateRequest templateRequest)
         {
@@ -87,6 +93,7 @@ namespace LSAPI.Controllers
 
         }
 
+        [Authorize(Roles = Roles.Admin + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
         public async Task<ActionResult<TemplateResponse>> DeleteTemplate(int id)
         {
@@ -110,6 +117,7 @@ namespace LSAPI.Controllers
 
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("api/templates/count")]
         public async Task<ActionResult<TemplateResponse>> GetCountTemplate()
         {

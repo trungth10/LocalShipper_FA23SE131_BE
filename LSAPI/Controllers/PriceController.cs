@@ -23,7 +23,7 @@ namespace LSAPI.Controllers
             _priceService = priceService;
         }
 
-
+        [AllowAnonymous]
         [HttpGet()]
         public async Task<ActionResult<List<PriceLSResponse>>> GetPriceItem(int? id, string? name, int? storeId, int? hourFilter,
             int? dateFilter, int? mode, int? status, int? priority, int? pageNumber, int? pageSize)
@@ -52,6 +52,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("api/prices/count")]
         public async Task<ActionResult<PriceInZoneResponse>> GetCountPrice()
         {
@@ -68,6 +69,7 @@ namespace LSAPI.Controllers
 
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<PriceLSResponse>> UpdatePrice(int id, [FromBody] PutPriceRequest priceRequest, int accountId)
         {
@@ -107,7 +109,7 @@ namespace LSAPI.Controllers
         }
 
 
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPost("register-price")]
         public async Task<ActionResult<PriceLSResponse>> CreatePrice([FromBody] RegisterPriceRequest request, int accountId)
         {
@@ -142,6 +144,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
         public async Task<ActionResult<MessageResponse>> DeletePrice(int id)
         {

@@ -16,7 +16,6 @@ namespace LSAPI.Controllers
 {
     [ApiController]
     [Route("api/shippers")]
-    //[Authorize(Policy = "Shipper")]
     public class ShipperController : Controller
     {
 
@@ -27,6 +26,7 @@ namespace LSAPI.Controllers
             _shipperService = shipperService;
         }
 
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPut("status")]
         public async Task<ActionResult<ShipperResponse>> UpdateShipperStatus(int shipperId, [FromBody] UpdateShipperStatusRequest request)
         {
@@ -52,7 +52,7 @@ namespace LSAPI.Controllers
             }
         }
 
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<TransactionResponse>>> GetShipper(int id, string fullName,
                                             string email, string phone,
@@ -95,7 +95,7 @@ namespace LSAPI.Controllers
         //        return BadRequest($"Không tìm thấy shipper");
         //    }
         //}
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/shippers/count")]
         public async Task<ActionResult<ShipperResponse>> GetCountShipper()
         {
@@ -112,7 +112,7 @@ namespace LSAPI.Controllers
 
         }
 
-
+        [AllowAnonymous]
         [HttpPost("register-shipper-information")]
         public async Task<ActionResult<ShipperResponse>> CreateShipper([FromBody] ShipperInformationRequest request)
         {
@@ -170,6 +170,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<ShipperResponse>> UpdateShipper(int id, [FromBody] PutShipperRequest shipperRequest)
         {
@@ -227,6 +228,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Admin + "," + Roles.Staff + "," + Roles.Store, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
         public async Task<ActionResult<MessageResponse>> DeleteShipper(int id)
         {

@@ -14,8 +14,6 @@ namespace LSAPI.Controllers
 {
     [ApiController]
 
-
-    //[Authorize(Policy = "Shipper")]
     
     public class OrderController : Controller
     {
@@ -25,7 +23,7 @@ namespace LSAPI.Controllers
             _orderService = orderService;
         }
 
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/orders")]
         public async Task<ActionResult<OrderResponse>> GetOrder(int id, int status, int storeId, int batchId, int? shipperId,
             string tracking_number, string cancel_reason, decimal distance_price,
@@ -59,7 +57,7 @@ namespace LSAPI.Controllers
             }
         }
 
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/orders/count")]
         public async Task<ActionResult<OrderResponse>> GetCountOrder(int storeId, int shipperId)
         {
@@ -76,7 +74,7 @@ namespace LSAPI.Controllers
 
         }
 
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPost("api/orders")]
         public async Task<ActionResult<MessageResponse>> CreateOrder(OrderRequest request)
         {
@@ -100,7 +98,7 @@ namespace LSAPI.Controllers
 
         }
 
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPut("api/orders")]
         public async Task<ActionResult<MessageResponse>> UpdateOrder(int id, PutOrderRequest orderRequest)
         {
@@ -149,7 +147,7 @@ namespace LSAPI.Controllers
 
         }
 
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpDelete("api/orders")]
         public async Task<ActionResult<MessageResponse>> DeleteOrder(int id)
         {
@@ -179,7 +177,7 @@ namespace LSAPI.Controllers
 
 
         //SHIPPER
-
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPut("shipper/api/orders")]
         public async Task<ActionResult<MessageResponse>> ShipperToStatusOrder(int id, int shipperId, string cancelReason, OrderStatusEnum status)
         {
@@ -202,6 +200,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("shipper/api/orders/statistical")]
         public async Task<ActionResult<TotalPriceResponse>> GetTotalPriceSumByShipperId(int shipperId, int? month, int? year, int? day)
         {
@@ -224,8 +223,9 @@ namespace LSAPI.Controllers
             }
 
         }
-      
-         [HttpGet("shipper/api/orders/statistical-price")]
+
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [HttpGet("shipper/api/orders/statistical-price")]
         public async Task<ActionResult<TotalPriceResponse>> GetTotalPriceSumByShipperId(int shipperId)
          {
             if (shipperId == 0)
@@ -240,7 +240,8 @@ namespace LSAPI.Controllers
              return Ok(rs);
          }
 
-         [HttpGet("shipper/api/orders/rate-cancel")]
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [HttpGet("shipper/api/orders/rate-cancel")]
         public async Task<ActionResult<TotalPriceResponse>> GetCancelRateByShipperId(int shipperId)
          {
             if (shipperId == 0)
@@ -255,6 +256,8 @@ namespace LSAPI.Controllers
              return Ok(rs);
          }
 
+
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("shipper/api/orders/rate-complete")]
         public async Task<ActionResult<TotalPriceResponse>> GetReceiveRateByShipperId(int shipperId)
          {

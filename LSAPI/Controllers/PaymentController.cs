@@ -21,6 +21,7 @@ namespace LSAPI.Controllers
             _paymentService = paymentService;
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<PaymentResponse>> GetPayment(int id, string paymentMethod, int status, string paymentCode
             , string paymentImage, int packageId, int? pageNumber, int? pageSize)
@@ -50,7 +51,7 @@ namespace LSAPI.Controllers
         }
 
 
-
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("api/payments/count")]
         public async Task<ActionResult<PaymentResponse>> GetCountPayment()
         {
@@ -66,6 +67,7 @@ namespace LSAPI.Controllers
 
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost()]
         public async Task<ActionResult<PaymentResponse>> CreatePayment([FromBody] PaymentRequest request)
         {
@@ -84,6 +86,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<PaymentResponse>> UpdatePayment(int id,[FromBody] PutPaymentRequest request)
         {
@@ -114,6 +117,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Admin + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
         public async Task<ActionResult<PaymentResponse>> DeletePayment(int id)
         {

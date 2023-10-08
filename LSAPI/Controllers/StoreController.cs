@@ -23,6 +23,7 @@ namespace LSAPI.Controllers
             _storeService = storeService;
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<StoreResponse>>> GetStore(int id, string storeName, int status, int zoneId, int walletId, int accountId, int? pageNumber, int? pageSize)
         {
@@ -30,12 +31,12 @@ namespace LSAPI.Controllers
             {
                 if (pageNumber.HasValue && pageNumber <= 0)
                 {
-                    return BadRequest("pageNumber phải là số dương");
+                    return BadRequest("Số trang phải là số nguyên dương");
                 }
 
                 if (pageSize.HasValue && pageSize <= 0)
                 {
-                    return BadRequest("pageSize phải là số dương");
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
                 }
                 if (id < 0)
                 {
@@ -67,6 +68,8 @@ namespace LSAPI.Controllers
             }
 
         }
+
+        [AllowAnonymous]
         [HttpPost()]
         public async Task<ActionResult<StoreResponse>> PostStore(StoreRequest request)
         {
@@ -134,6 +137,8 @@ namespace LSAPI.Controllers
             }
 
         }
+
+        [Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<StoreResponse>> PutStore(int id, StoreRequest storeRequest)
         {
@@ -191,6 +196,8 @@ namespace LSAPI.Controllers
             }
 
         }
+
+        [Authorize(Roles = Roles.Admin + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
         public async Task<ActionResult<StoreResponse>> DeleteStore(int id)
         {
@@ -214,6 +221,7 @@ namespace LSAPI.Controllers
 
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("count")]
         public async Task<ActionResult<StoreResponse>> GetCountStore()
         {

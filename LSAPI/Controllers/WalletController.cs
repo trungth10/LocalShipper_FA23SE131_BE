@@ -24,6 +24,7 @@ namespace LSAPI.Controllers
             _walletTransService = walletTransService;
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("wallet-transaction")]
         public async Task<ActionResult<WalletTransactionResponse>> GetWalletTrans(int id, string transactionType, int fromWallet, 
             int toWallet, decimal amount, int? pageNumber, int? pageSize)
@@ -53,6 +54,7 @@ namespace LSAPI.Controllers
 
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("count-wallet-transaction")]
         public async Task<ActionResult<WalletTransactionResponse>> GetCountWalletTrans()
         {
@@ -67,6 +69,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("create-wallet-transaction")]
         public async Task<ActionResult<WalletTransactionResponse>> CreateWalletTrans([FromBody] WalletTransactionRequest request)
         {
@@ -93,6 +96,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut("update-wallet-transaction")]
         public async Task<ActionResult<WalletTransactionResponse>> UpdateWalletTrans(int id, WalletTransactionRequest request)
         {
@@ -127,6 +131,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpDelete("delete-wallet-transaction")]
         public async Task<ActionResult<MessageResponse>> DeleteWalletTrans(int id)
         {
@@ -149,6 +154,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<WalletResponse>> GetWallet(int id, decimal balance, int? pageNumber, int? pageSize)
         {
@@ -164,6 +170,7 @@ namespace LSAPI.Controllers
 
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("count")]
         public async Task<ActionResult<WalletResponse>> GetCountWallet()
         {
@@ -178,6 +185,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost()]
         public async Task<ActionResult<WalletResponse>> CreateWallet([FromBody] WalletRequest request)
         {
@@ -196,6 +204,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<WalletResponse>> UpdateAccount(int id, [FromBody] WalletRequest request)
         {

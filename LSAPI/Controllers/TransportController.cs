@@ -23,6 +23,7 @@ namespace LSAPI.Controllers
             _transportService = transportService;
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<TransportResponse>>> GetTransport(int? id, int? typeId, string? licencePlate, string? transportColor,
                                                         string? transportImage, string? transportRegistration, int? pageNumber, int? pageSize)
@@ -64,7 +65,7 @@ namespace LSAPI.Controllers
         //        return BadRequest($"Không tìm thấy phương tiện");
         //    }
         //}
-
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("api/transports/count")]
         public async Task<ActionResult<TransportResponse>> GetCountTransport()
         {
@@ -81,7 +82,7 @@ namespace LSAPI.Controllers
 
         }
 
-
+        [Authorize(Roles = Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("register-transport")]
         public async Task<ActionResult<TransportResponse>> CreateTransport([FromBody] RegisterTransportRequest request)
         {
@@ -100,6 +101,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<TransportResponse>> UpdateAccount(int id, [FromBody] PutTransportRequest request)
         {
@@ -126,6 +128,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
         public async Task<ActionResult<TransportResponse>> DeleteAccount(int id)
         {

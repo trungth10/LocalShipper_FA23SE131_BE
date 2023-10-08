@@ -22,6 +22,7 @@ namespace LSAPI.Controllers
             _priceInZoneService = priceInZoneService;
         }
 
+        [AllowAnonymous]
         [HttpGet()]
         public async Task<ActionResult<List<PriceInZoneResponse>>> GetPriceInZone(int? id, int? priceId,
             int? zoneId, int? pageNumber, int? pageSize)
@@ -50,6 +51,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("api/price-in-zones/count")]
         public async Task<ActionResult<PriceInZoneResponse>> GetCountPriceInZone()
         {
@@ -66,7 +68,7 @@ namespace LSAPI.Controllers
 
         }
 
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPost("register-price-in-zone")]
         public async Task<ActionResult<PriceInZoneResponse>> CreatePriceInZone([FromBody] RegisterPriceInZoneRequest request)
         {
@@ -89,6 +91,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<PriceInZoneResponse>> UpdatePriceInZone(int id, [FromBody] PutPriceInZoneRequest priceInZonerequest)
         {
@@ -119,6 +122,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
         public async Task<ActionResult<MessageResponse>> DeletePriceItem(int id)
         {

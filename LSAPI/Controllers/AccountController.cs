@@ -29,7 +29,7 @@ namespace LSAPI.Controllers
             _accountService = accountService;           
         }
 
-        [Authorize( Roles= Roles.Admin, AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles= Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/accounts/")]
         public async Task<ActionResult<AccountResponse>> GetAccount(int id, string phone, string email, int role, string fcm_token, int? pageNumber, int? pageSize)
         {
@@ -58,8 +58,8 @@ namespace LSAPI.Controllers
             
         }
 
-        
 
+        [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/accounts/count")]
         public async Task<ActionResult<AccountResponse>> GetCountAccount()
         {
@@ -76,7 +76,7 @@ namespace LSAPI.Controllers
 
         }
 
-
+        [Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPost("api/accounts/register-shipper-account")]
         public async Task<ActionResult<AccountResponse>> RegisterShipperAccount([FromBody] RegisterRequest request)
         {
@@ -111,8 +111,9 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]
         [HttpPost("store/api/accounts/add-shipper")]
-        public async Task<ActionResult<AccountResponse>> RegisterShippePrivate(int storeId ,[FromBody] RegisterRequest request)
+        public async Task<ActionResult<AccountResponse>> RegisterShipperPrivate(int storeId ,[FromBody] RegisterRequest request)
         {
             try
             {
@@ -144,6 +145,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpPut("api/accounts")]
         public async Task<ActionResult<AccountResponse>> UpdateAccount(int id, [FromBody] AccountRequest request)
         {
@@ -176,6 +178,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpDelete("api/accounts")]
         public async Task<ActionResult<AccountResponse>> DeleteAccount(int id)
         {
@@ -245,6 +248,8 @@ namespace LSAPI.Controllers
             }
         }
 
+
+
         [HttpPut("api/accounts/forgot-password")]
         public async Task<ActionResult<AccountResponse>> ForgotPassword(string email)
         {
@@ -256,7 +261,7 @@ namespace LSAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Xem count thất bại: {ex.Message}");
+                return BadRequest($"Thất bại: {ex.Message}");
             }
 
         }
@@ -272,7 +277,7 @@ namespace LSAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Xem count thất bại: {ex.Message}");
+                return BadRequest($"Thất bại: {ex.Message}");
             }
 
         }
