@@ -467,11 +467,12 @@ namespace LocalShipper.Service.Services.Implement
                 id= id,
                 Message = "Xóa gói hàng thành công",
             };
-        }
-        public async Task<int> GetTotalPackageCount()
+        } 
+        public async Task<int> GetTotalPackageCount(int? batchId)
         {
             var count = await _unitOfWork.Repository<Package>()
                 .GetAll()
+                .Where(f => f.BatchId == batchId || batchId == 0)
                 .CountAsync();
 
             return count;

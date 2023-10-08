@@ -281,12 +281,12 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("count")]
-        public async Task<ActionResult<PackageResponse>> GetCountPackage()
+        public async Task<ActionResult<PackageResponse>> GetCountPackage(int batchId)
         {
             try
             {
 
-                var rs = await _packageService.GetTotalPackageCount();
+                var rs = await _packageService.GetTotalPackageCount(batchId);
                 return Ok(rs);
             }
             catch (Exception ex)

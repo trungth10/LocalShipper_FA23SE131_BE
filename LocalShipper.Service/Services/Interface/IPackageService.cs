@@ -19,7 +19,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<PackageResponse> UpdatePackage(int id, PackageRequestForCreate request);
 
         Task<MessageResponse> DeletePackage(int id);
-        Task<int> GetTotalPackageCount();
+        Task<int> GetTotalPackageCount(int? batchId);
         Task<PackageResponse> UpdateStatusPackage(int id, PackageStatusEnum status);
     }
 }
