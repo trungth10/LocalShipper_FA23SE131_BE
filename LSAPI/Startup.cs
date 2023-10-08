@@ -181,9 +181,7 @@ namespace LSAPI
                 );
 
 
-            });
-
-
+            });         
         }
 
 
@@ -199,8 +197,9 @@ namespace LSAPI
             app.UseHttpsRedirection();
             app.UseRouting();
 
-            app.UseAuthentication();
             app.UseAuthorization();
+            app.UseAuthentication();
+            
 
             app.UseEndpoints(endpoints =>
             {

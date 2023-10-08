@@ -28,7 +28,8 @@ namespace LSAPI.Controllers
         {
             _accountService = accountService;           
         }
-       
+
+        [Authorize( Roles= Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/accounts/")]
         public async Task<ActionResult<AccountResponse>> GetAccount(int id, string phone, string email, int role, string fcm_token, int? pageNumber, int? pageSize)
         {
