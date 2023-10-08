@@ -24,6 +24,7 @@ namespace LSAPI.Controllers
             _transactionService = transactionService;
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<TransactionResponse>>> GetTransaction(int id, string transactionMethod, int orderId, int walletId, decimal amount, int? pageNumber, int? pageSize)
         {
@@ -64,7 +65,7 @@ namespace LSAPI.Controllers
         //        return BadRequest($"Không tìm thấy giao dịch");
         //    }
         //}
-
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("api/transactions/count")]
         public async Task<ActionResult<TransactionResponse>> GetCountTransaction()
         {
@@ -81,7 +82,7 @@ namespace LSAPI.Controllers
 
         }
 
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("register-transaction")]
         public async Task<ActionResult<TransactionResponse>> CreateTransaction([FromBody] RegisterTransactionRequest request)
         {
@@ -108,6 +109,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<TransactionResponse>> UpdateAccount(int id, [FromBody] PutTransactionRequest request)
         {
@@ -142,6 +144,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
         public async Task<ActionResult<MessageResponse>> DeleteAccount(int id)
         {

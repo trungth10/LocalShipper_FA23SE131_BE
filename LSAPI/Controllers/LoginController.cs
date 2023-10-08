@@ -26,7 +26,6 @@ namespace LSAPI.Controllers
 
 
         [HttpPost]
-
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (request == null || string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))

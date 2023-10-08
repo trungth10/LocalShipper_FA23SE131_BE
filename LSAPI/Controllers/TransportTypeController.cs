@@ -23,7 +23,7 @@ namespace LSAPI.Controllers
         }
 
 
-
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<TransportTypeResponse>>> GetTransportType(int id, string transportType, int? pageNumber, int? pageSize)
         {
@@ -51,6 +51,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("api/transport-types/count")]
         public async Task<ActionResult<TransportTypeResponse>> GetCountTransportType()
         {
@@ -67,7 +68,7 @@ namespace LSAPI.Controllers
 
         }
 
-
+        [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpPost("register-transport-type")]
         public async Task<ActionResult<TransportTypeResponse>> CreateTransportType([FromBody] RegisterTransportTypeRequest request)
         {
@@ -82,6 +83,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<TransportTypeResponse>> UpdateTransportType(int id, [FromBody] PutTransportTypeRequest request)
         {
@@ -104,6 +106,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
         public async Task<ActionResult<MessageResponse>> DeleteAccount(int id)
         {

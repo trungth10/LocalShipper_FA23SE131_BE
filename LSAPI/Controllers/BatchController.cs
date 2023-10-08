@@ -26,6 +26,7 @@ namespace LSAPI.Controllers
             _batchService = batchService;
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<BatchResponse>>> GetBatch(int id, string batchName, int? pageNumber, int? pageSize)
         {
@@ -33,12 +34,12 @@ namespace LSAPI.Controllers
             {
                 if (pageNumber.HasValue && pageNumber <= 0)
                 {
-                    return BadRequest("pageNumber phải là số nguyên dương");
+                    return BadRequest("Số trang phải là số nguyên dương");
                 }
 
                 if (pageSize.HasValue && pageSize <= 0)
                 {
-                    return BadRequest("pageSize phải là số nguyên dương");
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
                 }
                 if (id < 0 )
                 {
@@ -58,6 +59,7 @@ namespace LSAPI.Controllers
 
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPost()]
         public async Task<ActionResult<BatchResponse>> PostBatch(BatchRequest request)
         {
@@ -65,33 +67,33 @@ namespace LSAPI.Controllers
             {
                 if(request.StoreId <= 0 )
                 {
-                    return BadRequest("storeId phải là 1 số dương");
+                    return BadRequest("StoreId phải là 1 số nguyên dương");
                 }
 
                 var regex = new Regex("^[a-zA-Z0-9 ]+$"); 
                 if (!regex.IsMatch(request.BatchName))
                 {
-                    return BadRequest("batchName không được chứa ký tự đặc biệt");
+                    return BadRequest("Tên lô hàng không được chứa ký tự đặc biệt");
                 }
                 if (!regex.IsMatch(request.BatchDescription))
                 {
-                    return BadRequest("batchDescription không được chứa ký tự đặc biệt");
+                    return BadRequest("Mô tả không được chứa ký tự đặc biệt");
                 }
                 if (request.Status <= 0)
                 {
-                    return BadRequest("status phải phải là 1 số dương");
+                    return BadRequest("Status không hợp lệ");
                 }
                 var rs = await _batchService.CreateBatch(request);
                 return Ok(rs);
             }
             catch (Exception ex)
             {
-                return BadRequest($"thêm Batch thất bại: {ex.Message}");
+                return BadRequest($"Thêm Batch thất bại: {ex.Message}");
             }
 
         }
 
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<BatchResponse>> PutBatch(int id, BatchRequest batchRequest)
         {
@@ -133,6 +135,7 @@ namespace LSAPI.Controllers
 
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
         public async Task<ActionResult<BatchResponse>> DeleteBatch(int id)
         {
@@ -157,7 +160,7 @@ namespace LSAPI.Controllers
         }
 
 
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("count")]
         public async Task<ActionResult<BatchResponse>> GetCountBatch()
         {

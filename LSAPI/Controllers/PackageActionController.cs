@@ -23,6 +23,7 @@ namespace LSAPI.Controllers
             _packageActionService = packageActionService;
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<PackageActionResponse>>> GetPackageAction(int id, string actionType, int? pageNumber, int? pageSize)
         {
@@ -34,12 +35,12 @@ namespace LSAPI.Controllers
                 }
                 if (pageNumber.HasValue && pageNumber <= 0)
                 {
-                    return BadRequest("pageNumber phải là số nguyên dương");
+                    return BadRequest("Số trang phải là số nguyên dương");
                 }
 
                 if (pageSize.HasValue && pageSize <= 0)
                 {
-                    return BadRequest("pageSize phải là số nguyên dương");
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
                 }
                 var rs = await _packageActionService.GetPackageAction(id, actionType, pageNumber, pageSize);
                 return Ok(rs);
@@ -50,6 +51,8 @@ namespace LSAPI.Controllers
             }
 
         }
+
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPost()]
         public async Task<ActionResult<PackageActionResponse>> PostPackageAction(PackageActionRequest request)
         {
@@ -64,6 +67,8 @@ namespace LSAPI.Controllers
             }
            
         }
+
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<PackageActionResponse>> PutPackageAction(int id, PackageActionRequest packageActionRequest)
         {
@@ -87,6 +92,7 @@ namespace LSAPI.Controllers
             
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
         public async Task<ActionResult<PackageActionResponse>> DeletePackageAction(int id)
         {
@@ -111,7 +117,7 @@ namespace LSAPI.Controllers
            
         }
 
-
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpGet("count")]
         public async Task<ActionResult<PackageActionResponse>> GetCountPackageAction()
         {

@@ -22,6 +22,7 @@ namespace LSAPI.Controllers
             _packageTypeService = packageTypeService;
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<PackageTypeResponse>>> GetPackageType(int id, string packageType, int? pageNumber, int? pageSize)
         {
@@ -33,12 +34,12 @@ namespace LSAPI.Controllers
                 }
                 if (pageNumber.HasValue && pageNumber <= 0)
                 {
-                    return BadRequest("pageNumber phải là số nguyên dương");
+                    return BadRequest("Số trang phải là số nguyên dương");
                 }
 
                 if (pageSize.HasValue && pageSize <= 0)
                 {
-                    return BadRequest("pageSize phải là số nguyên dương");
+                    return BadRequest("số phần tử trong trang phải là số nguyên dương");
                 }
 
 
@@ -51,6 +52,8 @@ namespace LSAPI.Controllers
             }
             
         }
+
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPost()]
         public async Task<ActionResult<PackageTypeResponse>> PostPackageType(PackageTypeRequest request)
         {
@@ -68,6 +71,7 @@ namespace LSAPI.Controllers
            
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<PackageTypeResponse>> PutPackageType(int id, PackageTypeRequest packageTypeRequest)
         {
@@ -92,6 +96,7 @@ namespace LSAPI.Controllers
           
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("count")]
         public async Task<ActionResult<PackageTypeResponse>> GetCountPackageType()
         {

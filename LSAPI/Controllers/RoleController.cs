@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using Microsoft.AspNetCore.Authorization;
+using LocalShipper.Service.Helpers;
 
 namespace LSAPI.Controllers
 {
@@ -20,6 +21,7 @@ namespace LSAPI.Controllers
             _roleService = roleService;
         }
 
+        [Authorize(Roles = Roles.Admin + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<RoleResponse>>> GetRole(int? id, string? name, int? pageNumber, int? pageSize)
         {
@@ -47,6 +49,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/roles/count")]
         public async Task<ActionResult<RoleResponse>> GetCountRole()
         {
@@ -63,7 +66,7 @@ namespace LSAPI.Controllers
 
         }
 
-
+        [Authorize(Roles = Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpPost("register-role")]
         public async Task<ActionResult<RoleResponse>> CreateRole([FromBody] RegisterRoleRequest request)
         {
@@ -78,6 +81,7 @@ namespace LSAPI.Controllers
             }
         }
 
+        [Authorize(Roles = Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<RoleResponse>> UpdateRole(int id, PutRoleRequest roleRequest)
         {

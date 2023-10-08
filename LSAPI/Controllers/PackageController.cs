@@ -23,6 +23,7 @@ namespace LSAPI.Controllers
             _packageService = packageService;
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<PackageResponse>>> GetPackage(int batchId, int id,
             int status, int actionId, int typeId, int storeId, string customerName,
@@ -32,12 +33,12 @@ namespace LSAPI.Controllers
             {
                 if (pageNumber.HasValue && pageNumber <= 0)
                 {
-                    return BadRequest("pageNumber phải là số nguyên dương");
+                    return BadRequest("Số trang phải là số nguyên dương");
                 }
 
                 if (pageSize.HasValue && pageSize <= 0)
                 {
-                    return BadRequest("pageSize phải là số nguyên dương");
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
                 }
                 if (batchId < 0)
                 {
@@ -74,6 +75,8 @@ namespace LSAPI.Controllers
             }
 
         }
+
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPost()]
         public async Task<ActionResult<PackageResponse>> PostPackage(PackageRequestForCreate request)
         {
@@ -147,6 +150,9 @@ namespace LSAPI.Controllers
             }
 
         }
+
+
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<PackageResponse>> PutPackage(int id, PackageRequestForCreate request)
         {
@@ -229,6 +235,7 @@ namespace LSAPI.Controllers
 
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut("status")]
         public async Task<ActionResult<PackageResponse>> PutStatusPackage(int id, PackageStatusEnum status)
         {
@@ -257,6 +264,7 @@ namespace LSAPI.Controllers
 
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
         public async Task<ActionResult<PackageResponse>> DeletePackage(int id)
         {
@@ -280,6 +288,7 @@ namespace LSAPI.Controllers
 
         }
 
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("count")]
         public async Task<ActionResult<PackageResponse>> GetCountPackage(int batchId)
         {
