@@ -3,15 +3,19 @@ using LocalShipper.Data.Models;
 
 using LocalShipper.Data.UnitOfWork;
 using LocalShipper.Service.DTOs.Response;
+using LocalShipper.Service.Exceptions;
+using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,16 +26,19 @@ namespace LocalShipper.Service.Services.Implement
     {
         private readonly IUnitOfWork _unitOfWork;
         private IMapper _mapper;
-     
+
         private readonly IConfiguration _configuration;
         private readonly ILogger<LoginService> _logger;
 
-        public LoginService(IMapper mapper, IUnitOfWork unitOfWork,IConfiguration configuration,ILogger<LoginService> logger)
+        private readonly IEmailService _emailService;
+
+        public LoginService(IMapper mapper, IUnitOfWork unitOfWork, IConfiguration configuration, ILogger<LoginService> logger, IEmailService emailService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _configuration = configuration;
             _logger = logger;
+            _emailService = emailService;
         }
 
 
@@ -105,9 +112,9 @@ namespace LocalShipper.Service.Services.Implement
                 {
                     Success = true,
                     AccessToken = tokenString,
-                    Id = account.Id, 
+                    Id = account.Id,
                     UserName = account.Email,
-                    FullName = account.Fullname,  
+                    FullName = account.Fullname,
                     Role = account.Role.Name
                 };
             }
@@ -120,6 +127,136 @@ namespace LocalShipper.Service.Services.Implement
                     Message = "An error occurred during authentication."
                 };
             }
+        }
+
+        public async Task<LoginResponse> LoginOTP(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return new LoginResponse
+                {
+                    Success = false,
+                    Message = "Email are required."
+                };
+            }
+
+            try
+            {
+                var account = await _unitOfWork.Repository<Account>()
+                    .GetAll()
+                    .Where(a => a.Email == email)
+                    .Include(a => a.Role)
+                    .FirstOrDefaultAsync();
+
+
+
+                if (account == null)
+                {
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = "Invalid email"
+                    };
+                }
+
+                if (account.Active == false)
+                {
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = "Account is not active."
+                    };
+                }
+
+                Random random = new Random();
+                int otp = random.Next(1000, 9999);
+
+                account.FcmToken = otp.ToString();
+                await _unitOfWork.Repository<Account>().Update(account, account.Id);
+                await _unitOfWork.CommitAsync();
+
+                string subject = "Local Shipper - Login OTP";
+                string content = $"Vui lòng nhập OTP: {otp} để xác thực.";
+
+                var message = new Message(new List<string> { email }, subject, content);
+                _emailService.SendEmail(message);
+
+                return new LoginResponse
+                {
+                    Success = true,
+                    Message = "Kiểm tra email để xác thực bằng cách nhập OTP"
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during authentication.");
+                return new LoginResponse
+                {
+                    Success = false,
+                    Message = "An error occurred during authentication."
+                };
+            }
+        }
+
+        public async Task<LoginResponse> VerifyLoginOTP(string email, string otp)
+        {
+            var account = await _unitOfWork.Repository<Account>()
+                     .GetAll()
+                     .Where(a => a.Email == email)
+                     .Include(a => a.Role)
+                     .FirstOrDefaultAsync();
+            if (account == null)
+            {
+
+                throw new CrudException(HttpStatusCode.NotFound, "Email không tồn tại", email.ToString());
+            }
+            if (otp != account.FcmToken)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Sai mã OTP", email.ToString());
+            }
+
+            if(account != null)
+            {
+                var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, account.Email),
+            new Claim(ClaimTypes.Role, account.Role.Name),
+        };
+
+                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtAuth:Key"]));
+                var issuer = _configuration["JwtAuth:Issuer"];
+                var audience = _configuration["JwtAuth:Audience"];
+
+                var token = new JwtSecurityToken(
+                    issuer: issuer,
+                    audience: audience,
+                    claims: claims,
+                    expires: DateTime.UtcNow.AddHours(1),
+                    signingCredentials: new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256)
+                );
+
+                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+                return new LoginResponse
+                {
+                    Success = true,
+                    AccessToken = tokenString,
+                    Id = account.Id,
+                    UserName = account.Email,
+                    FullName = account.Fullname,
+                    Role = account.Role.Name
+                };
+
+            }
+            else
+            {
+                return new LoginResponse
+                {
+                    Success = false,
+                    Message = "Tài khoản không tồn tại."
+                };
+            }
+            
         }
 
 

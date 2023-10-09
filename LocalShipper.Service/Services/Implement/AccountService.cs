@@ -94,7 +94,6 @@ namespace LocalShipper.Service.Services.Implement
             if (account == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Email không tồn tại", email.ToString());        
-                return false;
             }
             
             string otp = GenerateOTP();
@@ -132,7 +131,11 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<bool> VerifyOTP(string email, string otp)
         {
-            var account = _unitOfWork.Repository<Account>().Find(x => x.Email == email && x.FcmToken == otp);
+            var account = _unitOfWork.Repository<Account>().Find(x => x.Email == email);
+            if (account.FcmToken != otp)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Mã xác thực không chính xác", email.ToString());
+            }
             if (account != null)
             {
                 account.Active = true;
@@ -412,7 +415,11 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<bool> VerifyForgotPassword(string email, string otp)
         {
-            var account = _unitOfWork.Repository<Account>().Find(x => x.Email == email && x.FcmToken == otp);
+            var account = _unitOfWork.Repository<Account>().Find(x => x.Email == email);
+            if (account.FcmToken != otp)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Mã xác thực không chính xác", email);
+            }
             if (account != null)
             { 
                 return true;

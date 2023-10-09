@@ -59,6 +59,55 @@ namespace LSAPI.Controllers
             return BadRequest("Invalid result.");
         }
 
+        [HttpPost("otp")]
+        public async Task<IActionResult> LoginOTP(string email)
+        {
+            if (email == null || string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            var result = await _iloginService.LoginOTP(email);
+
+            dynamic dynamicResult = result;
+
+            if (dynamicResult != null)
+            {
+                if (dynamicResult.Success)
+                {
+                    return Ok(new
+                    {
+                        AccessToken = dynamicResult.AccessToken,
+                        id = result.Id,
+                        UserName = result.UserName,
+                        FullName = result.FullName,
+                        Role = result.Role,
+                    });
+                }
+                else
+                {
+                    return Unauthorized(dynamicResult.Message);
+                }
+            }
+
+            return BadRequest("Invalid result.");
+        }
+
+        [HttpGet("verify-otp")]
+        public async Task<ActionResult> VerifyOTP(string email, string otp)
+        {
+            try
+            {
+
+                var rs = await _iloginService.VerifyLoginOTP(email, otp);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Thất bại: {ex.Message}");
+            }
+        }
+
         [HttpGet("accesstoken-to-role")]
         public async Task<IActionResult> GetUserRole(string accesstoken)
         {
