@@ -63,7 +63,7 @@ namespace LocalShipper.Service.Services.Implement
                 Active = false,
                 Phone = request.Phone,
                 FcmToken = otp,
-                RoleId = 5,               
+                RoleId = request.RoleId,               
                 Password = passwordHash
             };
 
