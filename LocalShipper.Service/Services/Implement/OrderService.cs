@@ -228,6 +228,14 @@ namespace LocalShipper.Service.Services.Implement
                                                       .Where(a => (totalPrice == null || totalPrice == 0) || a.TotalPrice == totalPrice)
                                                       .Where(a => string.IsNullOrWhiteSpace(other) || a.Other.Contains(other.Trim()));
 
+            var orderGetBatch = await _unitOfWork.Repository<Order>()
+                   .GetAll()
+                   .Include(o => o.Store)
+                   .Include(o => o.Batch)
+                   .Include(o => o.Shipper)
+                   .Where(a => a.Id == id)
+                   .FirstOrDefaultAsync();
+
 
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
@@ -239,10 +247,29 @@ namespace LocalShipper.Service.Services.Implement
             }
 
             var orderList = await orders.ToListAsync();
+
+            var package = await _unitOfWork.Repository<Package>()
+                   .GetAll()
+                   .Where(a => a.BatchId == orderGetBatch.BatchId)
+                   .ToListAsync();
+
+            if(orderGetBatch == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Lô hàng không có hoặc không tồn tại", id.ToString());
+            }
+
+            if (package == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Lô hàng không có hoặc không tồn tại gói hàng", id.ToString());
+            }
+
             if (orderList == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Order không có hoặc không tồn tại", id.ToString());
             }
+
+            decimal package_price = (decimal)package.Sum(o => o.PackagePrice);
+            int count = package.Count;
 
             var orderResponses = orderList.Select(order => new OrderResponse
             {
@@ -263,6 +290,8 @@ namespace LocalShipper.Service.Services.Implement
                 subTotalprice = order.SubtotalPrice,
                 totalPrice = order.TotalPrice,
                 other = order.Other,
+                package_price = package_price,
+                countPackage = count,
 
                 Store = order.Store != null ? new StoreResponse
                 {

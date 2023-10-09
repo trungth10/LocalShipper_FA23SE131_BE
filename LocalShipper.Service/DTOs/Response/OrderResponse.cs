@@ -25,6 +25,10 @@ namespace LocalShipper.Service.DTOs.Response
         public decimal? subTotalprice { get; set; }
         public decimal? totalPrice { get; set; }
         public string other { get; set; }
+
+        public decimal? package_price { get; set; }
+
+        public int countPackage { get; set; }
         public StoreResponse Store { get; set; }
         public BatchResponse Batches { get; set; }
         public ShipperResponse Shipper { get; set; }
