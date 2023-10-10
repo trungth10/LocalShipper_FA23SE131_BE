@@ -228,13 +228,12 @@ namespace LocalShipper.Service.Services.Implement
                                                       .Where(a => (totalPrice == null || totalPrice == 0) || a.TotalPrice == totalPrice)
                                                       .Where(a => string.IsNullOrWhiteSpace(other) || a.Other.Contains(other.Trim()));
 
-            var orderGetBatch = await _unitOfWork.Repository<Order>()
-                   .GetAll()
-                   .Include(o => o.Store)
-                   .Include(o => o.Batch)
-                   .Include(o => o.Shipper)
-                   .Where(a => a.Id == id)
-                   .FirstOrDefaultAsync();
+            var _orderGetBatch = _unitOfWork.Repository<Order>();
+            var package =  _unitOfWork.Repository<Package>();
+            decimal package_price = 0;
+            int count = 0;
+            var packagePrices = new Dictionary<int, decimal>();
+            var packageCounts = new Dictionary<int, int>();
 
 
             // Xác định giá trị cuối cùng của pageNumber
@@ -247,29 +246,40 @@ namespace LocalShipper.Service.Services.Implement
             }
 
             var orderList = await orders.ToListAsync();
-
-            var package = await _unitOfWork.Repository<Package>()
-                   .GetAll()
-                   .Where(a => a.BatchId == orderGetBatch.BatchId)
-                   .ToListAsync();
-
-            if(orderGetBatch == null)
-            {
-                throw new CrudException(HttpStatusCode.NotFound, "Lô hàng không có hoặc không tồn tại", id.ToString());
-            }
-
-            if (package == null)
-            {
-                throw new CrudException(HttpStatusCode.NotFound, "Lô hàng không có hoặc không tồn tại gói hàng", id.ToString());
-            }
+                
 
             if (orderList == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Order không có hoặc không tồn tại", id.ToString());
             }
 
-            decimal package_price = (decimal)package.Sum(o => o.PackagePrice);
-            int count = package.Count;
+            foreach (var order in orderList)
+            {
+                int currentOrderId = order.Id;
+
+                if (!packagePrices.ContainsKey(currentOrderId))
+                {
+                    var orderGetBatch = await _orderGetBatch
+                      .GetAll()
+                      .Include(o => o.Store)
+                      .Include(o => o.Batch)
+                      .Include(o => o.Shipper)
+                      .Where(a => a.Id == currentOrderId)
+                      .FirstOrDefaultAsync();
+
+                    var _package = await package
+                      .GetAll()
+                      .Where(a => a.BatchId == orderGetBatch.BatchId)
+                      .ToListAsync();
+
+                    package_price = (decimal)_package.Sum(o => o.PackagePrice);
+                    packagePrices.Add(currentOrderId, package_price);
+
+
+                    packageCounts.Add(currentOrderId, _package.Count);
+                }
+                    
+            }
 
             var orderResponses = orderList.Select(order => new OrderResponse
             {
@@ -290,8 +300,8 @@ namespace LocalShipper.Service.Services.Implement
                 subTotalprice = order.SubtotalPrice,
                 totalPrice = order.TotalPrice,
                 other = order.Other,
-                package_price = package_price,
-                countPackage = count,
+                package_price = packagePrices.ContainsKey(order.Id) ? packagePrices[order.Id] : 0,
+                countPackage = packageCounts.ContainsKey(order.Id) ? packageCounts[order.Id] : 0,
 
                 Store = order.Store != null ? new StoreResponse
                 {
