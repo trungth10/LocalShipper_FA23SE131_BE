@@ -429,7 +429,7 @@ namespace LocalShipper.Service.Services.Implement
         }
  
 
-        public async Task<PackageResponse> UpdateStatusPackage(int id, PackageStatusEnum status)
+        public async Task<PackageResponse> UpdateStatusPackage(int id, PackageStatusEnum status, string? cancelReason)
         {
             var package = await _unitOfWork.Repository<Package>()
                 .GetAll().Include(b => b.Type).Include(b => b.Action).Include(b => b.Batch)
@@ -439,8 +439,14 @@ namespace LocalShipper.Service.Services.Implement
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy gói hàng", id.ToString());
             }
-
-            package.Status = (int)status;
+            if((int)status != 3 && cancelReason != null) { throw new CrudException(HttpStatusCode.NotFound, "khong co phep nhap ly do vi khong trung status", id.ToString()); } 
+            else
+            {
+                package.Status = (int)status;
+                package.CancelReason = cancelReason;
+            }
+           
+            
 
             await _unitOfWork.Repository<Package>().Update(package, id);
             await _unitOfWork.CommitAsync();
@@ -476,6 +482,47 @@ namespace LocalShipper.Service.Services.Implement
                 .CountAsync();
 
             return count;
+        }
+        public async Task<decimal?> GetDistanceFromDistancePrice(int? packageId)
+        {
+            decimal distance = 0;
+            var distancePrice1 = await _unitOfWork.Repository<Package>().GetAll().Where(b => b.Id == packageId).Select(b => b.DistancePrice)
+                .FirstOrDefaultAsync();
+            var storeIdOfPackage = await _unitOfWork.Repository<Package>().GetAll().Where(b => b.Id == packageId).Select(b => b.StoreId)
+              .FirstOrDefaultAsync();
+
+            var storeId = await _unitOfWork.Repository<Package>().GetAll().Select(b => b.StoreId)
+                           .FirstOrDefaultAsync();
+
+            var priceL = await _unitOfWork.Repository<PriceL>().GetAll()
+                   .FirstOrDefaultAsync(b => b.StoreId == storeIdOfPackage);
+
+            if (priceL != null)
+            {
+                var priceItems = await _unitOfWork.Repository<PriceItem>().GetAll()
+                    .Where(b => b.PriceId == priceL.Id)
+                    .ToListAsync();
+                var id = priceItems.Select(b => b.Id).ToList();
+
+                var firstId = id.FirstOrDefault();
+
+                var secondId = id.Skip(1).FirstOrDefault();
+
+                var price1 = await _unitOfWork.Repository<PriceItem>().GetAll().Where(b => b.Id == firstId).Select(b => b.Price).FirstOrDefaultAsync();
+                var maxDistance1 = await _unitOfWork.Repository<PriceItem>().GetAll().Where(b => b.Id == firstId).Select(b => b.MaxDistance).FirstOrDefaultAsync();
+                var price2 = await _unitOfWork.Repository<PriceItem>().GetAll().Where(b => b.Id == secondId).Select(b => b.Price).FirstOrDefaultAsync();
+                var maxDistance2 = await _unitOfWork.Repository<PriceItem>().GetAll().Where(b => b.Id == secondId).Select(b => b.MaxDistance).FirstOrDefaultAsync();
+                if(distancePrice1 > (price1 * (decimal)maxDistance1))
+                {
+                    return distance = (decimal)maxDistance1 + ((distancePrice1 - price1 * (decimal)maxDistance1) / price2);
+                }else
+                {
+                   return distance = distancePrice1 / price1;
+                }
+                
+            }
+
+            return distance;
         }
     }
 }
