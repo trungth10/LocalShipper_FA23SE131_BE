@@ -48,4 +48,9 @@ namespace LocalShipper.Service.DTOs.Request
         public int? TypeId { get; set; }
        
     }
+    public class Distance
+    {
+        public int Distance1 { get; set; }
+        public int StoreId { get; set; }
+    }
 }

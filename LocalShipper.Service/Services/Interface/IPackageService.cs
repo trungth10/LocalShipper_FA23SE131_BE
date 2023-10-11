@@ -20,6 +20,7 @@ namespace LocalShipper.Service.Services.Interface
 
         Task<MessageResponse> DeletePackage(int id);
         Task<int> GetTotalPackageCount(int? batchId);
-        Task<PackageResponse> UpdateStatusPackage(int id, PackageStatusEnum status);
+        Task<PackageResponse> UpdateStatusPackage(int id, PackageStatusEnum status, string? cancelReason);
+        Task<decimal?> GetDistanceFromDistancePrice(int? packageId);
     }
 }

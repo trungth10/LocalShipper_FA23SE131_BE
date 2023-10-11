@@ -1,4 +1,5 @@
-﻿using LocalShipper.Service.DTOs.Request;
+﻿using LocalShipper.Data.Models;
+using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
 using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Implement;
@@ -219,7 +220,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("ActionId phải là số nguyên dương");
                 }
-                if (request.TypeId <=0)
+                if (request.TypeId <= 0)
                 {
                     return BadRequest("TypeId phải là số nguyên dương");
                 }
@@ -237,7 +238,7 @@ namespace LSAPI.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut("status")]
-        public async Task<ActionResult<PackageResponse>> PutStatusPackage(int id, PackageStatusEnum status)
+        public async Task<ActionResult<PackageResponse>> PutStatusPackage(int id, PackageStatusEnum status, string? cancelReason)
         {
             try
             {
@@ -250,11 +251,11 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Id phải là số nguyên dương");
                 }
-                if(status <= 0)
+                if (status <= 0)
                 {
                     return BadRequest("status phải là số dương");
                 }
-                var rs = await _packageService.UpdateStatusPackage(id, status);
+                var rs = await _packageService.UpdateStatusPackage(id, status, cancelReason);
                 return Ok(rs);
             }
             catch (Exception ex)
@@ -304,5 +305,13 @@ namespace LSAPI.Controllers
             }
 
         }
+
+        //[HttpGet("zzz")]
+        //public async Task<ActionResult<decimal>> GetDistancePriceToPrice(int? packageId)
+        //{
+        //    var rs = await _packageService.GetDistanceFromDistancePrice(packageId);
+        //    return Ok(rs);
+
+        //}
     }
 }
