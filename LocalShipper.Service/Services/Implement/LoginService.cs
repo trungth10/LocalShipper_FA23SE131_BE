@@ -17,6 +17,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -55,6 +56,7 @@ namespace LocalShipper.Service.Services.Implement
 
             try
             {
+               // CreatePasswordHash(password, out string passwordHash);
                 var account = await _unitOfWork.Repository<Account>()
                     .GetAll()
                     .Where(a => a.Email == email && a.Password == password)
@@ -128,6 +130,19 @@ namespace LocalShipper.Service.Services.Implement
                 };
             }
         }
+
+        private void CreatePasswordHash(string password, out string passwordHash)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+                byte[] hashBytes = hmac.ComputeHash(passwordBytes);
+
+                passwordHash = Convert.ToBase64String(hashBytes);
+            }
+        }
+
+
 
         public async Task<LoginResponse> LoginOTP(string email)
         {

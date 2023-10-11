@@ -79,6 +79,12 @@ namespace LocalShipper.Service.Services.Implement
                 order.PickupTime = DateTime.Now;
             }
 
+            if (status == OrderStatusEnum.IDLE || string.IsNullOrWhiteSpace(cancelReason))
+            {
+                order.Status = (int)status;
+                order.ShipperId = null;
+            }
+
             if (status == OrderStatusEnum.COMPLETED && string.IsNullOrWhiteSpace(cancelReason))
             {
                 order.Status = (int)status;

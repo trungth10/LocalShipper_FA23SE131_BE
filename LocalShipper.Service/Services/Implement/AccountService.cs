@@ -46,15 +46,13 @@ namespace LocalShipper.Service.Services.Implement
         public async Task<AccountResponse> RegisterShipperAccount(RegisterRequest request)
         {
             var emailExisted = _unitOfWork.Repository<Account>().Find(x => x.Email == request.Email);
-            
+
             if (emailExisted != null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Email đã tồn tại", request.Email.ToString());
             }
-            string otp = GenerateOTP();
-            CreatePasswordHash(request.Password, out string passwordHash);
-          
-
+            //string otp = GenerateOTP();
+           // CreatePasswordHash(request.Password, out string passwordHash, salt);
 
             Account account = new Account
             {               
@@ -62,9 +60,9 @@ namespace LocalShipper.Service.Services.Implement
                 Email = request.Email,
                 Active = false,
                 Phone = request.Phone,
-                FcmToken = otp,
+               // FcmToken = otp,
                 RoleId = request.RoleId,               
-                Password = passwordHash
+                Password = request.Password,
             };
 
             await _unitOfWork.Repository<Account>().InsertAsync(account);
@@ -83,10 +81,30 @@ namespace LocalShipper.Service.Services.Implement
                 Active = account.Active,
                 FcmToken = account.FcmToken,
                 CreateDate = account.CreateDate,
-                ImageUrl = account.ImageUrl,                                                                                       
+                ImageUrl = account.ImageUrl,                   
             };           
         }
+        /*private void CreatePasswordHash(string password, out string passwordHash, byte[] salt)
+        {
+            using (var hmac = new HMACSHA512(salt))
+            {
+                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+                byte[] hashBytes = hmac.ComputeHash(passwordBytes);
 
+                passwordHash = Convert.ToBase64String(hashBytes);
+            }
+        }
+        private byte[] GenerateSalt(int length = 16)
+        {
+            byte[] salt = new byte[length];
+
+            using (var rng = new RNGCryptoServiceProvider())
+            {
+                rng.GetBytes(salt);
+            }
+
+            return salt;
+        }*/
         public async Task<bool> SendOTPAgain (string email)
         {
             var account = _unitOfWork.Repository<Account>().Find(x => x.Email == email);
@@ -121,13 +139,7 @@ namespace LocalShipper.Service.Services.Implement
         }
 
 
-        private void CreatePasswordHash(string password, out string passwordHash)
-        {
-            using (var hmac = new HMACSHA512())
-            {               
-                passwordHash = Convert.ToBase64String(hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)));
-            }
-        }
+        
 
         public async Task<bool> VerifyOTP(string email, string otp)
         {
@@ -317,7 +329,7 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Email đã tồn tại", request.Email.ToString());
             }
             string otp = GenerateOTP();
-            CreatePasswordHash(request.Password, out string passwordHash);
+           // CreatePasswordHash(request.Password, out string passwordHash);
 
 
 
@@ -329,7 +341,7 @@ namespace LocalShipper.Service.Services.Implement
                 Phone = request.Phone,
                 FcmToken = otp,
                 RoleId = 5,
-                Password = passwordHash
+                Password = request.Password
             };
             await _unitOfWork.Repository<Account>().InsertAsync(account);
             await _unitOfWork.CommitAsync();
