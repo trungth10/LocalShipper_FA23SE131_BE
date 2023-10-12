@@ -25,9 +25,12 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/orders")]
-        public async Task<ActionResult<OrderResponse>> GetOrder(int id, int status, int storeId, int batchId, int? shipperId,
-            string tracking_number, string cancel_reason, decimal distance_price,
-            decimal subtotal_price, decimal totalPrice, string other, int? pageNumber, int? pageSize)
+        public async Task<ActionResult<OrderResponse>> GetOrder(int id, int status, int storeId, int shipperId,
+                                     string tracking_number, string cancel_reason, decimal distance_price,
+                                     decimal subtotal_price, decimal COD, decimal totalPrice, string other, int routeId,
+                                     int capacity, int package_weight, int package_width, int package_height, int package_length,
+                                     string customer_city, string customer_commune, string customer_district, string customer_phone,
+                                     string customer_name, string customer_email, int actionId, int typeId, int? pageNumber, int? pageSize)
         {
             try
             {
@@ -45,8 +48,11 @@ namespace LSAPI.Controllers
                     return BadRequest("Id không hợp lệ");
                 }
 
-                var response = await _orderService.GetOrder(id, status, storeId, batchId, shipperId, 
-                    tracking_number, cancel_reason, distance_price, subtotal_price, totalPrice, other, pageNumber, pageSize);
+                var response = await _orderService.GetOrder(id, status, storeId, shipperId,
+                    tracking_number, cancel_reason, distance_price, subtotal_price, COD, totalPrice, other,
+                    routeId, capacity, package_weight, package_width, package_height, package_length,
+                    customer_city, customer_commune, customer_district, customer_phone, customer_name,
+                    customer_email, actionId, typeId, pageNumber, pageSize);
 
 
                 return Ok(response);
@@ -74,78 +80,9 @@ namespace LSAPI.Controllers
 
         }
 
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
-        [HttpPost("api/orders")]
-        public async Task<ActionResult<MessageResponse>> CreateOrder(OrderRequest request)
-        {
-            try
-            {
-                if (request.storeId <= 0)
-                {
-                    return BadRequest("StoreId phải là số nguyên dương");
-                }
-                if (request.batchId <= 0)
-                {
-                    return BadRequest("BatchId phải là số nguyên dương");
-                }
-                var rs = await _orderService.CreateOrder(request);
-                return Ok(rs);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Tạo đơn hàng thất bại: {ex.Message}");
-            }
+       
 
-        }
-
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
-        [HttpPut("api/orders")]
-        public async Task<ActionResult<MessageResponse>> UpdateOrder(int id, PutOrderRequest orderRequest)
-        {
-            try
-            {
-                if (id == 0)
-                {
-                    return BadRequest("Vui lòng nhập Id");
-                }
-                if (id < 0)
-                {
-                    return BadRequest("Id phải là số nguyên dương");
-                }
-                if (orderRequest.storeId <= 0)
-                {
-                    return BadRequest("StoreId phải là số nguyên dương");
-                }
-                if (orderRequest.batchId <= 0)
-                {
-                    return BadRequest("BatchId phải là số nguyên dương");
-                }
-                if (orderRequest.status <= 0)
-                {
-                    return BadRequest("Status không hợp lệ");
-                }
-                if (orderRequest.distancePrice <= 0)
-                {
-                    return BadRequest("Số tiền phải là số dương");
-                }
-                if (orderRequest.subTotalprice <= 0)
-                {
-                    return BadRequest("Số tiền phải là số dương");
-                }
-                if (orderRequest.totalPrice <= 0)
-                {
-                    return BadRequest("Số tiền phải là số dương");
-                }
-
-                var rs = await _orderService.UpdateOrder(id, orderRequest);
-                return Ok(rs);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Cập nhật đơn hàng thất bại: {ex.Message}");
-            }
-
-        }
+        
 
         [Authorize(Roles = Roles.Store + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpDelete("api/orders")]

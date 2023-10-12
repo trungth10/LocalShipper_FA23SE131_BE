@@ -10,6 +10,8 @@ using LocalShipper.Service.Services.Interface;
 using MailKit.Search;
 using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Asn1.Ocsp;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Utilities.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,11 +40,19 @@ namespace LocalShipper.Service.Services.Implement
             var order = await _unitOfWork.Repository<Order>()
              .GetAll()
              .Include(o => o.Store)
-             .Include(o => o.S)
+             .Include(o => o.Shipper)
+             .Include(o => o.Action)
+             .Include(o => o.Type)
+             .Include(o => o.Route)
              .FirstOrDefaultAsync(a => a.Id == id && string.IsNullOrWhiteSpace(cancelReason));
 
             var orderCancel = await _unitOfWork.Repository<Order>()
              .GetAll()
+             .Include(o => o.Store)
+             .Include(o => o.Shipper)
+             .Include(o => o.Action)
+             .Include(o => o.Type)
+             .Include(o => o.Route)
              .FirstOrDefaultAsync(a => a.Id == id);
 
             var shipper = await _unitOfWork.Repository<Shipper>()
@@ -71,41 +81,148 @@ namespace LocalShipper.Service.Services.Implement
                 order.Status = (int)status;
                 order.ShipperId = shipperId;
                 order.AcceptTime = DateTime.Now;
+
+                if (order.Status == (int)OrderStatusEnum.WAITING)
+                {
+                    OrderHistory orderHistory = new OrderHistory
+                    {
+                        FromStatus = (int)OrderStatusEnum.WAITING,
+                        ToStatus = (int)status,
+                        OrderId = order.Id,
+                        ShipperId = shipperId,
+                        Status = (int)OrderHistoryStatusEnum.ACTICE
+                    };
+                    await _unitOfWork.Repository<OrderHistory>().InsertAsync(orderHistory);
+                    await _unitOfWork.CommitAsync();
+                }
+
+                if (order.Status == (int)OrderStatusEnum.ASSIGNING)
+                {
+                    OrderHistory orderHistory = new OrderHistory
+                    {
+                        FromStatus = (int)OrderStatusEnum.ASSIGNING,
+                        ToStatus = (int)status,
+                        OrderId = order.Id,
+                        ShipperId = shipperId,
+                        Status = (int)OrderHistoryStatusEnum.ACTICE
+                    };
+                    await _unitOfWork.Repository<OrderHistory>().InsertAsync(orderHistory);
+                    await _unitOfWork.CommitAsync();
+                }
+
+
+            }
+
+            if (status == OrderStatusEnum.WAITING && string.IsNullOrWhiteSpace(cancelReason))
+            {
+                order.Status = (int)status;
+                order.ShipperId = shipperId;
+
+                OrderHistory orderHistory = new OrderHistory
+                {
+                    FromStatus = (int)OrderStatusEnum.IDLE,
+                    ToStatus = (int)status,
+                    OrderId = order.Id,
+                    ShipperId = shipperId,
+                    Status = (int)OrderHistoryStatusEnum.ACTICE
+                };
+                await _unitOfWork.Repository<OrderHistory>().InsertAsync(orderHistory);
+                await _unitOfWork.CommitAsync();
             }
 
 
-            if (status == OrderStatusEnum.INPROCESS || string.IsNullOrWhiteSpace(cancelReason))
+            if (status == OrderStatusEnum.INPROCESS && string.IsNullOrWhiteSpace(cancelReason))
             {
                 order.Status = (int)status;
                 order.PickupTime = DateTime.Now;
+
+                OrderHistory orderHistory = new OrderHistory
+                {
+                    FromStatus = (int)OrderStatusEnum.ACCEPTED,
+                    ToStatus = (int)status,
+                    OrderId = order.Id,
+                    ShipperId = shipperId,
+                    Status = (int)OrderHistoryStatusEnum.ACTICE
+                };
+                await _unitOfWork.Repository<OrderHistory>().InsertAsync(orderHistory);
+                await _unitOfWork.CommitAsync();
             }
 
-            if (status == OrderStatusEnum.IDLE || string.IsNullOrWhiteSpace(cancelReason))
+            if (status == OrderStatusEnum.ASSIGNING && string.IsNullOrWhiteSpace(cancelReason))
+            {
+                order.Status = (int)status;
+                order.PickupTime = DateTime.Now;
+
+                OrderHistory orderHistory = new OrderHistory
+                {
+                    FromStatus = (int)OrderStatusEnum.IDLE,
+                    ToStatus = (int)status,
+                    OrderId = order.Id,
+                    ShipperId = shipperId,
+                    Status = (int)OrderHistoryStatusEnum.ACTICE
+                };
+                await _unitOfWork.Repository<OrderHistory>().InsertAsync(orderHistory);
+                await _unitOfWork.CommitAsync();
+            }
+
+            if (status == OrderStatusEnum.IDLE && string.IsNullOrWhiteSpace(cancelReason))
             {
                 order.Status = (int)status;
                 order.ShipperId = null;
+                OrderHistory orderHistory = new OrderHistory
+                {
+                    FromStatus = (int)OrderStatusEnum.CANCELLED,
+                    ToStatus = (int)status,
+                    OrderId = order.Id,
+                    ShipperId = shipperId,
+                    Status = (int)OrderHistoryStatusEnum.ACTICE
+                };
+                await _unitOfWork.Repository<OrderHistory>().InsertAsync(orderHistory);
+                await _unitOfWork.CommitAsync();
             }
 
             if (status == OrderStatusEnum.COMPLETED && string.IsNullOrWhiteSpace(cancelReason))
             {
                 order.Status = (int)status;
                 order.CompleteTime = DateTime.Now;
+                OrderHistory orderHistory = new OrderHistory
+                {
+                    FromStatus = (int)OrderStatusEnum.INPROCESS,
+                    ToStatus = (int)status,
+                    OrderId = order.Id,
+                    ShipperId = shipperId,
+                    Status = (int)OrderHistoryStatusEnum.ACTICE
+                };
+                await _unitOfWork.Repository<OrderHistory>().InsertAsync(orderHistory);
+                await _unitOfWork.CommitAsync();
+
             }
 
-            if (status == OrderStatusEnum.COMPLETED && string.IsNullOrWhiteSpace(cancelReason))
+            if (status == OrderStatusEnum.CANCELLED && string.IsNullOrWhiteSpace(cancelReason))
             {
                 order.Status = (int)status;
                 order.CompleteTime = DateTime.Now;
+                OrderHistory orderHistory = new OrderHistory
+                {
+                    FromStatus = (int)OrderStatusEnum.INPROCESS,
+                    ToStatus = (int)status,
+                    OrderId = order.Id,
+                    ShipperId = shipperId,
+                    Status = (int)OrderHistoryStatusEnum.ACTICE
+                };
+                await _unitOfWork.Repository<OrderHistory>().InsertAsync(orderHistory);
+                await _unitOfWork.CommitAsync();
+
             }
 
-            if (status == OrderStatusEnum.CANCELLED)
+
+            if (status == OrderStatusEnum.RETURN)
             {
                 orderCancel.Status = (int)status;
-                orderCancel.CancelTime = DateTime.Now;
+                orderCancel.CompleteTime = DateTime.Now;
                 orderCancel.CancelReason = cancelReason;
                 await _unitOfWork.Repository<Order>().Update(orderCancel, id);
                 await _unitOfWork.CommitAsync();
-
                 return _mapper.Map<Order, OrderResponse>(orderCancel);
             }
 
@@ -214,33 +331,48 @@ namespace LocalShipper.Service.Services.Implement
 
 
         //GET Order
-        public async Task<List<OrderResponse>> GetOrder(int? id, int? status, int? storeId, int? batchId, int? shipperId,
-                                      string? tracking_number, string? cancel_reason, decimal? distance_price,
-                                     decimal? subtotal_price, decimal? totalPrice, string? other, int? pageNumber, int? pageSize)
+        public async Task<List<OrderResponse>> GetOrder(int? id, int? status, int? storeId, int? shipperId,
+                                     string? tracking_number, string? cancel_reason, decimal? distance_price,
+                                     decimal? subtotal_price, decimal? COD, decimal? totalPrice, string? other, int? routeId,
+                                     int? capacity, int? package_weight, int? package_width, int? package_height, int? package_length,
+                                     string? customer_city, string? customer_commune, string? customer_district, string? customer_phone,
+                                     string? customer_name, string? customer_email, int? actionId, int? typeId, int? pageNumber, int? pageSize)
         {
 
             var orders = _unitOfWork.Repository<Order>().GetAll()
-                                                      .Include(o => o.Store)
-                                                      .Include(o => o.Batch)
-                                                      .Include(o => o.Shipper)
-                                                      .Where(a => (id == null || id == 0) || a.Id == id)
-                                                      .Where(a => (status == null || status == 0) || a.Status == status)
-                                                      .Where(a => (storeId == null || storeId == 0) || a.StoreId == storeId)
-                                                      .Where(a => (batchId == null || batchId == 0) || a.BatchId == batchId)
-                                                      .Where(a => (shipperId == null || shipperId == 0) || a.ShipperId == shipperId)
-                                                      .Where(a => string.IsNullOrWhiteSpace(tracking_number) || a.TrackingNumber.Contains(tracking_number.Trim()))
-                                                      .Where(a => string.IsNullOrWhiteSpace(cancel_reason) || a.CancelReason.Contains(cancel_reason.Trim()))
-                                                      .Where(a => (distance_price == null || distance_price == 0) || a.DistancePrice == distance_price)
-                                                      .Where(a => (subtotal_price == null || subtotal_price == 0) || a.SubtotalPrice == subtotal_price)
-                                                      .Where(a => (totalPrice == null || totalPrice == 0) || a.TotalPrice == totalPrice)
-                                                      .Where(a => string.IsNullOrWhiteSpace(other) || a.Other.Contains(other.Trim()));
+                                                       .Include(o => o.Store)
+                                                       .Include(o => o.Shipper)
+                                                       .Include(o => o.Action)
+                                                       .Include(o => o.Type)
+                                                       .Include(o => o.Route)
+                                                       .Where(a => (id == null || id == 0) || a.Id == id)
+                                                       .Where(a => (status == null || status == 0) || a.Status == status)
+                                                       .Where(a => (storeId == null || storeId == 0) || a.StoreId == storeId)
+                                                       .Where(a => (shipperId == null || shipperId == 0) || a.ShipperId == shipperId)
+                                                       .Where(a => string.IsNullOrWhiteSpace(tracking_number) || a.TrackingNumber.Contains(tracking_number.Trim()))
+                                                       .Where(a => string.IsNullOrWhiteSpace(cancel_reason) || a.CancelReason.Contains(cancel_reason.Trim()))
+                                                       .Where(a => (distance_price == null || distance_price == 0) || a.DistancePrice == distance_price)
+                                                       .Where(a => (subtotal_price == null || subtotal_price == 0) || a.SubtotalPrice == subtotal_price)
+                                                       .Where(a => (COD == null || COD == 0) || a.Cod == COD)
+                                                       .Where(a => (totalPrice == null || totalPrice == 0) || a.TotalPrice == totalPrice)
+                                                       .Where(a => string.IsNullOrWhiteSpace(other) || a.Other.Contains(other.Trim()))
+                                                       .Where(a => (routeId == null || routeId == 0) || a.RouteId == routeId)
+                                                       .Where(a => (capacity == null || capacity == 0) || a.Capacity == capacity)
+                                                       .Where(a => (package_weight == null || package_weight == 0) || a.PackageWeight == routeId)
+                                                       .Where(a => (package_width == null || package_width == 0) || a.PackageWidth == package_width)
+                                                       .Where(a => (package_height == null || package_height == 0) || a.PackageHeight == package_height)
+                                                       .Where(a => (package_length == null || package_length == 0) || a.PackageLength == package_length)
+                                                       .Where(a => string.IsNullOrWhiteSpace(customer_city) || a.CustomerCity.Contains(customer_city.Trim()))
+                                                       .Where(a => string.IsNullOrWhiteSpace(customer_commune) || a.CustomerCommune.Contains(customer_commune.Trim()))
+                                                       .Where(a => string.IsNullOrWhiteSpace(customer_district) || a.CustomerDistrict.Contains(customer_district.Trim()))
+                                                       .Where(a => string.IsNullOrWhiteSpace(customer_phone) || a.CustomerPhone.Contains(customer_phone.Trim()))
+                                                       .Where(a => string.IsNullOrWhiteSpace(customer_name) || a.CustomerName.Contains(customer_name.Trim()))
+                                                       .Where(a => string.IsNullOrWhiteSpace(customer_email) || a.CustomerEmail.Contains(customer_email.Trim()))
+                                                       .Where(a => (actionId == null || actionId == 0) || a.ActionId == actionId)
+                                                       .Where(a => (typeId == null || typeId == 0) || a.TypeId == typeId)
+                                                       ;
 
-            var _orderGetBatch = _unitOfWork.Repository<Order>();
-            var package =  _unitOfWork.Repository<Package>();
-            decimal package_price = 0;
-            int count = 0;
-            var packagePrices = new Dictionary<int, decimal>();
-            var packageCounts = new Dictionary<int, int>();
+
 
 
             // Xác định giá trị cuối cùng của pageNumber
@@ -253,102 +385,15 @@ namespace LocalShipper.Service.Services.Implement
             }
 
             var orderList = await orders.ToListAsync();
-                
+
 
             if (orderList == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Order không có hoặc không tồn tại", id.ToString());
             }
 
-            foreach (var order in orderList)
-            {
-                int currentOrderId = order.Id;
-
-                if (!packagePrices.ContainsKey(currentOrderId))
-                {
-                    var orderGetBatch = await _orderGetBatch
-                      .GetAll()
-                      .Include(o => o.Store)
-                      .Include(o => o.Batch)
-                      .Include(o => o.Shipper)
-                      .Where(a => a.Id == currentOrderId)
-                      .FirstOrDefaultAsync();
-
-                    var _package = await package
-                      .GetAll()
-                      .Where(a => a.BatchId == orderGetBatch.BatchId)
-                      .ToListAsync();
-
-                    package_price = (decimal)_package.Sum(o => o.PackagePrice);
-                    packagePrices.Add(currentOrderId, package_price);
-
-
-                    packageCounts.Add(currentOrderId, _package.Count);
-                }
-                    
-            }
-
-            var orderResponses = orderList.Select(order => new OrderResponse
-            {
-                Id = order.Id,
-                storeId = order.StoreId,
-                batchId = order.BatchId,
-                shipperId = order.ShipperId == null ? null : (int)order.ShipperId,
-                status = order.Status,
-                trackingNumber = order.TrackingNumber,
-                createTime = order.CreateTime,
-                orderTime = order.OrderTime,
-                acceptTime = order.AcceptTime,
-                pickupTime = order.PickupTime,
-                cancelTime = order.CancelTime,
-                cancelReason = order.CancelReason,
-                completeTime = order.CompleteTime,
-                distancePrice = order.DistancePrice,
-                subTotalprice = order.SubtotalPrice,
-                totalPrice = order.TotalPrice,
-                other = order.Other,
-                package_price = packagePrices.ContainsKey(order.Id) ? packagePrices[order.Id] : 0,
-                countPackage = packageCounts.ContainsKey(order.Id) ? packageCounts[order.Id] : 0,
-
-                Store = order.Store != null ? new StoreResponse
-                {
-                    Id = order.StoreId,
-                    StoreName = order.Store.StoreName,
-                    StoreAddress = order.Store.StoreAddress,
-                    StorePhone = order.Store.StorePhone,
-                    StoreEmail = order.Store.StoreEmail,
-                    OpenTime = order.Store.OpenTime,
-                    CloseTime = order.Store.CloseTime,
-                    StoreDescription = order.Store.StoreDescription,
-                    Status = order.Store.Status,
-                    TemplateId = order.Store.TemplateId,
-                    ZoneId = order.Store.ZoneId,
-                    AccountId = order.Store.AccountId,
-                } : null,
-                Batches = order.Batch != null ? new BatchResponse
-                {
-                    Id = order.Batch.Id,
-                    BatchName = order.Batch.BatchName,
-                    BatchDescription = order.Batch.BatchDescription,
-                    CreatedAt = order.Batch.CreatedAt,
-                    UpdateAt = order.Batch.UpdateAt,
-                } : null,
-                Shipper = order.Shipper != null ? new ShipperResponse
-                {
-                    Id = order.Shipper.Id,
-                    FullName = order.Shipper.FullName,
-                    EmailShipper = order.Shipper.EmailShipper,
-                    PhoneShipper = order.Shipper.PhoneShipper,
-                    AddressShipper = order.Shipper.AddressShipper,
-                    TransportId = (int)order.Shipper.TransportId,
-                    AccountId = order.Shipper.AccountId,
-                    ZoneId = (int)order.Shipper.ZoneId,
-                    Status = (ShipperStatusEnum)order.Shipper.Status,
-                    Fcmtoken = order.Shipper.Fcmtoken,
-                    WalletId = order.Shipper.WalletId
-                } : null
-            }).ToList();
-            return orderResponses;
+            var orderResponse = _mapper.Map<List<OrderResponse>>(orderList);
+            return orderResponse;
         }
 
 
@@ -372,11 +417,13 @@ namespace LocalShipper.Service.Services.Implement
         {
 
             var order = await _unitOfWork.Repository<Order>()
-           .GetAll()
-                 .Include(o => o.Store)
-                 .Include(o => o.Batch)
-                 .Include(o => o.Shipper)
-                 .FirstOrDefaultAsync(a => a.Id == id);
+                                         .GetAll()
+                                         .Include(o => o.Store)
+                                         .Include(o => o.Shipper)
+                                         .Include(o => o.Action)
+                                         .Include(o => o.Type)
+                                         .Include(o => o.Route)
+                                         .FirstOrDefaultAsync(a => a.Id == id);
 
             if (order == null)
             {
@@ -393,66 +440,8 @@ namespace LocalShipper.Service.Services.Implement
             await _unitOfWork.Repository<Order>().Update(order, id);
             await _unitOfWork.CommitAsync();
 
-            var updatedOrderResponse = new OrderResponse
-            {
-                Id = order.Id,
-                storeId = order.StoreId,
-                batchId = order.BatchId,
-                shipperId = (int)order.ShipperId,
-                status = order.Status,
-                trackingNumber = order.TrackingNumber,
-                createTime = order.CreateTime,
-                orderTime = order.OrderTime,
-                acceptTime = order.AcceptTime,
-                pickupTime = order.PickupTime,
-                cancelTime = order.CancelTime,
-                cancelReason = order.CancelReason,
-                completeTime = order.CompleteTime,
-                distancePrice = order.DistancePrice,
-                subTotalprice = order.SubtotalPrice,
-                totalPrice = order.TotalPrice,
-                other = order.Other,
-
-                Store = order.Store != null ? new StoreResponse
-                {
-                    Id = order.StoreId,
-                    StoreName = order.Store.StoreName,
-                    StoreAddress = order.Store.StoreAddress,
-                    StorePhone = order.Store.StorePhone,
-                    StoreEmail = order.Store.StoreEmail,
-                    OpenTime = order.Store.OpenTime,
-                    CloseTime = order.Store.CloseTime,
-                    StoreDescription = order.Store.StoreDescription,
-                    Status = order.Store.Status,
-                    TemplateId = order.Store.TemplateId,
-                    ZoneId = order.Store.ZoneId,
-                    AccountId = order.Store.AccountId,
-                } : null,
-                Batches = order.Batch != null ? new BatchResponse
-                {
-                    Id = order.Batch.Id,
-                    BatchName = order.Batch.BatchName,
-                    BatchDescription = order.Batch.BatchDescription,
-                    CreatedAt = order.Batch.CreatedAt,
-                    UpdateAt = order.Batch.UpdateAt,
-                } : null,
-                Shipper = order.Shipper != null ? new ShipperResponse
-                {
-                    Id = order.Shipper.Id,
-                    FullName = order.Shipper.FullName,
-                    EmailShipper = order.Shipper.EmailShipper,
-                    PhoneShipper = order.Shipper.PhoneShipper,
-                    AddressShipper = order.Shipper.AddressShipper,
-                    TransportId = (int)order.Shipper.TransportId,
-                    AccountId = order.Shipper.AccountId,
-                    ZoneId = (int)order.Shipper.ZoneId,
-                    Status = (ShipperStatusEnum)order.Shipper.Status,
-                    Fcmtoken = order.Shipper.Fcmtoken,
-                    WalletId = order.Shipper.WalletId
-                } : null
-            };
-
-            return updatedOrderResponse;
+            var orderResponse = _mapper.Map<OrderResponse>(order);
+            return orderResponse;
         }
 
     }

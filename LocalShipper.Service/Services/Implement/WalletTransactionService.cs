@@ -31,17 +31,21 @@ namespace LocalShipper.Service.Services.Implement
 
         //GET WalletTransaction
         public async Task<List<WalletTransactionResponse>> GetWalletTrans(int? id, string? transactionType, int? fromWallet, int? toWallet,
-            decimal? amount, int? pageNumber, int? pageSize)
+            decimal? amount, string? description, int? orderId, int? pageNumber, int? pageSize)
         {
 
             var walletTrans = _unitOfWork.Repository<WalletTransaction>().GetAll()
                                                               .Include(w => w.FromWallet)
                                                               .Include(w => w.ToWallet)
+                                                              .Include(w => w.Order)
                                                               .Where(w => id == 0 || w.Id == id)
                                                               .Where(w => string.IsNullOrWhiteSpace(transactionType) || w.TransactionType.Contains(transactionType.Trim()))
                                                               .Where(w => fromWallet == 0 || w.FromWalletId == fromWallet)
                                                               .Where(w => toWallet == 0 || w.ToWalletId == toWallet)
-                                                              .Where(w => amount == 0 || w.Amount == amount);
+                                                              .Where(w => amount == 0 || w.Amount == amount)
+                                                              .Where(w => string.IsNullOrWhiteSpace(description) || w.Description.Contains(description.Trim()))
+                                                              .Where(w => orderId == 0 || w.OrderId == orderId)
+                                                              ;
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
             // Áp dụng phân trang nếu có thông số pageNumber và pageSize
@@ -57,33 +61,7 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Giao dịch trên ví không có hoặc không tồn tại", id.ToString());
             }
 
-            var walletTransResponses = walletTransList.Select(walletTransaction => new WalletTransactionResponse
-            {
-                Id = walletTransaction.Id,
-                TransactionType = walletTransaction.TransactionType,
-                FromWalletId = walletTransaction.FromWalletId,
-                ToWalletId = walletTransaction.ToWalletId,
-                Amount = walletTransaction.Amount,
-                TransactionTime = walletTransaction.TransactionTime,
-                Description = walletTransaction.Description,
-                CreatedAt = walletTransaction.CreatedAt,
-
-                FromWallet = walletTransaction.FromWallet != null ? new WalletResponse
-                {
-                    Id = walletTransaction.FromWallet.Id,
-                    Balance = walletTransaction.FromWallet.Balance,
-                    CreatedAt = walletTransaction.FromWallet.CreatedAt,
-                    UpdatedAt = walletTransaction.FromWallet.UpdatedAt
-                } : null,
-                ToWallet = walletTransaction.ToWallet != null ? new WalletResponse
-                {
-                    Id = walletTransaction.ToWallet.Id,
-                    Balance = walletTransaction.ToWallet.Balance,
-                    CreatedAt = walletTransaction.ToWallet.CreatedAt,
-                    UpdatedAt = walletTransaction.ToWallet.UpdatedAt
-                } : null
-               
-            }).ToList();
+            var walletTransResponses = _mapper.Map<List<WalletTransactionResponse>>(walletTransList);
             return walletTransResponses;
         }
     
@@ -119,7 +97,7 @@ namespace LocalShipper.Service.Services.Implement
                 FromWalletId = request.FromWalletId,
                 ToWalletId = request.ToWalletId,
                 Amount = request.Amount,
-                Description = request.Description,               
+                Description = request.Description,
             };
 
             //Update ví gửi
@@ -153,82 +131,33 @@ namespace LocalShipper.Service.Services.Implement
             await _unitOfWork.CommitAsync();
 
 
-            var walletTransResponse = new WalletTransactionResponse
-            {
-                Id = walletTrans.Id,
-                TransactionType = walletTrans.TransactionType,
-                FromWalletId = walletTrans.FromWalletId,
-                ToWalletId = walletTrans.ToWalletId,
-                Amount = walletTrans.Amount,
-                TransactionTime = walletTrans.TransactionTime,
-                Description = walletTrans.Description,
-                CreatedAt = walletTrans.CreatedAt,
-
-                FromWallet = walletTrans.FromWallet != null ? new WalletResponse
-                {
-                    Id = walletTrans.FromWallet.Id,
-                    Balance = walletTrans.FromWallet.Balance,
-                    CreatedAt = walletTrans.FromWallet.CreatedAt,
-                    UpdatedAt = walletTrans.FromWallet.UpdatedAt
-                } : null,
-                ToWallet = walletTrans.ToWallet != null ? new WalletResponse
-                {
-                    Id = walletTrans.ToWallet.Id,
-                    Balance = walletTrans.ToWallet.Balance,
-                    CreatedAt = walletTrans.ToWallet.CreatedAt,
-                    UpdatedAt = walletTrans.ToWallet.UpdatedAt
-                } : null
-            };
-            return walletTransResponse;
+            var walletTransResponses = _mapper.Map<WalletTransactionResponse>(walletTrans);
+            return walletTransResponses;
         }
 
         //UPDATE WalletTransaction
-        public async Task<WalletTransactionResponse> UpdateWalletTrans(int id, WalletTransactionRequest request)
-        {
-            var walletTrans = await _unitOfWork.Repository<WalletTransaction>()
-                .GetAll()
-                .Include(o => o.FromWallet)
-                .Include(o => o.ToWallet)
-                .FirstOrDefaultAsync(a => a.Id == id);
+         public async Task<WalletTransactionResponse> UpdateWalletTrans(int id, WalletTransactionRequest request)
+         {
+             var walletTrans = await _unitOfWork.Repository<WalletTransaction>()
+                 .GetAll()
+                 .Include(o => o.FromWallet)
+                 .Include(o => o.ToWallet)
+                 .Include(o => o.Order)
+                 .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (walletTrans == null)
-            {
-                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy giao dịch", id.ToString());
-            }
+             if (walletTrans == null)
+             {
+                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy giao dịch", id.ToString());
+             }
 
-            walletTrans.TransactionType = request.TransactionType;
-            walletTrans.Description = request.Description;
+             walletTrans.TransactionType = request.TransactionType;
+             walletTrans.Description = request.Description;
 
-            await _unitOfWork.Repository<WalletTransaction>().Update(walletTrans, id);
-            await _unitOfWork.CommitAsync();
+             await _unitOfWork.Repository<WalletTransaction>().Update(walletTrans, id);
+             await _unitOfWork.CommitAsync();
 
-            var walletTransResponse = new WalletTransactionResponse
-            {
-                Id = walletTrans.Id,
-                TransactionType = walletTrans.TransactionType,
-                FromWalletId = walletTrans.FromWalletId,
-                ToWalletId = walletTrans.ToWalletId,
-                Amount = walletTrans.Amount,
-                TransactionTime = walletTrans.TransactionTime,
-                Description = walletTrans.Description,
-                CreatedAt = walletTrans.CreatedAt,
-
-                FromWallet = walletTrans.FromWallet != null ? new WalletResponse
-                {
-                    Id = walletTrans.FromWallet.Id,
-                    Balance = walletTrans.FromWallet.Balance,
-                    CreatedAt = walletTrans.FromWallet.CreatedAt,
-                    UpdatedAt = walletTrans.FromWallet.UpdatedAt
-                } : null,
-                ToWallet = walletTrans.ToWallet != null ? new WalletResponse
-                {
-                    Id = walletTrans.ToWallet.Id,
-                    Balance = walletTrans.ToWallet.Balance,
-                    CreatedAt = walletTrans.ToWallet.CreatedAt,
-                    UpdatedAt = walletTrans.ToWallet.UpdatedAt
-                } : null
-            };
-            return walletTransResponse;
+            var walletTransResponses = _mapper.Map<WalletTransactionResponse>(walletTrans);
+            return walletTransResponses;
         }
 
         //DELETE WalletTransaction
