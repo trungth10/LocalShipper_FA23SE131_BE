@@ -14,11 +14,9 @@ namespace LSAPI.Mapper
             CreateMap<Shipper, ShipperResponse>().ReverseMap();
             CreateMap<Order, OrderResponse>().ReverseMap();
             CreateMap<PackageAction, PackageActionResponse>().ReverseMap();
-            CreateMap<Package, PackageResponse>().ReverseMap();
             CreateMap<PackageType, PackageTypeResponse>().ReverseMap();
             CreateMap<Store, StoreResponse>().ReverseMap();
             CreateMap<Template, TemplateResponse>().ReverseMap();
-            CreateMap<Batch, BatchResponse>().ReverseMap();
             CreateMap<Account, AccountResponse>().ReverseMap();
             CreateMap<Wallet, WalletResponse>().ReverseMap();
             CreateMap<Zone, ZoneResponse>().ReverseMap();

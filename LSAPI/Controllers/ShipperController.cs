@@ -54,7 +54,7 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet()]
-        public async Task<ActionResult<List<TransactionResponse>>> GetShipper(int id, string fullName,
+        public async Task<ActionResult<List<ShipperResponse>>> GetShipper(int id, string fullName,
                                             string email, string phone,
                                             string address, int transportId, int accountId, int zoneId, int status, string fcmToken, int walletId, int? pageNumber, int? pageSize)
         {

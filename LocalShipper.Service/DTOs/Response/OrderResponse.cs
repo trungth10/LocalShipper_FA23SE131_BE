@@ -9,28 +9,41 @@ namespace LocalShipper.Service.DTOs.Response
     public class OrderResponse
     {
         public int Id { get; set; }
-        public int storeId { get; set; }
-        public int batchId { get; set; }
-        public int? shipperId { get; set; }
-        public int status { get; set; }
-        public string trackingNumber { get; set; }
-        public DateTime? createTime { get; set; }
-        public DateTime? orderTime { get; set; }
-        public DateTime? acceptTime { get; set; }
-        public DateTime? pickupTime { get; set; }
-        public DateTime? cancelTime { get; set; }
-        public string cancelReason { get; set; }
-        public DateTime? completeTime { get; set; }
-        public decimal? distancePrice { get; set; }
-        public decimal? subTotalprice { get; set; }
-        public decimal? totalPrice { get; set; }
-        public string other { get; set; }
+        public int Status { get; set; }
+        public int StoreId { get; set; }
+        public int? ShipperId { get; set; }
+        public string TrackingNumber { get; set; }
+        public DateTime? CreateTime { get; set; }
+        public DateTime? OrderTime { get; set; }
+        public DateTime? AcceptTime { get; set; }
+        public DateTime? PickupTime { get; set; }
+        public DateTime? CancelTime { get; set; }
+        public string CancelReason { get; set; }
+        public DateTime? CompleteTime { get; set; }
+        public decimal? DistancePrice { get; set; }
+        public decimal? SubtotalPrice { get; set; }
+        public decimal? Cod { get; set; }
+        public decimal? TotalPrice { get; set; }
+        public string Other { get; set; }
+        public int? RouteId { get; set; }
+        public int Capacity { get; set; }
+        public int? PackageWeight { get; set; }
+        public int? PackageWidth { get; set; }
+        public int? PackageHeight { get; set; }
+        public int? PackageLength { get; set; }
+        public string CustomerCity { get; set; }
+        public string CustomerCommune { get; set; }
+        public string CustomerDistrict { get; set; }
+        public string CustomerPhone { get; set; }
+        public string CustomerName { get; set; }
+        public string CustomerEmail { get; set; }
+        public int ActionId { get; set; }
+        public int TypeId { get; set; }
 
-        public decimal? package_price { get; set; }
+        public StoreResponse Store {get; set;}
+        public ShipperResponse Shipper { get; set;}
+        public PackageActionResponse PackageAction { get; set;}
+        public PackageTypeResponse PackageType { get; set;}
 
-        public int countPackage { get; set; }
-        public StoreResponse Store { get; set; }
-        public BatchResponse Batches { get; set; }
-        public ShipperResponse Shipper { get; set; }
     }
 }

@@ -117,11 +117,8 @@ namespace LSAPI
             services.AddScoped<IShipperService, ShipperService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IOrderService, OrderService>();
-            services.AddScoped<IBatchService, BatchService>();
-            services.AddScoped<IPackageService, PackageService>();
             services.AddScoped<IRatingService, RatingService>();
             services.AddScoped<IAccountService, AccountService>();
-            services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<ITransportService, TransportService>();
             services.AddScoped<IPackageActionService, PackageActionService>();
             services.AddScoped<IPackageTypeService, PackageTypeService>();
@@ -132,7 +129,6 @@ namespace LSAPI
             services.AddScoped<IHistoryService, HistoryService>();
             services.AddScoped<IWalletService, WalletService>();
             services.AddScoped<IWalletTransactionService, WalletTransactionService>();
-            services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IZoneService, ZoneService>();
             services.AddScoped<IPriceLSService, PriceService>();
             services.AddScoped<IPriceItemService, PriceItemService>();

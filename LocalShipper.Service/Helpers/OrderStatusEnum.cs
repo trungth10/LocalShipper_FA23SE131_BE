@@ -21,5 +21,6 @@ namespace LocalShipper.Service.Helpers
         INPROCESS = 6,       
         COMPLETED = 7,
         DELETED = 8,
+        RETURN = 9,
     }
 }
