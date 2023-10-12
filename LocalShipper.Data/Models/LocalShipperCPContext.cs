@@ -20,22 +20,20 @@ namespace LocalShipper.Data.Models
         }
 
         public virtual DbSet<Account> Accounts { get; set; }
-        public virtual DbSet<Batch> Batches { get; set; }
         public virtual DbSet<History> Histories { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
-        public virtual DbSet<Package> Packages { get; set; }
+        public virtual DbSet<OrderHistory> OrderHistories { get; set; }
         public virtual DbSet<PackageAction> PackageActions { get; set; }
         public virtual DbSet<PackageType> PackageTypes { get; set; }
-        public virtual DbSet<Payment> Payments { get; set; }
         public virtual DbSet<PriceInZone> PriceInZones { get; set; }
         public virtual DbSet<PriceItem> PriceItems { get; set; }
         public virtual DbSet<PriceL> PriceLs { get; set; }
         public virtual DbSet<Rating> Ratings { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
+        public virtual DbSet<RouteEdge> RouteEdges { get; set; }
         public virtual DbSet<Shipper> Shippers { get; set; }
         public virtual DbSet<Store> Stores { get; set; }
         public virtual DbSet<Template> Templates { get; set; }
-        public virtual DbSet<Transaction> Transactions { get; set; }
         public virtual DbSet<Transport> Transports { get; set; }
         public virtual DbSet<TransportType> TransportTypes { get; set; }
         public virtual DbSet<Wallet> Wallets { get; set; }
@@ -105,34 +103,6 @@ namespace LocalShipper.Data.Models
                     .HasConstraintName("FK_Account_Role");
             });
 
-            modelBuilder.Entity<Batch>(entity =>
-            {
-                entity.ToTable("Batch");
-
-                entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.BatchDescription)
-                    .HasMaxLength(255)
-                    .HasColumnName("batch_description");
-
-                entity.Property(e => e.BatchName)
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .HasColumnName("batch_name");
-
-                entity.Property(e => e.CreatedAt)
-                    .HasColumnType("datetime")
-                    .HasColumnName("created_at")
-                    .HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.Status).HasColumnName("status");
-
-                entity.Property(e => e.UpdateAt)
-                    .HasColumnType("datetime")
-                    .HasColumnName("update_at")
-                    .HasDefaultValueSql("(getdate())");
-            });
-
             modelBuilder.Entity<History>(entity =>
             {
                 entity.ToTable("History");
@@ -172,7 +142,7 @@ namespace LocalShipper.Data.Models
                     .HasColumnType("datetime")
                     .HasColumnName("accept_time");
 
-                entity.Property(e => e.BatchId).HasColumnName("batchId");
+                entity.Property(e => e.ActionId).HasColumnName("actionId");
 
                 entity.Property(e => e.CancelReason)
                     .HasMaxLength(255)
@@ -182,6 +152,12 @@ namespace LocalShipper.Data.Models
                     .HasColumnType("datetime")
                     .HasColumnName("cancel_time");
 
+                entity.Property(e => e.Capacity).HasColumnName("capacity");
+
+                entity.Property(e => e.Cod)
+                    .HasColumnType("decimal(10, 2)")
+                    .HasColumnName("COD");
+
                 entity.Property(e => e.CompleteTime)
                     .HasColumnType("datetime")
                     .HasColumnName("complete_time");
@@ -190,6 +166,30 @@ namespace LocalShipper.Data.Models
                     .HasColumnType("datetime")
                     .HasColumnName("create_time")
                     .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.CustomerCity)
+                    .HasMaxLength(255)
+                    .HasColumnName("customer_city");
+
+                entity.Property(e => e.CustomerCommune)
+                    .HasMaxLength(255)
+                    .HasColumnName("customer_commune");
+
+                entity.Property(e => e.CustomerDistrict)
+                    .HasMaxLength(255)
+                    .HasColumnName("customer_district");
+
+                entity.Property(e => e.CustomerEmail)
+                    .HasMaxLength(100)
+                    .HasColumnName("customer_email");
+
+                entity.Property(e => e.CustomerName)
+                    .HasMaxLength(100)
+                    .HasColumnName("customer_name");
+
+                entity.Property(e => e.CustomerPhone)
+                    .HasMaxLength(20)
+                    .HasColumnName("customer_phone");
 
                 entity.Property(e => e.DistancePrice)
                     .HasColumnType("decimal(10, 2)")
@@ -203,9 +203,19 @@ namespace LocalShipper.Data.Models
                     .HasMaxLength(255)
                     .HasColumnName("other");
 
+                entity.Property(e => e.PackageHeight).HasColumnName("package_height");
+
+                entity.Property(e => e.PackageLength).HasColumnName("package_length");
+
+                entity.Property(e => e.PackageWeight).HasColumnName("package_weight");
+
+                entity.Property(e => e.PackageWidth).HasColumnName("package_width");
+
                 entity.Property(e => e.PickupTime)
                     .HasColumnType("datetime")
                     .HasColumnName("pickup_time");
+
+                entity.Property(e => e.RouteId).HasColumnName("routeId");
 
                 entity.Property(e => e.ShipperId).HasColumnName("shipperId");
 
@@ -226,111 +236,69 @@ namespace LocalShipper.Data.Models
                     .HasMaxLength(255)
                     .HasColumnName("tracking_number");
 
-                entity.HasOne(d => d.Batch)
-                    .WithMany(p => p.Orders)
-                    .HasForeignKey(d => d.BatchId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Order_Batch");
+                entity.Property(e => e.TypeId).HasColumnName("typeId");
 
-                entity.HasOne(d => d.Shipper)
+                entity.HasOne(d => d.Action)
                     .WithMany(p => p.Orders)
-                    .HasForeignKey(d => d.ShipperId)
-                    .HasConstraintName("FK_Order_Shipper");
+                    .HasForeignKey(d => d.ActionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Order_PackageAction");
+
+                entity.HasOne(d => d.Route)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.RouteId)
+                    .HasConstraintName("FK_Order_RouteEdge");
 
                 entity.HasOne(d => d.Store)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.StoreId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Order_Store");
+
+                entity.HasOne(d => d.Type)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.TypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Order_PackageType");
             });
 
-            modelBuilder.Entity<Package>(entity =>
+            modelBuilder.Entity<OrderHistory>(entity =>
             {
-                entity.ToTable("Package");
+                entity.ToTable("OrderHistory");
 
                 entity.Property(e => e.Id).HasColumnName("id");
 
-                entity.Property(e => e.ActionId).HasColumnName("actionId");
+                entity.Property(e => e.ChangeDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("change_date")
+                    .HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.BatchId).HasColumnName("batchId");
+                entity.Property(e => e.FromShipperId).HasColumnName("from_shipperId");
 
-                entity.Property(e => e.CancelReason)
-                    .HasMaxLength(255)
-                    .HasColumnName("cancel_reason");
+                entity.Property(e => e.FromStatus).HasColumnName("from_status");
 
-                entity.Property(e => e.Capacity).HasColumnName("capacity");
-
-                entity.Property(e => e.CustomerAddress)
-                    .IsRequired()
-                    .HasMaxLength(255)
-                    .HasColumnName("customer_address");
-
-                entity.Property(e => e.CustomerEmail)
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .HasColumnName("customer_email");
-
-                entity.Property(e => e.CustomerName)
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .HasColumnName("customer_name");
-
-                entity.Property(e => e.CustomerPhone)
-                    .IsRequired()
-                    .HasMaxLength(20)
-                    .HasColumnName("customer_phone");
-
-                entity.Property(e => e.DistancePrice)
-                    .HasColumnType("decimal(10, 2)")
-                    .HasColumnName("distance_price");
-
-                entity.Property(e => e.PackageHeight).HasColumnName("package_height");
-
-                entity.Property(e => e.PackageLength).HasColumnName("package_length");
-
-                entity.Property(e => e.PackageWeight).HasColumnName("package_weight");
-
-                entity.Property(e => e.PackageWidth).HasColumnName("package_width");
+                entity.Property(e => e.OrderId).HasColumnName("orderId");
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
-                entity.Property(e => e.StoreId).HasColumnName("storeId");
+                entity.Property(e => e.ToShipperId).HasColumnName("to_shipperId");
 
-                entity.Property(e => e.SubtotalPrice)
-                    .HasColumnType("decimal(10, 2)")
-                    .HasColumnName("subtotal_price");
+                entity.Property(e => e.ToStatus).HasColumnName("to_status");
 
-                entity.Property(e => e.TotalPrice)
-                    .HasColumnType("decimal(10, 2)")
-                    .HasColumnName("total_price");
+                entity.HasOne(d => d.FromShipper)
+                    .WithMany(p => p.OrderHistoryFromShippers)
+                    .HasForeignKey(d => d.FromShipperId)
+                    .HasConstraintName("FK_OrderHistory_Shipper");
 
-                entity.Property(e => e.PackagePrice)
-                   .HasColumnType("decimal(10, 2)")
-                   .HasColumnName("package_price");
+                entity.HasOne(d => d.Order)
+                    .WithMany(p => p.OrderHistories)
+                    .HasForeignKey(d => d.OrderId)
+                    .HasConstraintName("FK_OrderHistory_Order");
 
-                entity.Property(e => e.TypeId).HasColumnName("typeId");
-
-                entity.HasOne(d => d.Action)
-                    .WithMany(p => p.Packages)
-                    .HasForeignKey(d => d.ActionId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Package_PackageAction");
-
-                entity.HasOne(d => d.Batch)
-                    .WithMany(p => p.Packages)
-                    .HasForeignKey(d => d.BatchId)
-                    .HasConstraintName("FK_Package_Batch");
-
-                entity.HasOne(d => d.Store)
-                    .WithMany(p => p.Packages)
-                    .HasForeignKey(d => d.StoreId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Package_Store");
-
-                entity.HasOne(d => d.Type)
-                    .WithMany(p => p.Packages)
-                    .HasForeignKey(d => d.TypeId)
-                    .HasConstraintName("FK_Package_PackageType");
+                entity.HasOne(d => d.ToShipper)
+                    .WithMany(p => p.OrderHistoryToShippers)
+                    .HasForeignKey(d => d.ToShipperId)
+                    .HasConstraintName("FK_OrderHistory_Shipper1");
             });
 
             modelBuilder.Entity<PackageAction>(entity =>
@@ -366,38 +334,6 @@ namespace LocalShipper.Data.Models
                     .IsRequired()
                     .HasMaxLength(50)
                     .HasColumnName("package_type");
-            });
-
-            modelBuilder.Entity<Payment>(entity =>
-            {
-                entity.ToTable("Payment");
-
-                entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.PackageId).HasColumnName("packageId");
-
-                entity.Property(e => e.PaymentCode)
-                    .HasMaxLength(50)
-                    .HasColumnName("payment_code");
-
-                entity.Property(e => e.PaymentDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("payment_date")
-                    .HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.PaymentImage).HasColumnName("payment_image");
-
-                entity.Property(e => e.PaymentMethod)
-                    .HasMaxLength(50)
-                    .HasColumnName("payment_method");
-
-                entity.Property(e => e.Status).HasColumnName("status");
-
-                entity.HasOne(d => d.Package)
-                    .WithMany(p => p.Payments)
-                    .HasForeignKey(d => d.PackageId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Payment_Package");
             });
 
             modelBuilder.Entity<PriceInZone>(entity =>
@@ -541,6 +477,46 @@ namespace LocalShipper.Data.Models
                     .HasMaxLength(50);
             });
 
+            modelBuilder.Entity<RouteEdge>(entity =>
+            {
+                entity.ToTable("RouteEdge");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_date")
+                    .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.Eta)
+                    .HasColumnType("datetime")
+                    .HasColumnName("ETA");
+
+                entity.Property(e => e.FromStation).HasColumnName("from_station");
+
+                entity.Property(e => e.Priority).HasColumnName("priority");
+
+                entity.Property(e => e.Progress).HasColumnName("progress");
+
+                entity.Property(e => e.Quantity).HasColumnName("quantity");
+
+                entity.Property(e => e.ShipperId).HasColumnName("shipperId");
+
+                entity.Property(e => e.StartDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("start_date");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.ToStation).HasColumnName("to_station");
+
+                entity.HasOne(d => d.Shipper)
+                    .WithMany(p => p.RouteEdges)
+                    .HasForeignKey(d => d.ShipperId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_RouteEdge_Shipper");
+            });
+
             modelBuilder.Entity<Shipper>(entity =>
             {
                 entity.ToTable("Shipper");
@@ -550,11 +526,11 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.AccountId).HasColumnName("accountId");
 
                 entity.Property(e => e.AddressShipper)
-                    .IsRequired()
                     .HasMaxLength(100)
                     .HasColumnName("address_shipper");
 
                 entity.Property(e => e.EmailShipper)
+                    .IsRequired()
                     .HasMaxLength(100)
                     .HasColumnName("email_shipper");
 
@@ -563,10 +539,12 @@ namespace LocalShipper.Data.Models
                     .HasColumnName("fcmtoken");
 
                 entity.Property(e => e.FullName)
+                    .IsRequired()
                     .HasMaxLength(100)
                     .HasColumnName("full_name");
 
                 entity.Property(e => e.PhoneShipper)
+                    .IsRequired()
                     .HasMaxLength(50)
                     .HasColumnName("phone_shipper");
 
@@ -591,7 +569,6 @@ namespace LocalShipper.Data.Models
                 entity.HasOne(d => d.Transport)
                     .WithMany(p => p.Shippers)
                     .HasForeignKey(d => d.TransportId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Shipper_Transport");
 
                 entity.HasOne(d => d.Wallet)
@@ -602,7 +579,6 @@ namespace LocalShipper.Data.Models
                 entity.HasOne(d => d.Zone)
                     .WithMany(p => p.Shippers)
                     .HasForeignKey(d => d.ZoneId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Shipper_Zone");
             });
 
@@ -693,52 +669,6 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.TemplateName)
                     .HasMaxLength(100)
                     .HasColumnName("template_name");
-            });
-
-            modelBuilder.Entity<Transaction>(entity =>
-            {
-                entity.ToTable("Transaction");
-
-                entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.Amount)
-                    .HasColumnType("decimal(10, 2)")
-                    .HasColumnName("amount");
-
-                entity.Property(e => e.CreatedAt)
-                    .HasColumnType("datetime")
-                    .HasColumnName("created_at")
-                    .HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.OrderId).HasColumnName("orderId");
-
-                entity.Property(e => e.TransactionDescription)
-                    .HasMaxLength(255)
-                    .HasColumnName("transaction_description");
-
-                entity.Property(e => e.TransactionMethod)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .HasColumnName("transaction_method");
-
-                entity.Property(e => e.TransactionTime)
-                    .HasColumnType("datetime")
-                    .HasColumnName("transaction_time")
-                    .HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.WalletId).HasColumnName("walletId");
-
-                entity.HasOne(d => d.Order)
-                    .WithMany(p => p.Transactions)
-                    .HasForeignKey(d => d.OrderId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Transaction_Order");
-
-                entity.HasOne(d => d.Wallet)
-                    .WithMany(p => p.Transactions)
-                    .HasForeignKey(d => d.WalletId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Transaction_Wallet");
             });
 
             modelBuilder.Entity<Transport>(entity =>
@@ -834,6 +764,8 @@ namespace LocalShipper.Data.Models
 
                 entity.Property(e => e.FromWalletId).HasColumnName("from_walletId");
 
+                entity.Property(e => e.OrderId).HasColumnName("orderId");
+
                 entity.Property(e => e.ToWalletId).HasColumnName("to_walletId");
 
                 entity.Property(e => e.TransactionTime)
@@ -849,13 +781,16 @@ namespace LocalShipper.Data.Models
                 entity.HasOne(d => d.FromWallet)
                     .WithMany(p => p.WalletTransactionFromWallets)
                     .HasForeignKey(d => d.FromWalletId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_WalletTransaction_Wallet");
+
+                entity.HasOne(d => d.Order)
+                    .WithMany(p => p.WalletTransactions)
+                    .HasForeignKey(d => d.OrderId)
+                    .HasConstraintName("FK_WalletTransaction_Order");
 
                 entity.HasOne(d => d.ToWallet)
                     .WithMany(p => p.WalletTransactionToWallets)
                     .HasForeignKey(d => d.ToWalletId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_WalletTransaction_Wallet1");
             });
 

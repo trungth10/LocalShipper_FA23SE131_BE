@@ -9,13 +9,13 @@ namespace LocalShipper.Data.Models
     {
         public PackageType()
         {
-            Packages = new HashSet<Package>();
+            Orders = new HashSet<Order>();
         }
 
         public int Id { get; set; }
         public string PackageType1 { get; set; }
         public DateTime? CreatedAt { get; set; }
 
-        public virtual ICollection<Package> Packages { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
     }
 }

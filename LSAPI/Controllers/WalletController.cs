@@ -206,7 +206,7 @@ namespace LSAPI.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut()]
-        public async Task<ActionResult<WalletResponse>> UpdateAccount(int id, [FromBody] WalletRequest request)
+        public async Task<ActionResult<WalletResponse>> UpdateWallet(int id, [FromBody] WalletRequest request)
         {
             try
             {
