@@ -249,6 +249,11 @@ namespace LocalShipper.Data.Models
                     .HasForeignKey(d => d.RouteId)
                     .HasConstraintName("FK_Order_RouteEdge");
 
+                entity.HasOne(d => d.Shipper)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.ShipperId)
+                    .HasConstraintName("FK_Order_Shipper");
+
                 entity.HasOne(d => d.Store)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.StoreId)
@@ -273,32 +278,25 @@ namespace LocalShipper.Data.Models
                     .HasColumnName("change_date")
                     .HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.FromShipperId).HasColumnName("from_shipperId");
-
                 entity.Property(e => e.FromStatus).HasColumnName("from_status");
 
                 entity.Property(e => e.OrderId).HasColumnName("orderId");
 
+                entity.Property(e => e.ShipperId).HasColumnName("shipperId");
+
                 entity.Property(e => e.Status).HasColumnName("status");
 
-                entity.Property(e => e.ToShipperId).HasColumnName("to_shipperId");
-
                 entity.Property(e => e.ToStatus).HasColumnName("to_status");
-
-                entity.HasOne(d => d.FromShipper)
-                    .WithMany(p => p.OrderHistoryFromShippers)
-                    .HasForeignKey(d => d.FromShipperId)
-                    .HasConstraintName("FK_OrderHistory_Shipper");
 
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.OrderHistories)
                     .HasForeignKey(d => d.OrderId)
                     .HasConstraintName("FK_OrderHistory_Order");
 
-                entity.HasOne(d => d.ToShipper)
-                    .WithMany(p => p.OrderHistoryToShippers)
-                    .HasForeignKey(d => d.ToShipperId)
-                    .HasConstraintName("FK_OrderHistory_Shipper1");
+                entity.HasOne(d => d.Shipper)
+                    .WithMany(p => p.OrderHistories)
+                    .HasForeignKey(d => d.ShipperId)
+                    .HasConstraintName("FK_OrderHistory_Shipper");
             });
 
             modelBuilder.Entity<PackageAction>(entity =>

@@ -9,8 +9,8 @@ namespace LocalShipper.Data.Models
     {
         public Shipper()
         {
-            OrderHistoryFromShippers = new HashSet<OrderHistory>();
-            OrderHistoryToShippers = new HashSet<OrderHistory>();
+            OrderHistories = new HashSet<OrderHistory>();
+            Orders = new HashSet<Order>();
             Ratings = new HashSet<Rating>();
             RouteEdges = new HashSet<RouteEdge>();
         }
@@ -33,8 +33,8 @@ namespace LocalShipper.Data.Models
         public virtual Transport Transport { get; set; }
         public virtual Wallet Wallet { get; set; }
         public virtual Zone Zone { get; set; }
-        public virtual ICollection<OrderHistory> OrderHistoryFromShippers { get; set; }
-        public virtual ICollection<OrderHistory> OrderHistoryToShippers { get; set; }
+        public virtual ICollection<OrderHistory> OrderHistories { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<Rating> Ratings { get; set; }
         public virtual ICollection<RouteEdge> RouteEdges { get; set; }
     }

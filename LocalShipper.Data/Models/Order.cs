@@ -47,6 +47,7 @@ namespace LocalShipper.Data.Models
 
         public virtual PackageAction Action { get; set; }
         public virtual RouteEdge Route { get; set; }
+        public virtual Shipper Shipper { get; set; }
         public virtual Store Store { get; set; }
         public virtual PackageType Type { get; set; }
         public virtual ICollection<OrderHistory> OrderHistories { get; set; }
