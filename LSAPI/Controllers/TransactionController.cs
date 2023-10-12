@@ -111,7 +111,7 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Store + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
-        public async Task<ActionResult<TransactionResponse>> UpdateAccount(int id, [FromBody] PutTransactionRequest request)
+        public async Task<ActionResult<TransactionResponse>> UpdateTransaction(int id, [FromBody] PutTransactionRequest request)
         {
             try
             {
@@ -146,7 +146,7 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
-        public async Task<ActionResult<MessageResponse>> DeleteAccount(int id)
+        public async Task<ActionResult<MessageResponse>> DeleteTransaction(int id)
         {
             try
             {

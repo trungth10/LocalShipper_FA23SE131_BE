@@ -103,7 +103,7 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
-        public async Task<ActionResult<TransportResponse>> UpdateAccount(int id, [FromBody] PutTransportRequest request)
+        public async Task<ActionResult<TransportResponse>> UpdateTransport(int id, [FromBody] PutTransportRequest request)
         {
             try
             {
@@ -130,7 +130,7 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
-        public async Task<ActionResult<TransportResponse>> DeleteAccount(int id)
+        public async Task<ActionResult<TransportResponse>> DeleteTransport(int id)
         {
             try
             {

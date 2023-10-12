@@ -11,7 +11,6 @@ namespace LocalShipper.Data.Models
         {
             Histories = new HashSet<History>();
             Orders = new HashSet<Order>();
-            Packages = new HashSet<Package>();
             PriceLs = new HashSet<PriceL>();
             Ratings = new HashSet<Rating>();
         }
@@ -36,7 +35,6 @@ namespace LocalShipper.Data.Models
         public virtual Zone Zone { get; set; }
         public virtual ICollection<History> Histories { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
-        public virtual ICollection<Package> Packages { get; set; }
         public virtual ICollection<PriceL> PriceLs { get; set; }
         public virtual ICollection<Rating> Ratings { get; set; }
     }

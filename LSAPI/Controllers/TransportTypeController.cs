@@ -108,7 +108,7 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpDelete()]
-        public async Task<ActionResult<MessageResponse>> DeleteAccount(int id)
+        public async Task<ActionResult<MessageResponse>> DeleteTransportType(int id)
         {
             try
             {

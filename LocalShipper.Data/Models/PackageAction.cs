@@ -9,7 +9,7 @@ namespace LocalShipper.Data.Models
     {
         public PackageAction()
         {
-            Packages = new HashSet<Package>();
+            Orders = new HashSet<Order>();
         }
 
         public int Id { get; set; }
@@ -17,6 +17,6 @@ namespace LocalShipper.Data.Models
         public DateTime? CreatedAt { get; set; }
         public bool? Deleted { get; set; }
 
-        public virtual ICollection<Package> Packages { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
     }
 }
