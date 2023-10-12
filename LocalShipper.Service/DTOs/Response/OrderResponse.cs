@@ -44,6 +44,7 @@ namespace LocalShipper.Service.DTOs.Response
         public ShipperResponse Shipper { get; set;}
         public PackageActionResponse PackageAction { get; set;}
         public PackageTypeResponse PackageType { get; set;}
+        public RouteEdgeResponse RouteEdge { get; set;}
 
     }
 }

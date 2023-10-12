@@ -26,8 +26,8 @@ namespace LSAPI.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("wallet-transaction")]
-        public async Task<ActionResult<WalletTransactionResponse>> GetWalletTrans(int id, string transactionType, int fromWallet, 
-            int toWallet, decimal amount, int? pageNumber, int? pageSize)
+        public async Task<ActionResult<WalletTransactionResponse>> GetWalletTrans(int id, string transactionType, int fromWallet, int toWallet,
+            decimal amount, string description, int orderId, int? pageNumber, int? pageSize)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Id không hợp lệ");
                 }
-                var rs = await _walletTransService.GetWalletTrans(id, transactionType, fromWallet, toWallet, amount, pageNumber, pageSize);
+                var rs = await _walletTransService.GetWalletTrans(id, transactionType, fromWallet, toWallet, amount, description, orderId,  pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)
@@ -69,7 +69,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        /*[Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("create-wallet-transaction")]
         public async Task<ActionResult<WalletTransactionResponse>> CreateWalletTrans([FromBody] WalletTransactionRequest request)
         {
@@ -94,9 +94,9 @@ namespace LSAPI.Controllers
             {
                 return BadRequest($"Giao dịch thất bại: {ex.Message}");
             }
-        }
+        }*/
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
+       /* [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut("update-wallet-transaction")]
         public async Task<ActionResult<WalletTransactionResponse>> UpdateWalletTrans(int id, WalletTransactionRequest request)
         {
@@ -129,7 +129,7 @@ namespace LSAPI.Controllers
             {
                 return BadRequest($"Cập nhật giao dịch thất bại: {ex.Message}");
             }
-        }
+        }*/
 
         [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpDelete("delete-wallet-transaction")]

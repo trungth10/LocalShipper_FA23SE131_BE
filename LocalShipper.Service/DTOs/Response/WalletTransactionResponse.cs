@@ -19,6 +19,7 @@ namespace LocalShipper.Service.DTOs.Response
 
         public WalletResponse FromWallet { get; set; }
         public WalletResponse ToWallet { get; set; }
+        public OrderResponse Order { get; set; }
 
     }
 }
