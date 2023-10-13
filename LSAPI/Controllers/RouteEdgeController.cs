@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using LocalShipper.Service.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using LocalShipper.Service.DTOs.Request;
 
 namespace LSAPI.Controllers
 {
@@ -72,7 +73,74 @@ namespace LSAPI.Controllers
                 return BadRequest($"Thêm vận đơn vào lộ trình thất bại: {ex.Message}");
             }
         }
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Staff + "," + Roles.Store, AuthenticationSchemes = "Bearer")]
+        [HttpPut("shipper/api/routes")]
+        public async Task<ActionResult<RouteEdgeResponse>> UpdateRoute(int routeId, RouteRequest request)
+        {
+            try
+            {
+                if(request.Quantity < 1)
+                {
+                    return BadRequest("Quantity phải là số dương");
+                }
+                if (request.Progress < 1)
+                {
+                    return BadRequest("Quantity phải là số dương");
+                }
+                if (request.Priority < 1)
+                {
+                    return BadRequest("Priority phải là số dương");
+                }
+                if (request.Status < 1)
+                {
+                    return BadRequest("Status phải là số dương");
+                }
+                if (request.ShipperId < 1)
+                {
+                    return BadRequest("ShipperId phải là số dương");
+                }
 
+                if (routeId < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
+                if (routeId < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
+
+                var response = await _routeService.UpdateRoute(routeId, request);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"cập nhật lộ trình thất bại: {ex.Message}");
+            }
+        }
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
+        [HttpDelete("api/routes")]
+        public async Task<ActionResult<MessageResponse>> DeleteOrder(int routeId)
+        {
+            try
+            {
+                if (routeId == 0)
+                {
+                    return BadRequest("Vui lòng nhập Id");
+                }
+                if (routeId < 0)
+                {
+                    return BadRequest("Id phải là số nguyên dương");
+                }           
+                var rs = await _routeService.DeleteRoute(routeId);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xóa đơn hàng thất bại: {ex.Message}");
+            }
+
+        }
 
     }
 }
