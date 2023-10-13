@@ -9,6 +9,9 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using LocalShipper.Service.Helpers;
 using Org.BouncyCastle.Asn1.Ocsp;
+using LocalShipper.Data.Models;
+using MailKit.Search;
+using System.Text.RegularExpressions;
 
 namespace LSAPI.Controllers
 {
@@ -208,6 +211,179 @@ namespace LSAPI.Controllers
             }
             var rs = await _orderService.GetReceiveRateByShipperId(shipperId);
              return Ok(rs);
-         }         
+         }
+        [AllowAnonymous]
+        [HttpPost("api/orders/create")]
+        public async Task<ActionResult<OrderResponse>> CreateOrder(OrderRequestForCreate request)
+        {
+            try
+            {
+                if (request.StoreId < 1)
+                {
+                    return BadRequest("storeId phải là số dương");
+                }
+                if (request.DistancePrice < 0)
+                {
+                    return BadRequest("DistancePrice phải là số dương");
+                }
+                if (request.SubtotalPrice < 0)
+                {
+                    return BadRequest("SubtotalPrice phải là số dương");
+                }
+                if (request.Cod < 0)
+                {
+                    return BadRequest("Cod phải là số dương");
+                }
+                if (request.PackageWidth < 0)
+                {
+                    return BadRequest("PackageWidth phải là số dương");
+                }
+                if (request.PackageHeight < 0)
+                {
+                    return BadRequest("PackageHeight phải là số dương");
+                }
+                if (request.PackageLength < 0)
+                {
+                    return BadRequest("PackageLength phải là số dương");
+                }
+                if (request.PackageWeight < 0)
+                {
+                    return BadRequest("PackageWeight phải là số dương");
+                }
+                if (request.TypeId < 1)
+                {
+                    return BadRequest("TypeId phải là số dương");
+                }
+                if (request.ActionId < 1)
+                {
+                    return BadRequest("TypeId phải là số dương");
+                }
+                var regex2 = new Regex("^[0-9]+$");
+
+                if (!regex2.IsMatch(request.CustomerPhone))
+                {
+                    return BadRequest("Số điện thoại không hợp lệ");
+                }
+                if (request.CustomerPhone.Length < 9 || request.CustomerPhone.Length > 11)
+                {
+                    return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
+                }
+                var regex = new Regex(@"^\w+@gmail\.com$");
+                if (!regex.IsMatch(request.CustomerEmail))
+                {
+                    return BadRequest("Email phải có địa chỉ tên miền @gmail.com");
+                }
+                if (string.IsNullOrWhiteSpace(request.CustomerEmail))
+                {
+                    return BadRequest("CustomerEmail không được để trống");
+                }
+                if (string.IsNullOrWhiteSpace(request.CustomerName))
+                {
+                    return BadRequest("CustomerName không được để trống");
+                }
+                var regex3 = new Regex(@"[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]");
+                if (regex3.IsMatch(request.CustomerName))
+                {
+                    return BadRequest("CustomerName không được chứa ký tự đặc biệt");
+                }
+                if (string.IsNullOrWhiteSpace(request.CustomerDistrict))
+                {
+                    return BadRequest("CustomerDistrict không được để trống");
+                }
+                if (string.IsNullOrWhiteSpace(request.CustomerCity))
+                {
+                    return BadRequest("CustomerCity không được để trống");
+                }
+                if (string.IsNullOrWhiteSpace(request.CustomerCommune))
+                {
+                    return BadRequest("CustomerCommune không được để trống");
+                }
+                var rs = await _orderService.CreateOrder(request);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"tạo Order thất bại: {ex.Message}");
+            }
+           
+        }
+        [HttpPut("api/orders/update")]
+        public async Task<ActionResult<OrderResponse>> UpdateOrder(int id, OrderRequestForUpdate request)
+        {
+            try 
+            {
+                if (id == 0)
+                {
+                    return BadRequest("làm ơn nhập Id");
+                }
+                if (id < 0)
+                {
+                    return BadRequest("id phải là số dương");
+                }
+                if (request.DistancePrice < 0)
+                {
+                    return BadRequest("DistancePrice phải là số dương");
+                }
+                if (request.SubtotalPrice < 0)
+                {
+                    return BadRequest("SubtotalPrice phải là số dương");
+                }
+                if (request.Cod < 0)
+                {
+                    return BadRequest("Cod phải là số dương");
+                }
+                if (request.PackageWidth < 0)
+                {
+                    return BadRequest("PackageWidth phải là số dương");
+                }
+                if (request.PackageHeight < 0)
+                {
+                    return BadRequest("PackageHeight phải là số dương");
+                }
+                if (request.PackageLength < 0)
+                {
+                    return BadRequest("PackageLength phải là số dương");
+                }
+                if (request.PackageWeight < 0)
+                {
+                    return BadRequest("PackageWeight phải là số dương");
+                }
+                if (request.TypeId < 1)
+                {
+                    return BadRequest("TypeId phải là số dương");
+                }
+                if (request.ActionId < 1)
+                {
+                    return BadRequest("TypeId phải là số dương");
+                }
+                //var regex2 = new Regex("^[0-9]+$");
+
+                //if (!regex2.IsMatch(request.CustomerPhone))
+                //{
+                //    return BadRequest("Số điện thoại không hợp lệ");
+                //}
+                //if (request.CustomerPhone.Length < 9 || request.CustomerPhone.Length > 11)
+                //{
+                //    return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
+                //}
+                //var regex = new Regex(@"^\w+@gmail\.com$");
+                //if (!regex.IsMatch(request.CustomerEmail))
+                //{
+                //    return BadRequest("Email phải có địa chỉ tên miền @gmail.com");
+                //}
+                //var regex3 = new Regex(@"[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]");
+                //if (regex3.IsMatch(request.CustomerName))
+                //{
+                //    return BadRequest("CustomerName không được chứa ký tự đặc biệt");
+                //}
+                var rs = await _orderService.UpdateOrder(id, request);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"cập nhật Order thất bại: {ex.Message}");
+            }
+            
+        }
     }
 }

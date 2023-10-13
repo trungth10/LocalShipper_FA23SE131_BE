@@ -31,4 +31,51 @@ namespace LocalShipper.Service.DTOs.Request
         public int ActionId { get; set; }
         public int TypeId { get; set; }
     }
+
+    public class OrderRequestForCreate
+    {
+
+        public int? StoreId { get; set; }      
+        public string TrackingNumber { get; set; }
+        public decimal DistancePrice { get; set; }
+        public decimal SubtotalPrice { get; set; }
+        public decimal? Cod { get; set; }
+        public string Other { get; set; }
+        public int Capacity { get; set; }
+        public int? PackageWeight { get; set; }
+        public int? PackageWidth { get; set; }
+        public int? PackageHeight { get; set; }
+        public int? PackageLength { get; set; }
+        public string CustomerCity { get; set; }
+        public string CustomerCommune { get; set; }
+        public string CustomerDistrict { get; set; }
+        public string CustomerPhone { get; set; }
+        public string CustomerName { get; set; }
+        public string CustomerEmail { get; set; }
+        public int ActionId { get; set; }
+        public int TypeId { get; set; }
+
+    }
+    public class OrderRequestForUpdate
+    {
+      
+        public int? ShipperId { get; set; }
+        public decimal DistancePrice { get; set; }
+        public decimal SubtotalPrice { get; set; }
+        public decimal? Cod { get; set; }
+        public string Other { get; set; }
+        public int Capacity { get; set; }
+        public int? PackageWeight { get; set; }
+        public int? PackageWidth { get; set; }
+        public int? PackageHeight { get; set; }
+        public int? PackageLength { get; set; }
+        public string CustomerCity { get; set; }
+        public string CustomerCommune { get; set; }
+        public string CustomerDistrict { get; set; }
+        public string CustomerPhone { get; set; }
+        public string CustomerName { get; set; }
+        public string CustomerEmail { get; set; }
+        public int ActionId { get; set; }
+        public int TypeId { get; set; }
+    }
 }
