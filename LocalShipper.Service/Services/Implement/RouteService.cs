@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LocalShipper.Data.Models;
 using LocalShipper.Data.UnitOfWork;
+using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
 using LocalShipper.Service.Exceptions;
 using LocalShipper.Service.Helpers;
@@ -98,14 +99,68 @@ namespace LocalShipper.Service.Services.Implement
                 await _unitOfWork.Repository<Order>().Update(order, order.Id);
                 await _unitOfWork.CommitAsync();
             }
-                               
+
             var orderResponse = _mapper.Map<List<OrderResponse>>(orders);
             return orderResponse;
         }
 
+        public async Task<RouteEdgeResponse> UpdateRoute(int routeId, RouteRequest request)
+        {
 
+            var route = await _unitOfWork.Repository<RouteEdge>().GetAll()
+                .FirstOrDefaultAsync(r => r.Id == routeId);
 
+            if (route == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Route không tồn tại", routeId.ToString());
+            }
+            route.FromStation = request.FromStation.Trim();
+            route.ToStation = request.ToStation.Trim();
+            route.CreatedDate = request.CreatedDate;
+            route.StartDate = request.StartDate;
+            route.Eta = request.Eta;
+            route.Quantity= request.Quantity;
+            route.Progress= request.Progress;
+            route.Priority= request.Priority;
+            route.Status= request.Status;
+            route.ShipperId= request.ShipperId;
+                
 
+            await _unitOfWork.Repository<RouteEdge>().Update(route, route.Id);
+            await _unitOfWork.CommitAsync();
+
+            var routeResponse = _mapper.Map<RouteEdgeResponse>(route);
+            return routeResponse;
+        }
+
+        public async Task<MessageResponse> DeleteRoute(int routeId)
+        {          
+            var route = await _unitOfWork.Repository<RouteEdge>().GetAll()
+                .FirstOrDefaultAsync(r => r.Id == routeId);
+
+            if (route == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Route không tồn tại", routeId.ToString());
+            }
+            var ordersInRoute = await _unitOfWork.Repository<Order>().GetAll()
+                .Where(o => o.RouteId == routeId)
+                .ToListAsync();
+
+            
+            foreach (var order in ordersInRoute)
+            {
+                order.RouteId = null;
+                await _unitOfWork.Repository<Order>().Update(order, order.Id);
+            }
+
+            _unitOfWork.Repository<RouteEdge>().Delete(route);
+            await _unitOfWork.CommitAsync();
+
+            return new  MessageResponse
+            {
+                Message = "Đã xóa",
+            }; 
+        }
     }
 
 
