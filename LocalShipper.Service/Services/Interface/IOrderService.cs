@@ -27,8 +27,9 @@ namespace LocalShipper.Service.Services.Interface
         Task<OrderResponse> DeleteOrder(int id);
         Task<TotalPriceAndTotalResponse> GetTotalPriceAndOrderCount(int shipperId, int? month, int? year, int? day);
 
-        Task<OrderResponse> CreateOrder(OrderRequestForCreate request);
+        Task<OrderCreateResponse> CreateOrder(OrderRequestForCreate request);
         Task<OrderResponse> UpdateOrder(int id, OrderRequestForUpdate request);
+        Task<List<OrderResponse>> GetOrderSuggest(int id, SuggestEnum suggest, int money);
 
     }
 }

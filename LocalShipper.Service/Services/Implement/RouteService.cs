@@ -3,8 +3,11 @@ using LocalShipper.Data.Models;
 using LocalShipper.Data.UnitOfWork;
 using LocalShipper.Service.DTOs.Response;
 using LocalShipper.Service.Exceptions;
+using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Interface;
+using MailKit.Search;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.X509;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,19 +63,47 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //SHIPPER
-        //Suggest Route
-        public async Task<List<RouteEdgeResponse>> GetRouteSuggest(int id)
+        //Add Order to Route
+        public async Task<List<OrderResponse>> AddOrderToRoute(IEnumerable<int> id, int shipperId)
         {
 
-            var route = _unitOfWork.Repository<RouteEdge>().GetAll()
-            .Include(r => r.Shipper)
-            .FirstOrDefaultAsync(r => r.Id == id);
-            
-            
+            var orders = await _unitOfWork.Repository<Order>()
+                                         .GetAll()
+                                         .Include(o => o.Store)
+                                         .Include(o => o.Shipper)
+                                         .Include(o => o.Action)
+                                         .Include(o => o.Type)
+                                         .Include(o => o.Route)
+                                         .Where(o => id.Contains(o.Id))
+                                         .ToListAsync();
 
-            var routeResponse = _mapper.Map<List<RouteEdgeResponse>>(routeList);
-            return routeResponse;
+            if (orders.Count == 0)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy đơn hàng", id.ToString());
+            }
+
+            RouteEdge route = new RouteEdge
+            {
+                Quantity = orders.Count,
+                Status = (int)RouteEdgeStatusEnum.IDLE,
+                ShipperId = shipperId
+            };
+
+            await _unitOfWork.Repository<RouteEdge>().InsertAsync(route);
+            await _unitOfWork.CommitAsync();
+
+            foreach (var order in orders)
+            {
+                order.RouteId = route.Id;
+                await _unitOfWork.Repository<Order>().Update(order, order.Id);
+                await _unitOfWork.CommitAsync();
+            }
+                               
+            var orderResponse = _mapper.Map<List<OrderResponse>>(orders);
+            return orderResponse;
         }
+
+
 
 
     }

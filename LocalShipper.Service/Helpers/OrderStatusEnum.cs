@@ -29,4 +29,14 @@ namespace LocalShipper.Service.Helpers
         ACTIVE =1,
         DEACTIVE = 2,
     }
+
+    public enum SuggestEnum
+    {
+        DISTRICT =1,
+        ACTION = 2,
+        TYPE = 3,
+        CAPACITY_LOW =4,
+        CAPACITY_HIGHT = 5,
+        COD =6,
+    }
 }
