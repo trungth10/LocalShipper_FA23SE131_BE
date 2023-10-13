@@ -22,6 +22,7 @@ namespace LSAPI.Mapper
             CreateMap<Zone, ZoneResponse>().ReverseMap();
 
             CreateMap<WalletTransaction, WalletTransactionResponse>().ReverseMap();
+            CreateMap<RouteEdge, RouteEdgeResponse>().ReverseMap();
         }
     }
 }

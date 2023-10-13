@@ -13,8 +13,8 @@ namespace LocalShipper.Data.Models
         }
 
         public int Id { get; set; }
-        public int? FromStation { get; set; }
-        public int? ToStation { get; set; }
+        public string? FromStation { get; set; }
+        public string? ToStation { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? Eta { get; set; }

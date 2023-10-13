@@ -23,4 +23,10 @@ namespace LocalShipper.Service.Helpers
         DELETED = 8,
         RETURN = 9,
     }
+
+    public enum RouteStatusEnum
+    {
+        ACTIVE =1,
+        DEACTIVE = 2,
+    }
 }
