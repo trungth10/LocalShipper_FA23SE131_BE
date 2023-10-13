@@ -98,6 +98,11 @@ namespace LocalShipper.Service.Services.Implement
 
                 if (order.Status == (int)OrderStatusEnum.ASSIGNING)
                 {
+                    if (order.ShipperId != null)
+                    {
+                        throw new CrudException(HttpStatusCode.NotFound, "Shipper khác đã nhận đơn hàng!", order.ToString());
+                    }
+
                     OrderHistory orderHistory = new OrderHistory
                     {
                         FromStatus = (int)OrderStatusEnum.ASSIGNING,
@@ -443,13 +448,11 @@ namespace LocalShipper.Service.Services.Implement
         }
         //Store
         //CREATE ORDER
-        public async Task<OrderResponse> CreateOrder(OrderRequestForCreate request)
+        public async Task<OrderCreateResponse> CreateOrder(OrderRequestForCreate request)
         {
 
-          
             decimal distancePrice = 0;
             decimal distancePriceMax1 = 0;
-
             decimal max1;
             decimal min1;
             decimal max2;
@@ -603,7 +606,8 @@ namespace LocalShipper.Service.Services.Implement
             };
             await _unitOfWork.Repository<Order>().InsertAsync(newOrder);
             await _unitOfWork.CommitAsync();
-            var orderResponse = _mapper.Map<OrderResponse>(newOrder);
+            var orderResponse = _mapper.Map<OrderCreateResponse>(newOrder);
+            orderResponse.Distance = request.DistancePrice;
             return orderResponse;
         }
 
@@ -817,6 +821,7 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Đơn hàng đã bị xóa rồi", id.ToString());
             }
 
+
             order.Status = (int)OrderStatusEnum.DELETED;
 
             await _unitOfWork.Repository<Order>().Update(order, id);
@@ -825,6 +830,61 @@ namespace LocalShipper.Service.Services.Implement
             var orderResponse = _mapper.Map<OrderResponse>(order);
             return orderResponse;
         }
+
+        //SHIPPER
+        //Suggest Order
+        public async Task<List<OrderResponse>> GetOrderSuggest(int id,SuggestEnum suggest, int money)
+        {
+
+            var order = await _unitOfWork.Repository<Order>().GetAll()
+             .Include(o => o.Store)
+             .Include(o => o.Shipper)
+             .Include(o => o.Action)
+             .Include(o => o.Type)
+             .Include(o => o.Route)
+             .FirstOrDefaultAsync(r => r.Id == id);
+
+            var orderSuggest = _unitOfWork.Repository<Order>().GetAll()
+             .Include(o => o.Store)
+             .Include(o => o.Shipper)
+             .Include(o => o.Action)
+             .Include(o => o.Type)
+             .Include(o => o.Route)
+             .Where(o => o.ShipperId == order.ShipperId && o.PickupTime == null)
+            ;
+
+             
+            if (suggest == SuggestEnum.DISTRICT && (money == null || money ==0 ))
+            {
+                 orderSuggest.Where(a => a.CustomerDistrict.Equals(order.CustomerDistrict) ).ToListAsync();
+            }
+            if (suggest == SuggestEnum.ACTION && (money == null || money == 0))
+            {
+                orderSuggest.Where(a => a.ActionId == order.ActionId ).ToListAsync();
+            }
+            if (suggest == SuggestEnum.TYPE && (money == null || money == 0))
+            {
+                 orderSuggest.Where(a => a.TypeId == order.TypeId).ToListAsync();
+            }
+            if (suggest == SuggestEnum.CAPACITY_LOW && (money == null || money == 0))
+            {
+                orderSuggest.Where(a => a.Capacity <= 5 ).ToListAsync();
+            }
+            if (suggest == SuggestEnum.CAPACITY_HIGHT && (money == null || money == 0))
+            {
+               orderSuggest.Where(a => a.Capacity > 5).ToListAsync();
+            }
+            if (suggest == SuggestEnum.COD)
+            {
+               orderSuggest.Where(a => a.Capacity <= money).ToListAsync();
+            }
+
+            var orderResponse = _mapper.Map<List<OrderResponse>>(orderSuggest);
+            return orderResponse;
+        }
+
+       
+
 
     }
 

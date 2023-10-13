@@ -212,9 +212,11 @@ namespace LSAPI.Controllers
             var rs = await _orderService.GetReceiveRateByShipperId(shipperId);
              return Ok(rs);
          }
-        [AllowAnonymous]
+
+
+        [Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]
         [HttpPost("api/orders/create")]
-        public async Task<ActionResult<OrderResponse>> CreateOrder(OrderRequestForCreate request)
+        public async Task<ActionResult<OrderCreateResponse>> CreateOrder(OrderRequestForCreate request)
         {
             try
             {
@@ -307,6 +309,8 @@ namespace LSAPI.Controllers
             }
            
         }
+
+        [Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]
         [HttpPut("api/orders/update")]
         public async Task<ActionResult<OrderResponse>> UpdateOrder(int id, OrderRequestForUpdate request)
         {
@@ -384,6 +388,23 @@ namespace LSAPI.Controllers
                 return BadRequest($"cập nhật Order thất bại: {ex.Message}");
             }
             
+        }
+
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [HttpGet("shipper/api/orders/suggest")]
+        public async Task<ActionResult<OrderResponse>> GetOrderSuggest(int id, SuggestEnum suggest, int money)
+        {
+            try
+            {
+
+                var rs = await _orderService.GetOrderSuggest(id, suggest,money);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Gợi ý hóa đơn thất bại: {ex.Message}");
+            }
+
         }
     }
 }

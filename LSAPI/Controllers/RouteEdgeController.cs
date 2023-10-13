@@ -4,6 +4,9 @@ using LocalShipper.Service.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
+using LocalShipper.Service.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LSAPI.Controllers
 {
@@ -18,6 +21,7 @@ namespace LSAPI.Controllers
             _routeService = routeService;
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("api/routes")]
         public async Task<ActionResult<RouteEdgeResponse>> GetRoute(int id, string fromStation, string toStation, int quantity, int progress, int priority, int status, int shipperId, int? pageNumber, int? pageSize)
         {
@@ -44,6 +48,28 @@ namespace LSAPI.Controllers
             catch (Exception ex)
             {
                 return BadRequest($"Xem lộ trình thất bại: {ex.Message}");
+            }
+        }
+
+
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [HttpPost("shipper/api/routes")]
+        public async Task<ActionResult<RouteEdgeResponse>> AddOrderToRoute(IEnumerable<int> id, int shipperId)
+        {
+            try
+            {               
+                if (shipperId < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
+
+                var response = await _routeService.AddOrderToRoute(id, shipperId);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Thêm vận đơn vào lộ trình thất bại: {ex.Message}");
             }
         }
 
