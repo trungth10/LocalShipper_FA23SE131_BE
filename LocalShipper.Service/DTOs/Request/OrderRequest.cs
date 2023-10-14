@@ -78,4 +78,27 @@ namespace LocalShipper.Service.DTOs.Request
         public int ActionId { get; set; }
         public int TypeId { get; set; }
     }
+
+    public class OrderRequestV2
+    {
+        public IEnumerable<int>? id {get ; set;}
+        public IEnumerable<int>? status { get; set; }
+        public IEnumerable<int>? storeId { get; set; }
+        public IEnumerable<int>? shipperId { get; set; }
+        public IEnumerable<string>? tracking_number { get; set; }
+        public IEnumerable<string>? cancel_reason { get; set; }
+        public IEnumerable<string>? other { get; set; }
+        public int? capacity { get; set; } = 0;
+        public decimal? COD { get; set; } = 0;
+        public IEnumerable<int>? routeId { get; set; }    
+        public IEnumerable<string>? customer_city { get; set; }
+        public IEnumerable<string>? customer_commune { get; set; }
+        public IEnumerable<string>? customer_district { get; set; }
+        public IEnumerable<string>? customer_phone { get; set; }
+        public IEnumerable<string>? customer_name { get; set; }
+        public IEnumerable<string>? customer_email { get; set; }
+        public IEnumerable<int>? actionId { get; set; }
+        public IEnumerable<int>? typeId { get; set; }
+
+    }
 }

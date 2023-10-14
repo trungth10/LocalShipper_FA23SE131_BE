@@ -31,5 +31,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<OrderResponse> UpdateOrder(int id, OrderRequestForUpdate request);
         Task<List<OrderResponse>> GetOrderSuggest(int id, SuggestEnum suggest, int money);
 
+        Task<List<OrderResponse>> GetOrderV2(OrderRequestV2 request, int? pageNumber, int? pageSize);
+
     }
 }

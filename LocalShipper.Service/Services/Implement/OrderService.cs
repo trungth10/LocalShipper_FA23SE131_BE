@@ -401,6 +401,57 @@ namespace LocalShipper.Service.Services.Implement
             return orderResponse;
         }
 
+        //GET Order v2
+        public async Task<List<OrderResponse>> GetOrderV2( OrderRequestV2 request,int? pageNumber, int? pageSize)
+        {
+
+            var orders = _unitOfWork.Repository<Order>().GetAll()
+                                                       .Include(o => o.Store)
+                                                       .Include(o => o.Shipper)
+                                                       .Include(o => o.Action)
+                                                       .Include(o => o.Type)
+                                                       .Include(o => o.Route)
+                                                       .Where(a => !request.id.Any()  || request.id.Contains(a.Id))
+                                                       .Where(a => !request.status.Any() || request.status.Contains(a.Status))
+                                                       .Where(a => !request.storeId.Any() || request.storeId.Contains(a.StoreId))
+                                                       .Where(a => !request.shipperId.Any() || request.shipperId.Contains((int)a.ShipperId))
+                                                       .Where(a => !request.tracking_number.Any() || request.tracking_number.Contains(a.TrackingNumber))
+                                                       .Where(a => !request.cancel_reason.Any() || request.cancel_reason.Contains(a.CancelReason))                                                       
+                                                       .Where(a => (request.COD == null || request.COD == 0) || a.Cod <= request.COD)                                                    
+                                                       .Where(a => !request.other.Any() || request.other.Contains(a.Other))
+                                                       .Where(a => !request.routeId.Any() || request.routeId.Contains((int)a.RouteId))
+                                                       .Where(a => (request.capacity == null || request.capacity == 0) || a.Capacity <= request.capacity)                                                      
+                                                       .Where(a => !request.customer_city.Any() || request.customer_city.Contains(a.CustomerCity))
+                                                       .Where(a => !request.customer_commune.Any() || request.customer_commune.Contains(a.CustomerCommune))
+                                                       .Where(a => !request.customer_district.Any() || request.customer_district.Contains(a.CustomerDistrict))
+                                                       .Where(a => !request.customer_phone.Any() || request.customer_phone.Contains(a.CustomerPhone))
+                                                       .Where(a => !request.customer_name.Any() || request.customer_name.Contains(a.CustomerName))
+                                                       .Where(a => !request.customer_email.Any() || request.customer_email.Contains(a.CustomerEmail))
+                                                       .Where(a => !request.actionId.Any() || request.actionId.Contains(a.ActionId))
+                                                       .Where(a => !request.typeId.Any() || request.typeId.Contains(a.TypeId))
+                                                       ;
+
+            // Xác định giá trị cuối cùng của pageNumber
+            pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+            // Áp dụng phân trang nếu có thông số pageNumber và pageSize
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                orders = orders.Skip((pageNumber.Value - 1) * pageSize.Value)
+                                       .Take(pageSize.Value);
+            }
+
+            var orderList = await orders.ToListAsync();
+
+
+            if (orderList == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Order không có hoặc không tồn tại", "ERROR");
+            }
+
+            var orderResponse = _mapper.Map<List<OrderResponse>>(orderList);
+            return orderResponse;
+        }
+
 
         //GET Count
         public async Task<int> GetTotalOrderCount(int? storeId, int? shipperId)
@@ -426,7 +477,7 @@ namespace LocalShipper.Service.Services.Implement
                 }
             }
 
-           
+
             return null;
         }
         public async Task<decimal?> GetMaxDistance(int? storeId)
@@ -444,7 +495,7 @@ namespace LocalShipper.Service.Services.Implement
                 return (decimal)maxDistance;
             }
 
-            return null; 
+            return null;
         }
         //Store
         //CREATE ORDER
@@ -582,27 +633,27 @@ namespace LocalShipper.Service.Services.Implement
             {
                 StoreId = request.StoreId.HasValue ? request.StoreId.Value : 0,
                 TrackingNumber = request.TrackingNumber.Trim(),
-                DistancePrice= distancePrice,
-                SubtotalPrice= request.SubtotalPrice,
+                DistancePrice = distancePrice,
+                SubtotalPrice = request.SubtotalPrice,
                 Cod = request.Cod,
                 TotalPrice = distancePrice + request.SubtotalPrice + request.Cod,
-                Capacity= request.Capacity,
-                PackageWeight= request.PackageWeight,
-                PackageHeight= request.PackageHeight,
-                PackageLength= request.PackageLength,
-                PackageWidth= request.PackageWidth,
-                CustomerCity= request.CustomerCity.Trim(),
-                CustomerCommune= request.CustomerCommune.Trim(),
-                CustomerDistrict= request.CustomerDistrict.Trim(),
-                CustomerEmail= request.CustomerEmail.Trim(),
-                CustomerName= request.CustomerName.Trim(),
-                CustomerPhone= request.CustomerPhone.Trim(),
-                ActionId= request.ActionId,
-                TypeId  = request.TypeId,
+                Capacity = request.Capacity,
+                PackageWeight = request.PackageWeight,
+                PackageHeight = request.PackageHeight,
+                PackageLength = request.PackageLength,
+                PackageWidth = request.PackageWidth,
+                CustomerCity = request.CustomerCity.Trim(),
+                CustomerCommune = request.CustomerCommune.Trim(),
+                CustomerDistrict = request.CustomerDistrict.Trim(),
+                CustomerEmail = request.CustomerEmail.Trim(),
+                CustomerName = request.CustomerName.Trim(),
+                CustomerPhone = request.CustomerPhone.Trim(),
+                ActionId = request.ActionId,
+                TypeId = request.TypeId,
                 CreateTime = DateTime.Now,
                 OrderTime = DateTime.Now,
                 Status = (int)OrderStatusEnum.IDLE,
-                
+
             };
             await _unitOfWork.Repository<Order>().InsertAsync(newOrder);
             await _unitOfWork.CommitAsync();
@@ -764,14 +815,14 @@ namespace LocalShipper.Service.Services.Implement
             var currentCommune = customerDistric;
             var currentDistric = customerDistric;
             var currentOther = other;
-            var storeId1 =  storeId;
-            order.StoreId =  storeId1;
+            var storeId1 = storeId;
+            order.StoreId = storeId1;
             order.ShipperId = request.ShipperId;
             order.Capacity = request.Capacity;
             order.PackageWeight = request.PackageWeight;
             order.PackageWidth = request.PackageWidth;
             order.PackageHeight = request.PackageHeight;
-            order.PackageLength = request.PackageLength;        
+            order.PackageLength = request.PackageLength;
             order.CustomerPhone = request.CustomerPhone ?? currentPhone;
             order.CustomerName = request.CustomerName ?? currentName;
             order.CustomerEmail = request.CustomerEmail ?? currentEmail;
@@ -785,9 +836,9 @@ namespace LocalShipper.Service.Services.Implement
             order.TotalPrice = distancePrice + request.SubtotalPrice + request.Cod;
             order.ActionId = request.ActionId;
             order.TypeId = request.TypeId;
-            order.CreateTime =DateTime.Now;
+            order.CreateTime = DateTime.Now;
             order.OrderTime = DateTime.Now;
-                
+
 
             await _unitOfWork.Repository<Order>().Update(order, id);
             await _unitOfWork.CommitAsync();
@@ -833,7 +884,7 @@ namespace LocalShipper.Service.Services.Implement
 
         //SHIPPER
         //Suggest Order
-        public async Task<List<OrderResponse>> GetOrderSuggest(int id,SuggestEnum suggest, int money)
+        public async Task<List<OrderResponse>> GetOrderSuggest(int id, SuggestEnum suggest, int money)
         {
 
             var order = await _unitOfWork.Repository<Order>().GetAll()
@@ -853,37 +904,37 @@ namespace LocalShipper.Service.Services.Implement
              .Where(o => o.ShipperId == order.ShipperId && o.PickupTime == null)
             ;
 
-             
-            if (suggest == SuggestEnum.DISTRICT && (money == null || money ==0 ))
+
+            if (suggest == SuggestEnum.DISTRICT && (money == null || money == 0))
             {
-                 orderSuggest.Where(a => a.CustomerDistrict.Equals(order.CustomerDistrict) ).ToListAsync();
+                orderSuggest.Where(a => a.CustomerDistrict.Equals(order.CustomerDistrict)).ToListAsync();
             }
             if (suggest == SuggestEnum.ACTION && (money == null || money == 0))
             {
-                orderSuggest.Where(a => a.ActionId == order.ActionId ).ToListAsync();
+                orderSuggest.Where(a => a.ActionId == order.ActionId).ToListAsync();
             }
             if (suggest == SuggestEnum.TYPE && (money == null || money == 0))
             {
-                 orderSuggest.Where(a => a.TypeId == order.TypeId).ToListAsync();
+                orderSuggest.Where(a => a.TypeId == order.TypeId).ToListAsync();
             }
             if (suggest == SuggestEnum.CAPACITY_LOW && (money == null || money == 0))
             {
-                orderSuggest.Where(a => a.Capacity <= 5 ).ToListAsync();
+                orderSuggest.Where(a => a.Capacity <= 5).ToListAsync();
             }
             if (suggest == SuggestEnum.CAPACITY_HIGHT && (money == null || money == 0))
             {
-               orderSuggest.Where(a => a.Capacity > 5).ToListAsync();
+                orderSuggest.Where(a => a.Capacity > 5).ToListAsync();
             }
             if (suggest == SuggestEnum.COD)
             {
-               orderSuggest.Where(a => a.Capacity <= money).ToListAsync();
+                orderSuggest.Where(a => a.Capacity <= money).ToListAsync();
             }
 
             var orderResponse = _mapper.Map<List<OrderResponse>>(orderSuggest);
             return orderResponse;
         }
 
-       
+
 
 
     }

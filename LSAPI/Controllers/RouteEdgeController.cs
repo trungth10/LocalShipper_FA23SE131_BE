@@ -74,7 +74,7 @@ namespace LSAPI.Controllers
             }
         }
         [Authorize(Roles = Roles.Shipper + "," + Roles.Staff + "," + Roles.Store, AuthenticationSchemes = "Bearer")]
-        [HttpPut("shipper/api/routes")]
+        [HttpPut("api/routes")]
         public async Task<ActionResult<RouteEdgeResponse>> UpdateRoute(int routeId, RouteRequest request)
         {
             try

@@ -67,6 +67,34 @@ namespace LSAPI.Controllers
         }
 
         [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [HttpPost("api/orders/v2")]
+        public async Task<ActionResult<OrderResponse>> GetOrderV2( [FromBody] OrderRequestV2 request, int? pageNumber, int? pageSize)
+        {
+            try
+            {
+                if (pageNumber.HasValue && pageNumber <= 0)
+                {
+                    return BadRequest("Số trang phải là số nguyên dương");
+                }
+
+                if (pageSize.HasValue && pageSize <= 0)
+                {
+                    return BadRequest("Số phần tử trong trang phải là số nguyên dương");
+                }
+               
+
+                var response = await _orderService.GetOrderV2(request, pageNumber, pageSize);
+
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xem đơn hàng thất bại: {ex.Message}");
+            }
+        }
+
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/orders/count")]
         public async Task<ActionResult<OrderResponse>> GetCountOrder(int storeId, int shipperId)
         {
