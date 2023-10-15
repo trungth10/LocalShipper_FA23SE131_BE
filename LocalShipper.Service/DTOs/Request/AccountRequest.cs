@@ -25,4 +25,8 @@ namespace LocalShipper.Service.DTOs.Request
     {
         public string? Email { get; set; } = null;
     }
+    public class ChangePassword
+    {
+        public string Password { get; set; }
+    }
 }

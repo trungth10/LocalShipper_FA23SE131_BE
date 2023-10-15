@@ -281,6 +281,39 @@ namespace LSAPI.Controllers
             }
 
         }
+        [HttpPost("api/accounts/change-password")]
+        public async Task<IActionResult> ChangePassword(int userId, string currentPassword, string newPassword)
+        {
+            try
+            {
+                if(userId == 0)
+                {
+                    return BadRequest("làm ơn nhập userId");
+                }
+                if (userId < 0)
+                {
+                    return BadRequest("userId phải là số dương");
+                }
+                if (currentPassword == null)
+                {
+                    return BadRequest("làm ơn nhập currentPassword");
+                }
+                if (newPassword == null)
+                {
+                    return BadRequest("làm ơn nhập newPassword");
+                }
+                var result = await _accountService.ChangePassword(userId, currentPassword, newPassword);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"thay đổi mật khẩu thất bại: {ex.Message}");
+            }
+
+           
+        }
+
 
     }
 }
