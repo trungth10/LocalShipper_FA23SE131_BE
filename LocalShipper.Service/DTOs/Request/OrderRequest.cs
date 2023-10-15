@@ -41,6 +41,7 @@ namespace LocalShipper.Service.DTOs.Request
         public decimal SubtotalPrice { get; set; }
         public decimal? Cod { get; set; }
         public string Other { get; set; }
+        public DateTime? OrderTime { get; set; }
         public int Capacity { get; set; }
         public int? PackageWeight { get; set; }
         public int? PackageWidth { get; set; }
@@ -64,6 +65,7 @@ namespace LocalShipper.Service.DTOs.Request
         public decimal SubtotalPrice { get; set; }
         public decimal? Cod { get; set; }
         public string Other { get; set; }
+        public DateTime? OrderTime { get; set; }
         public int Capacity { get; set; }
         public int? PackageWeight { get; set; }
         public int? PackageWidth { get; set; }
