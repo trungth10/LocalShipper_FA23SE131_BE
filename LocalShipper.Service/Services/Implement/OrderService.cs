@@ -582,7 +582,7 @@ namespace LocalShipper.Service.Services.Implement
                         }
 
                     }
-
+                      
                     else if (GetPriceItemId(priceItems, (double)request.DistancePrice) == priceItems.Skip(1).FirstOrDefault().Id || request.DistancePrice > maxDistance.Value)
                     {
 
@@ -651,9 +651,8 @@ namespace LocalShipper.Service.Services.Implement
                 ActionId = request.ActionId,
                 TypeId = request.TypeId,
                 CreateTime = DateTime.Now,
-                OrderTime = DateTime.Now,
+                OrderTime = request.OrderTime,
                 Status = (int)OrderStatusEnum.IDLE,
-
             };
             await _unitOfWork.Repository<Order>().InsertAsync(newOrder);
             await _unitOfWork.CommitAsync();
@@ -837,7 +836,7 @@ namespace LocalShipper.Service.Services.Implement
             order.ActionId = request.ActionId;
             order.TypeId = request.TypeId;
             order.CreateTime = DateTime.Now;
-            order.OrderTime = DateTime.Now;
+            order.OrderTime = request.OrderTime;
 
 
             await _unitOfWork.Repository<Order>().Update(order, id);
