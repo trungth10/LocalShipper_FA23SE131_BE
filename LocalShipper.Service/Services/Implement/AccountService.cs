@@ -440,6 +440,28 @@ namespace LocalShipper.Service.Services.Implement
             return false;
         }
 
+        public async Task<string> ChangePassword(int userId, string currentPassword, string newPassword)
+        {
+            var user = await _unitOfWork.Repository<Account>().GetAll().Where(b => b.Id == userId).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Tài khoản không tồn tại", userId.ToString());
+            }
+
+            if (user.Password != currentPassword)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Mật khẩu hiện tại không đúng", userId.ToString());
+            }
+
+            // Kiểm tra rằng `newPassword` đáp ứng các yêu cầu về mật khẩu của bạn (độ dài, ký tự đặc biệt, v.v.)
+
+            user.Password = newPassword;
+            await _unitOfWork.Repository<Account>().Update(user, user.Id);
+            await _unitOfWork.CommitAsync();
+
+            return "Mật khẩu đã được thay đổi thành công.";
+        }
 
 
 
