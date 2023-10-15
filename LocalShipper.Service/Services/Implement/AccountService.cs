@@ -463,7 +463,21 @@ namespace LocalShipper.Service.Services.Implement
             return "Mật khẩu đã được thay đổi thành công.";
         }
 
+        public async Task<string> ChangePasswordOfForget(string email, string newPassword)
+        {
+            var user = await _unitOfWork.Repository<Account>().GetAll().Where(b => b.Email == email.Trim()).FirstOrDefaultAsync();
 
+            if (user == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Tài khoản không tồn tại", email.ToString());
+            }      
+
+            user.Password = newPassword;
+            await _unitOfWork.Repository<Account>().Update(user, user.Id);
+            await _unitOfWork.CommitAsync();
+
+            return "Mật khẩu đã được thay đổi thành công.";
+        }
 
 
 

@@ -23,5 +23,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<bool> VerifyForgotPassword(string email, string otp);
 
         Task<string> ChangePassword(int userId, string currentPassword, string newPassword);
+       Task<string> ChangePasswordOfForget(string email, string newPassword);
     }
 }

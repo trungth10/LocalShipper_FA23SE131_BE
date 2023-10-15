@@ -313,7 +313,27 @@ namespace LSAPI.Controllers
 
            
         }
+        [HttpPost("api/accounts/reset-password")]
+        public async Task<IActionResult> ChangePasswordOfForget(string email, string newPassword)
+        {
+            try
+            {
+                
+                if (newPassword == null)
+                {
+                    return BadRequest("làm ơn nhập newPassword");
+                }
+                var result = await _accountService.ChangePasswordOfForget(email, newPassword);
 
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"thay đổi mật khẩu thất bại: {ex.Message}");
+            }
+
+
+        }
 
     }
 }
