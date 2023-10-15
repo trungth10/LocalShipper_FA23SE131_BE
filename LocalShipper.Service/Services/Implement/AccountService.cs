@@ -399,7 +399,7 @@ namespace LocalShipper.Service.Services.Implement
            
 
             Random random = new Random();
-            int otp = random.Next(1, 99);
+            int otp = random.Next(1000, 9999);
 
             account.FcmToken = otp.ToString();
             await _unitOfWork.Repository<Account>().Update(account, account.Id);
