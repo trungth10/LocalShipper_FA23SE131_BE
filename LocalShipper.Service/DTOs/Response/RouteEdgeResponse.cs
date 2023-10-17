@@ -9,7 +9,8 @@ namespace LocalShipper.Service.DTOs.Response
     public class RouteEdgeResponse
     {
         public int Id { get; set; }
-        public string? FromStation { get; set; }
+        public string Name { get; set; }
+        public string? StoreId { get; set; }
         public string? ToStation { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime StartDate { get; set; }

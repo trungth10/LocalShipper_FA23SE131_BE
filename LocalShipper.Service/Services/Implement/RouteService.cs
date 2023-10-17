@@ -36,7 +36,7 @@ namespace LocalShipper.Service.Services.Implement
             var route = _unitOfWork.Repository<RouteEdge>().GetAll()
             .Include(r => r.Shipper)
             .Where(a => (id == null || id == 0) || a.Id == id)
-            .Where(a => string.IsNullOrWhiteSpace(fromStation) || a.FromStation.Contains(fromStation.Trim()))
+            .Where(a => string.IsNullOrWhiteSpace(fromStation) || a.StoreId.Contains(fromStation.Trim()))
             .Where(a => string.IsNullOrWhiteSpace(toStation) || a.ToStation.Contains(toStation.Trim()))
             .Where(a => (quantity == null || quantity == 0) || a.Quantity == quantity)
             .Where(a => (progress == null || progress == 0) || a.Progress == progress)
@@ -103,6 +103,43 @@ namespace LocalShipper.Service.Services.Implement
             var orderResponse = _mapper.Map<List<OrderResponse>>(orders);
             return orderResponse;
         }
+        public async Task<RouteEdgeResponse> CreateRoute(CreateRouteRequest request)
+        { 
+            var storeNames = await _unitOfWork.Repository<Store>().GetAll().Select(s => s.Id).ToListAsync();
+
+
+            if (!storeNames.Contains(request.StoreId))
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Tên cửa hàng không hợp lệ", request.StoreId.ToString());
+            }
+
+            var existingName = await _unitOfWork.Repository<RouteEdge>().FindAsync(b => b.Name == request.Name);
+            if (existingName != null)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Name đã tồn tại", request.Name);
+            }
+
+            var route = new RouteEdge
+            {
+                Name = request.Name.Trim(),
+                StoreId = request.StoreId.ToString(), 
+                ToStation = request.ToStation.Trim(),
+                CreatedDate = request.CreatedDate,
+                StartDate = request.StartDate,
+                Eta = request.Eta,
+                Quantity = request.Quantity,
+                Progress = request.Progress,
+                Priority = request.Priority,
+                Status = request.Status,
+                ShipperId = request.ShipperId
+            };
+
+            await _unitOfWork.Repository<RouteEdge>().InsertAsync(route);
+            await _unitOfWork.CommitAsync();
+
+            var routeResponse = _mapper.Map<RouteEdgeResponse>(route);
+            return routeResponse;
+        }
 
         public async Task<RouteEdgeResponse> UpdateRoute(int routeId, RouteRequest request)
         {
@@ -114,7 +151,7 @@ namespace LocalShipper.Service.Services.Implement
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Route không tồn tại", routeId.ToString());
             }
-            route.FromStation = request.FromStation.Trim();
+            route.StoreId = request.StoreId.Trim();
             route.ToStation = request.ToStation.Trim();
             route.CreatedDate = request.CreatedDate;
             route.StartDate = request.StartDate;

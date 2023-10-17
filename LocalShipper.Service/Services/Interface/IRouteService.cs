@@ -17,5 +17,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<RouteEdgeResponse> UpdateRoute(int routeId, RouteRequest request);
 
         Task<MessageResponse> DeleteRoute(int routeId);
+        Task<RouteEdgeResponse> CreateRoute(CreateRouteRequest request);
     }
 }
