@@ -103,7 +103,7 @@ namespace LSAPI.Controllers
                 }
                 if (request.Progress < 1)
                 {
-                    return BadRequest("Quantity phải là số dương");
+                    return BadRequest("Progress phải là số dương");
                 }
                 if (request.Priority < 1)
                 {
