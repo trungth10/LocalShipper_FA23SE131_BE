@@ -73,6 +73,24 @@ namespace LSAPI.Controllers
                 return BadRequest($"Thêm vận đơn vào lộ trình thất bại: {ex.Message}");
             }
         }
+
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [HttpPost("api/routes")]
+        public async Task<ActionResult<RouteEdgeResponse>> AddRoute(CreateRouteRequest request)
+        {
+            try
+            {
+
+
+                var response = await _routeService.CreateRoute(request);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Thêm vận đơn vào lộ trình thất bại: {ex.Message}");
+            }
+        }
         [Authorize(Roles = Roles.Shipper + "," + Roles.Staff + "," + Roles.Store, AuthenticationSchemes = "Bearer")]
         [HttpPut("api/routes")]
         public async Task<ActionResult<RouteEdgeResponse>> UpdateRoute(int routeId, RouteRequest request)
