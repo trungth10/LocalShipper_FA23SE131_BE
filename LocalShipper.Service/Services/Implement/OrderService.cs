@@ -633,6 +633,7 @@ namespace LocalShipper.Service.Services.Implement
             {
                 StoreId = request.StoreId.HasValue ? request.StoreId.Value : 0,
                 TrackingNumber = request.TrackingNumber.Trim(),
+                Distance = request.Distance,
                 DistancePrice = distancePrice,
                 SubtotalPrice = request.SubtotalPrice,
                 Cod = request.Cod,
@@ -657,7 +658,7 @@ namespace LocalShipper.Service.Services.Implement
             await _unitOfWork.Repository<Order>().InsertAsync(newOrder);
             await _unitOfWork.CommitAsync();
             var orderResponse = _mapper.Map<OrderCreateResponse>(newOrder);
-            orderResponse.Distance = request.DistancePrice;
+           
             return orderResponse;
         }
 
@@ -829,6 +830,7 @@ namespace LocalShipper.Service.Services.Implement
             order.CustomerCommune = request.CustomerCommune ?? currentCommune;
             order.CustomerDistrict = request.CustomerDistrict ?? currentDistric;
             order.Cod = request.Cod;
+            order.Distance = request.Distance;
             order.DistancePrice = distancePrice;
             order.SubtotalPrice = request.SubtotalPrice;
             order.Other = request.Other ?? currentOther;

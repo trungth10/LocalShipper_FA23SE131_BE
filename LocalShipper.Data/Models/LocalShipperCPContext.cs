@@ -191,6 +191,10 @@ namespace LocalShipper.Data.Models
                     .HasMaxLength(20)
                     .HasColumnName("customer_phone");
 
+                entity.Property(e => e.Distance)
+                    .HasColumnType("decimal(10, 2)")
+                    .HasColumnName("distance");
+
                 entity.Property(e => e.DistancePrice)
                     .HasColumnType("decimal(10, 2)")
                     .HasColumnName("distance_price");
@@ -513,6 +517,7 @@ namespace LocalShipper.Data.Models
                     .HasForeignKey(d => d.ShipperId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_RouteEdge_Shipper");
+
             });
 
             modelBuilder.Entity<Shipper>(entity =>

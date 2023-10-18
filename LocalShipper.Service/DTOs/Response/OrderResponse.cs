@@ -20,6 +20,7 @@ namespace LocalShipper.Service.DTOs.Response
         public DateTime? CancelTime { get; set; }
         public string CancelReason { get; set; }
         public DateTime? CompleteTime { get; set; }
+        public decimal? Distance { get; set; }
         public decimal? DistancePrice { get; set; }
         public decimal? SubtotalPrice { get; set; }
         public decimal? Cod { get; set; }
@@ -61,7 +62,7 @@ namespace LocalShipper.Service.DTOs.Response
         public DateTime? CancelTime { get; set; }
         public string CancelReason { get; set; }
         public DateTime? CompleteTime { get; set; }
-        public decimal Distance { get; set; }
+        public decimal? Distance { get; set; }
         public decimal? DistancePrice { get; set; }
         public decimal? SubtotalPrice { get; set; }
         public decimal? Cod { get; set; }
