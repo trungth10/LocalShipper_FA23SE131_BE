@@ -22,6 +22,6 @@ namespace LocalShipper.Service.DTOs.Response
         public int ShipperId { get; set; }
         public ShipperResponse Shipper { get; set; }
   
-        public OrderResponse Order { get; set; }
+   
     }
 }
