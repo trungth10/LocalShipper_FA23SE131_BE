@@ -14,12 +14,12 @@ namespace LocalShipper.Data.Models
 
         public int Id { get; set; }
         public string Name { get; set; }
-        public string? StoreId { get; set; }
+        public string? FromStation { get; set; }
         public string? ToStation { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? Eta { get; set; }
-        public int Quantity { get; set; }
+        public int? Quantity { get; set; }
         public int? Progress { get; set; }
         public int? Priority { get; set; }
         public int? Status { get; set; }

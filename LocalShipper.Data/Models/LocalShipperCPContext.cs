@@ -494,7 +494,7 @@ namespace LocalShipper.Data.Models
                     .HasColumnType("datetime")
                     .HasColumnName("ETA");
 
-                entity.Property(e => e.StoreId).HasColumnName("storeId");
+                entity.Property(e => e.FromStation).HasColumnName("from_station");
                 entity.Property(e => e.Name).HasColumnName("name");
                 entity.Property(e => e.Priority).HasColumnName("priority");
 

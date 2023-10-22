@@ -55,7 +55,7 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("shipper/api/routes")]
-        public async Task<ActionResult<RouteEdgeResponse>> AddOrderToRoute(IEnumerable<int> id, int shipperId)
+        public async Task<ActionResult<RouteEdgeResponse>> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId)
         {
             try
             {               
@@ -64,7 +64,7 @@ namespace LSAPI.Controllers
                     return BadRequest("Id không hợp lệ");
                 }
 
-                var response = await _routeService.AddOrderToRoute(id, shipperId);
+                var response = await _routeService.AddOrderToRoute(id, shipperId, routeId);
 
                 return Ok(response);
             }
@@ -74,7 +74,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+       // [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("api/routes")]
         public async Task<ActionResult<RouteEdgeResponse>> AddRoute(CreateRouteRequest request)
         {
