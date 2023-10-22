@@ -74,7 +74,7 @@ namespace LSAPI.Controllers
             }
         }
 
-       // [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+       [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("api/routes")]
         public async Task<ActionResult<RouteEdgeResponse>> AddRoute(CreateRouteRequest request)
         {
