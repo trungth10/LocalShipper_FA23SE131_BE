@@ -35,8 +35,7 @@ namespace LocalShipper.Service.Helpers
         DISTRICT =1,
         ACTION = 2,
         TYPE = 3,
-        CAPACITY_LOW =4,
-        CAPACITY_HIGHT = 5,
-        COD =6,
+        CAPACITY =4,
+        COD =5,
     }
 }

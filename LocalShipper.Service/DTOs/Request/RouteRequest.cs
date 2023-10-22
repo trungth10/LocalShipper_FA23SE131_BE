@@ -30,4 +30,9 @@ namespace LocalShipper.Service.DTOs.Request
 
 
     }
+
+    public class CreateRouteRequestAuto
+    {
+        public DateTime? StartDate { get; set; }
+    }
 }

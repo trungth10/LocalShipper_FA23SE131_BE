@@ -1,5 +1,6 @@
 ﻿using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
+using LocalShipper.Service.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,5 +19,7 @@ namespace LocalShipper.Service.Services.Interface
 
         Task<MessageResponse> DeleteRoute(int routeId);
         Task<RouteEdgeResponse> CreateRoute(CreateRouteRequest request);
+
+        Task<List<OrderResponse>> CreateRouteSuggest(int shiperId, int money, SuggestEnum suggest, int capacityLow, int capacityHight, CreateRouteRequestAuto request);
     }
 }

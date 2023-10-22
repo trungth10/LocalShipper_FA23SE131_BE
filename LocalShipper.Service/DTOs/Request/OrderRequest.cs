@@ -95,6 +95,7 @@ namespace LocalShipper.Service.DTOs.Request
         public IEnumerable<string>? other { get; set; }
         public int? capacity { get; set; } = 0;
         public decimal? COD { get; set; } = 0;
+        public decimal? Distance { get; set; } = 0;
         public IEnumerable<int>? routeId { get; set; }    
         public IEnumerable<string>? customer_city { get; set; }
         public IEnumerable<string>? customer_commune { get; set; }

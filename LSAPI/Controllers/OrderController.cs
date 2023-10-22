@@ -29,7 +29,7 @@ namespace LSAPI.Controllers
         [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/orders")]
         public async Task<ActionResult<OrderResponse>> GetOrder(int id, int status, int storeId, int shipperId,
-                                     string tracking_number, string cancel_reason, decimal distance_price,
+                                     string tracking_number, string cancel_reason, decimal distance, decimal distance_price,
                                      decimal subtotal_price, decimal COD, decimal totalPrice, string other, int routeId,
                                      int capacity, int package_weight, int package_width, int package_height, int package_length,
                                      string customer_city, string customer_commune, string customer_district, string customer_phone,
@@ -52,7 +52,7 @@ namespace LSAPI.Controllers
                 }
 
                 var response = await _orderService.GetOrder(id, status, storeId, shipperId,
-                    tracking_number, cancel_reason, distance_price, subtotal_price, COD, totalPrice, other,
+                    tracking_number, cancel_reason, distance, distance_price, subtotal_price, COD, totalPrice, other,
                     routeId, capacity, package_weight, package_width, package_height, package_length,
                     customer_city, customer_commune, customer_district, customer_phone, customer_name,
                     customer_email, actionId, typeId, pageNumber, pageSize);

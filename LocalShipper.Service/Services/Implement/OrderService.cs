@@ -337,7 +337,7 @@ namespace LocalShipper.Service.Services.Implement
 
         //GET Order
         public async Task<List<OrderResponse>> GetOrder(int? id, int? status, int? storeId, int? shipperId,
-                                     string? tracking_number, string? cancel_reason, decimal? distance_price,
+                                     string? tracking_number, string? cancel_reason, decimal? distance,  decimal? distance_price,
                                      decimal? subtotal_price, decimal? COD, decimal? totalPrice, string? other, int? routeId,
                                      int? capacity, int? package_weight, int? package_width, int? package_height, int? package_length,
                                      string? customer_city, string? customer_commune, string? customer_district, string? customer_phone,
@@ -356,6 +356,7 @@ namespace LocalShipper.Service.Services.Implement
                                                        .Where(a => (shipperId == null || shipperId == 0) || a.ShipperId == shipperId)
                                                        .Where(a => string.IsNullOrWhiteSpace(tracking_number) || a.TrackingNumber.Contains(tracking_number.Trim()))
                                                        .Where(a => string.IsNullOrWhiteSpace(cancel_reason) || a.CancelReason.Contains(cancel_reason.Trim()))
+                                                       .Where(a => (distance == null || distance == 0) || a.Distance == distance)
                                                        .Where(a => (distance_price == null || distance_price == 0) || a.DistancePrice == distance_price)
                                                        .Where(a => (subtotal_price == null || subtotal_price == 0) || a.SubtotalPrice == subtotal_price)
                                                        .Where(a => (COD == null || COD == 0) || a.Cod == COD)
@@ -417,7 +418,8 @@ namespace LocalShipper.Service.Services.Implement
                                                        .Where(a => !request.shipperId.Any() || request.shipperId.Contains((int)a.ShipperId))
                                                        .Where(a => !request.tracking_number.Any() || request.tracking_number.Contains(a.TrackingNumber))
                                                        .Where(a => !request.cancel_reason.Any() || request.cancel_reason.Contains(a.CancelReason))                                                       
-                                                       .Where(a => (request.COD == null || request.COD == 0) || a.Cod <= request.COD)                                                    
+                                                       .Where(a => (request.COD == null || request.COD == 0) || a.Cod <= request.COD)
+                                                       .Where(a => (request.Distance == null || request.Distance == 0) || a.Distance <= request.Distance)
                                                        .Where(a => !request.other.Any() || request.other.Contains(a.Other))
                                                        .Where(a => !request.routeId.Any() || request.routeId.Contains((int)a.RouteId))
                                                        .Where(a => (request.capacity == null || request.capacity == 0) || a.Capacity <= request.capacity)                                                      
@@ -918,14 +920,10 @@ namespace LocalShipper.Service.Services.Implement
             {
                 orderSuggest.Where(a => a.TypeId == order.TypeId).ToListAsync();
             }
-            if (suggest == SuggestEnum.CAPACITY_LOW && (money == null || money == 0))
+            if (suggest == SuggestEnum.CAPACITY && (money == null || money == 0))
             {
                 orderSuggest.Where(a => a.Capacity <= 5).ToListAsync();
-            }
-            if (suggest == SuggestEnum.CAPACITY_HIGHT && (money == null || money == 0))
-            {
-                orderSuggest.Where(a => a.Capacity > 5).ToListAsync();
-            }
+            }           
             if (suggest == SuggestEnum.COD)
             {
                 orderSuggest.Where(a => a.Capacity <= money).ToListAsync();
@@ -934,6 +932,8 @@ namespace LocalShipper.Service.Services.Implement
             var orderResponse = _mapper.Map<List<OrderResponse>>(orderSuggest);
             return orderResponse;
         }
+
+        
 
 
 

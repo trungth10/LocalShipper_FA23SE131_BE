@@ -74,7 +74,28 @@ namespace LSAPI.Controllers
             }
         }
 
-       [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [HttpPost("shipper/api/routes-auto")]
+        public async Task<ActionResult<OrderResponse>> CreateRouteSuggest(int shiperId, int money, SuggestEnum suggest, int capacityLow, int capacityHight, CreateRouteRequestAuto request)
+        {
+            try
+            {
+                if (shiperId < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
+
+                var response = await _routeService.CreateRouteSuggest(shiperId, money, suggest, capacityLow, capacityHight, request);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Thêm tự động vận đơn vào lộ trình thất bại: {ex.Message}");
+            }
+        }
+
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("api/routes")]
         public async Task<ActionResult<RouteEdgeResponse>> AddRoute(CreateRouteRequest request)
         {

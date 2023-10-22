@@ -20,6 +20,7 @@ namespace LocalShipper.Service.DTOs.Response
         public int? Priority { get; set; }
         public int? Status { get; set; }
         public int ShipperId { get; set; }
+
         public ShipperResponse Shipper { get; set; }
   
    
