@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -336,7 +337,7 @@ namespace LocalShipper.Service.Services.Implement
 
 
         //GET Order
-        public async Task<List<OrderResponse>> GetOrder(int? id, int? status, int? storeId, int? shipperId,
+        public async Task<List<OrderResponse>> GetOrder(int? zoneId,int? id, int? status, int? storeId, int? shipperId,
                                      string? tracking_number, string? cancel_reason, decimal? distance,  decimal? distance_price,
                                      decimal? subtotal_price, decimal? COD, decimal? totalPrice, string? other, int? routeId,
                                      int? capacity, int? package_weight, int? package_width, int? package_height, int? package_length,
@@ -376,6 +377,7 @@ namespace LocalShipper.Service.Services.Implement
                                                        .Where(a => string.IsNullOrWhiteSpace(customer_email) || a.CustomerEmail.Contains(customer_email.Trim()))
                                                        .Where(a => (actionId == null || actionId == 0) || a.ActionId == actionId)
                                                        .Where(a => (typeId == null || typeId == 0) || a.TypeId == typeId)
+                                                       .Where(a => (zoneId == null || zoneId == 0) || a.Store.ZoneId == zoneId)
                                                        ;
 
 

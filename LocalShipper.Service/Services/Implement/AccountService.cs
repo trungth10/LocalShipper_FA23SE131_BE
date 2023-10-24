@@ -322,7 +322,10 @@ namespace LocalShipper.Service.Services.Implement
         //Store Add Shipper
         public async Task<AccountResponse> RegisterShipperPrivate(int storeId,RegisterRequest request)
         {
-            var emailExisted = _unitOfWork.Repository<Account>().Find(x => x.Email == request.Email);          
+            var emailExisted = _unitOfWork.Repository<Account>().Find(x => x.Email == request.Email);
+            var store = _unitOfWork.Repository<Store>().Find(x => x.Id == storeId);
+
+            
 
             if (emailExisted != null)
             {
@@ -352,6 +355,7 @@ namespace LocalShipper.Service.Services.Implement
                 EmailShipper = account.Email,
                 PhoneShipper = account.Phone,
                 AccountId = account.Id,
+                ZoneId = store.ZoneId,
                 Status = (int)ShipperStatusEnum.Offline,
                 StoreId = storeId,
                 Type = (int)ShipperTypeEnum.PRIVATE,
