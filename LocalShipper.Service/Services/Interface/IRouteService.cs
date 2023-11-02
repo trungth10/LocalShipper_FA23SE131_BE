@@ -21,5 +21,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<RouteEdgeResponse> CreateRoute(CreateRouteRequest request);
 
         Task<List<OrderResponse>> CreateRouteSuggest(int shiperId, int money, SuggestEnum suggest, int capacityLow, int capacityHight, CreateRouteRequestAuto request);
+
+        Task<List<OrderResponse>> UpdateOrderRouteId(IEnumerable<int> orderid);
     }
 }

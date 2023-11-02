@@ -8,13 +8,14 @@ using System.Collections.Generic;
 using LocalShipper.Service.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using LocalShipper.Service.DTOs.Request;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace LSAPI.Controllers
 {
     [ApiController]
     public class RouteEdgeController : Controller
     {
-         
+
 
         private readonly IRouteService _routeService;
         public RouteEdgeController(IRouteService routeService)
@@ -58,7 +59,7 @@ namespace LSAPI.Controllers
         public async Task<ActionResult<RouteEdgeResponse>> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId)
         {
             try
-            {               
+            {
                 if (shipperId < 0)
                 {
                     return BadRequest("Id không hợp lệ");
@@ -118,7 +119,7 @@ namespace LSAPI.Controllers
         {
             try
             {
-                if(request.Quantity < 1)
+                if (request.Quantity < 1)
                 {
                     return BadRequest("Quantity phải là số dương");
                 }
@@ -170,7 +171,7 @@ namespace LSAPI.Controllers
                 if (routeId < 0)
                 {
                     return BadRequest("Id phải là số nguyên dương");
-                }           
+                }
                 var rs = await _routeService.DeleteRoute(routeId);
                 return Ok(rs);
             }
@@ -181,5 +182,23 @@ namespace LSAPI.Controllers
 
         }
 
+
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [HttpDelete("api/routes/routeid")]
+        public async Task<ActionResult<MessageResponse>> DeleteOrderidInRoute(IEnumerable<int> orderid)
+        {
+            try
+            {
+                var response = await _routeService.UpdateOrderRouteId(orderid);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xóa đơn hàng thất bại: {ex.Message}");
+
+            }
+
+        }
     }
 }
