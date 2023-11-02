@@ -271,5 +271,25 @@ namespace LocalShipper.Service.Services.Implement
             var orderResponse = _mapper.Map<List<OrderResponse>>(orderSuggest);
             return orderResponse;
         }
+
+        public async Task<List<OrderResponse>> UpdateOrderRouteId(IEnumerable<int> orderid)
+        {
+            var orders = await _unitOfWork.Repository<Order>()
+                .GetAll()
+                .Where(o => orderid.Contains(o.Id))
+                .ToListAsync();
+
+            foreach (var order in orders)
+            {
+                order.RouteId = null; 
+                await _unitOfWork.Repository<Order>().Update(order, order.Id);
+            }
+
+            await _unitOfWork.CommitAsync();
+
+            var orderResponse = _mapper.Map<List<OrderResponse>>(orders);
+            return orderResponse;
+        }
+
     }
 }
