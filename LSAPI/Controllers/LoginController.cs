@@ -109,7 +109,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("accesstoken-to-role")]
-        public async Task<IActionResult> GetUserRole(string accesstoken)
+        public async Task<IActionResult> GetUserRole()
         {
             try
             {
@@ -134,5 +134,92 @@ namespace LSAPI.Controllers
                 return StatusCode(500, "An error occurred while getting user role.");
             }
         }
+
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [HttpGet("accesstoken-to-infoshipper")]
+        
+        public async Task<IActionResult> GetAccountInfoShipperFromAccessToken()
+        {
+            try
+            {
+                // Lấy AccessToken từ tiêu đề Authorization
+                var accessToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+                // Gọi hàm GetAccountInfoFromAccessTokenAsync từ LoginService
+                var userInfo = await _iloginService.GetAccountShipperInfoFromAccessTokenAsync(accessToken);
+
+                if (userInfo != null)
+                {
+                    return Ok(userInfo);
+                }
+                else
+                {
+                    return BadRequest("Failed to get user info from AccessToken.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi nếu cần
+                return StatusCode(500, "An error occurred while getting user info.");
+            }
+        }
+
+        [Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]
+        [HttpGet("accesstoken-to-infostore")]
+
+        public async Task<IActionResult> GetAccountInfoStoreFromAccessToken()
+        {
+            try
+            {
+                // Lấy AccessToken từ tiêu đề Authorization
+                var accessToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+                // Gọi hàm GetAccountInfoFromAccessTokenAsync từ LoginService
+                var userInfo = await _iloginService.GetAccountStoreInfoFromAccessTokenAsync(accessToken);
+
+                if (userInfo != null)
+                {
+                    return Ok(userInfo);
+                }
+                else
+                {
+                    return BadRequest("Failed to get user info from AccessToken.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi nếu cần
+                return StatusCode(500, "An error occurred while getting user info.");
+            }
+        }
+        [Authorize(Roles = Roles.Admin + "," + Roles.Staff, AuthenticationSchemes = "Bearer")]
+        [HttpGet("accesstoken-to-info")]
+
+        public async Task<IActionResult> GetAccountInfoFromAccessToken()
+        {
+            try
+            {
+                // Lấy AccessToken từ tiêu đề Authorization
+                var accessToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+                // Gọi hàm GetAccountInfoFromAccessTokenAsync từ LoginService
+                var userInfo = await _iloginService.GetAccountInfoFromAccessTokenAsync(accessToken);
+
+                if (userInfo != null)
+                {
+                    return Ok(userInfo);
+                }
+                else
+                {
+                    return BadRequest("Failed to get user info from AccessToken.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi nếu cần
+                return StatusCode(500, "An error occurred while getting user info.");
+            }
+        }
+
     }
 }

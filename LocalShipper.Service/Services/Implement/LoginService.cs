@@ -20,6 +20,9 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using MailKit.Search;
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -56,11 +59,11 @@ namespace LocalShipper.Service.Services.Implement
 
             try
             {
-               // CreatePasswordHash(password, out string passwordHash);
+                // CreatePasswordHash(password, out string passwordHash);
                 var account = await _unitOfWork.Repository<Account>()
                     .GetAll()
                     .Where(a => a.Email == email && a.Password == password)
-                    .Include(a => a.Role)
+                    .Include(a => a.Role).Include(a => a.Shippers).Include(a => a.Stores)
                     .FirstOrDefaultAsync();
 
                 if (account == null)
@@ -94,6 +97,7 @@ namespace LocalShipper.Service.Services.Implement
         {
             new Claim(ClaimTypes.Name, account.Email),
             new Claim(ClaimTypes.Role, account.Role.Name),
+            new Claim("sub", account.Id.ToString())
         };
 
                 var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtAuth:Key"]));
@@ -104,11 +108,22 @@ namespace LocalShipper.Service.Services.Implement
                     issuer: issuer,
                     audience: audience,
                     claims: claims,
-                    expires: DateTime.UtcNow.AddHours(1),
+                    expires: DateTime.UtcNow.AddDays(7),
                     signingCredentials: new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256)
                 );
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+                if (token.ValidTo < DateTime.UtcNow)
+                {
+                    
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = "Access token đã hết hạn.",
+                        StatusCode = 400 
+                    };
+                }
 
                 return new LoginResponse
                 {
@@ -230,12 +245,13 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Sai mã OTP", email.ToString());
             }
 
-            if(account != null)
+            if (account != null)
             {
                 var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, account.Email),
             new Claim(ClaimTypes.Role, account.Role.Name),
+            new Claim("sub", account.Id.ToString())
         };
 
                 var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtAuth:Key"]));
@@ -246,11 +262,22 @@ namespace LocalShipper.Service.Services.Implement
                     issuer: issuer,
                     audience: audience,
                     claims: claims,
-                    expires: DateTime.UtcNow.AddHours(1),
+                    expires: DateTime.UtcNow.AddDays(7),
                     signingCredentials: new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256)
                 );
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+                if (token.ValidTo < DateTime.UtcNow)
+                {
+                   
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = "Access token đã hết hạn.",
+                        StatusCode = 400
+                    };
+                }
 
                 return new LoginResponse
                 {
@@ -271,7 +298,7 @@ namespace LocalShipper.Service.Services.Implement
                     Message = "Tài khoản không tồn tại."
                 };
             }
-            
+
         }
 
 
@@ -282,10 +309,10 @@ namespace LocalShipper.Service.Services.Implement
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var token = tokenHandler.ReadJwtToken(accessToken);
 
-                // Lấy danh sách các Claims từ AccessToken
+               
                 var claims = token.Claims;
 
-                // Tìm Claim có kiểu là "role"
+               
                 var roleClaim = claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role);
 
                 if (roleClaim != null)
@@ -295,15 +322,211 @@ namespace LocalShipper.Service.Services.Implement
                 }
                 else
                 {
-                    return null; // Không tìm thấy vai trò
+                    return null;
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting user role from AccessToken.");
+                return null;
+            }
+        }
+
+        public async Task<AccountInfoShippperResponse> GetAccountShipperInfoFromAccessTokenAsync(string accessToken)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = tokenHandler.ReadJwtToken(accessToken);
+
+                
+                var claims = token.Claims;
+
+               
+                var accountId = GetAccountIdFromClaims(claims);
+                if (accountId.HasValue)
+                {
+
+                    var account = await _unitOfWork.Repository<Account>()
+                        .GetAll()
+                        .Include(a => a.Shippers)
+                        .Include(a => a.Stores)
+                        .Include(a => a.Role)
+                        .FirstOrDefaultAsync(a => a.Id == accountId);
+
+                    if (account != null)
+                    {
+                       
+                            var accountResponse = new AccountInfoShippperResponse
+                            {
+                                Role = account.Role.Name,
+                                Fullname = account.Fullname,
+                                Phone = account.Phone,
+                                Email = account.Email,
+                                RoleId = account.RoleId,
+                                ShipperId = account.Shippers.Single().Id,
+                                AddressShipper = account.Shippers.Single().AddressShipper,
+                                TransportId = account.Shippers.Single().TransportId,
+                                ZoneId = account.Shippers.Single().ZoneId,
+                                WalletId = account.Shippers.Single().WalletId,
+                                AccountId = account.Id,
+                                Active = account.Active,
+                                FcmToken = account.FcmToken,
+                                CreateDate = account.CreateDate,
+                                ImageUrl = account.ImageUrl,
+                                Password = account.Password,
+                            };
+                            return accountResponse;
+                        }
+                       
+
+                    
+                }
+
+                return null; // Không tìm thấy tài khoản hoặc thông tin
+            }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi nếu cần
                 return null; // Xảy ra lỗi
             }
         }
+        public async Task<AccountInfoStoreResponse> GetAccountStoreInfoFromAccessTokenAsync(string accessToken)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = tokenHandler.ReadJwtToken(accessToken);
+
+                
+                var claims = token.Claims;
+
+                var accountId = GetAccountIdFromClaims(claims);
+                if (accountId.HasValue)
+                {
+
+                    var account = await _unitOfWork.Repository<Account>()
+                        .GetAll()
+                        .Include(a => a.Shippers)
+                        .Include(a => a.Stores)
+                        .Include(a => a.Role)
+                        .FirstOrDefaultAsync(a => a.Id == accountId);
+
+                    if (account != null)
+                    {
+
+                        var accountResponse = new AccountInfoStoreResponse
+                        {
+                            Role = account.Role.Name,
+                            Fullname = account.Fullname,
+                            Phone = account.Phone,
+                            Email = account.Email,
+                            RoleId = account.RoleId,
+                            StoreId = account.Stores.Single().Id,
+                            StoreAddress = account.Stores.Single().StoreAddress,
+                            StoreDescription = account.Stores.Single().StoreDescription,
+                            StoreName = account.Stores.Single().StoreName,
+                            ZoneId = account.Stores.Single().ZoneId,
+                            WalletId = account.Stores.Single().WalletId,
+                            OpenTime = account.Stores.Single().OpenTime,
+                            CloseTime = account.Stores.Single().CloseTime,
+                            Status = account.Stores.Single().Status,
+                            TemplateId= account.Stores.Single().TemplateId,
+                            AccountId = account.Id,                       
+                            FcmToken = account.FcmToken,
+                            CreateDate = account.CreateDate,
+                            ImageUrl = account.ImageUrl,
+                            Password = account.Password,
+                        };
+                        return accountResponse;
+                    }
+
+
+
+                }
+
+                return null; 
+            }
+            catch (Exception ex)
+            {
+               
+                return null;
+            }
+        }
+
+        public async Task<AccountInfoResponse> GetAccountInfoFromAccessTokenAsync(string accessToken)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = tokenHandler.ReadJwtToken(accessToken);
+
+
+                var claims = token.Claims;
+
+                var accountId = GetAccountIdFromClaims(claims);
+                if (accountId.HasValue)
+                {
+
+                    var account = await _unitOfWork.Repository<Account>()
+                        .GetAll()
+                        .Include(a => a.Shippers)
+                        .Include(a => a.Stores)
+                        .Include(a => a.Role)
+                        .FirstOrDefaultAsync(a => a.Id == accountId);
+
+                    if (account != null)
+                    {
+
+                        var accountResponse = new AccountInfoResponse
+                        {
+                            Role = account.Role.Name,
+                            Id= account.Id,
+                            Fullname = account.Fullname,
+                            Phone = account.Phone,
+                            Email = account.Email,
+                            RoleId = account.RoleId,                            
+                            FcmToken = account.FcmToken,
+                            CreateDate = account.CreateDate,
+                            ImageUrl = account.ImageUrl,
+                            Password = account.Password,
+                        };
+                        return accountResponse;
+                    }
+
+
+
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+
+                return null;
+            }
+        }
+
+
+        private int? GetAccountIdFromClaims(IEnumerable<Claim> claims)
+        {
+            // Thay đổi logic ở đây để lấy ID tài khoản từ danh sách Claims
+            foreach (var claim in claims)
+            {
+                if (claim.Type == "sub")
+                {
+                    if (int.TryParse(claim.Value, out int accountId))
+                    {
+                        return accountId;
+                    }
+                }
+            }
+            return null; // Không tìm thấy ID tài khoản
+        }
+
+
+
+
 
     }
 }
