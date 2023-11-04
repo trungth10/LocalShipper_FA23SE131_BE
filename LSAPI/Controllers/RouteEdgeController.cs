@@ -18,10 +18,31 @@ namespace LSAPI.Controllers
 
 
         private readonly IRouteService _routeService;
-        public RouteEdgeController(IRouteService routeService)
+        
+        public RouteEdgeController(IRouteService routeService )
         {
             _routeService = routeService;
+           
         }
+
+        [HttpGet("api/routes/convert")]
+        public async Task<ActionResult<GeocodingResponse>> ConvertAddress(string address)
+        {
+            try
+            {
+
+                var response = await _routeService.ConvertAddress(address);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Chuyển địa chỉ thất bại: {ex.Message}");
+            }
+        }
+
+
+
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("api/routes")]

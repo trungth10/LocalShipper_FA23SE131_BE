@@ -23,5 +23,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<List<OrderResponse>> CreateRouteSuggest(int shiperId, int money, SuggestEnum suggest, int capacityLow, int capacityHight, CreateRouteRequestAuto request);
 
         Task<List<OrderResponse>> UpdateOrderRouteId(IEnumerable<int> orderid);
+
+        Task<GeocodingResponse> ConvertAddress(string address);
     }
 }
