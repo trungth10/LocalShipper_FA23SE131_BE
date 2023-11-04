@@ -13,5 +13,10 @@ namespace LocalShipper.Service.Services.Interface
         Task<string> GetUserRoleFromAccessTokenAsync(string accessToken);
         Task<LoginResponse> LoginOTP(string email);
         Task<LoginResponse> VerifyLoginOTP(string email, string otp);
+
+        Task<AccountInfoShippperResponse> GetAccountShipperInfoFromAccessTokenAsync(string accessToken);
+        Task<AccountInfoStoreResponse> GetAccountStoreInfoFromAccessTokenAsync(string accessToken);
+        Task<AccountInfoResponse> GetAccountInfoFromAccessTokenAsync(string accessToken);
+
     }
 }
