@@ -37,9 +37,6 @@ namespace LocalShipper.Service.DTOs.Request
     {
 
         public int? StoreId { get; set; }      
-        public string TrackingNumber { get; set; }
-        public decimal Distance { get; set; }
-        public decimal DistancePrice { get; set; }
         public decimal SubtotalPrice { get; set; }
         public decimal? Cod { get; set; }
         public string Other { get; set; }

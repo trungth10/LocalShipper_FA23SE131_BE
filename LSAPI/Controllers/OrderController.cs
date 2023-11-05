@@ -251,11 +251,7 @@ namespace LSAPI.Controllers
                 if (request.StoreId < 1)
                 {
                     return BadRequest("storeId phải là số dương");
-                }
-                if (request.DistancePrice < 0)
-                {
-                    return BadRequest("DistancePrice phải là số dương");
-                }
+                }              
                 if (request.SubtotalPrice < 0)
                 {
                     return BadRequest("SubtotalPrice phải là số dương");

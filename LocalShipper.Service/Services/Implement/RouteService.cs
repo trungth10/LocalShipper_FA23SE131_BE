@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -145,8 +146,8 @@ namespace LocalShipper.Service.Services.Implement
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Route không tồn tại", routeId.ToString());
             }
-            route.FromStation = request.FromStation.Trim();
-            route.ToStation = request.ToStation.Trim();
+            route.FromStation = request.FromStation;
+            route.ToStation = request.ToStation;
             route.CreatedDate = request.CreatedDate;
             route.StartDate = request.StartDate;
             route.Eta = request.Eta;
@@ -289,6 +290,30 @@ namespace LocalShipper.Service.Services.Implement
 
             var orderResponse = _mapper.Map<List<OrderResponse>>(orders);
             return orderResponse;
+        }
+
+
+        public async Task<GeocodingResponse> ConvertAddress(string address)
+        {
+            string apiKey = "AIzaSyBBHXLtEw2nMmiMq7dBZHKytUwhzezi7UU";
+            string geocodingApiUrl = "https://maps.googleapis.com/maps/api/geocode/json";
+
+            using (var httpClient = new HttpClient())
+            {
+                var requestUri = $"{geocodingApiUrl}?address={Uri.EscapeDataString(address)}&key={apiKey}";
+                var response = await httpClient.GetAsync(requestUri);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();                   
+                    var result = Newtonsoft.Json.JsonConvert.DeserializeObject<GeocodingResponse>(content);
+                    return result;
+                }
+                else
+                {
+                    throw new Exception($"Failed to retrieve geocoding data. Status code: {response.StatusCode}");
+                }
+            }
         }
 
     }

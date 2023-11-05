@@ -16,10 +16,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -517,6 +519,79 @@ namespace LocalShipper.Service.Services.Implement
             decimal maxAmount1;
             decimal maxAmount2;
             decimal price1;
+            
+
+
+            string trackingNumber = await GenerateRandomTrackingNumber(3, 3);
+
+            //Lấy kinh độ vĩ độ để -> khoảng cách
+            double latitude = 0;
+            double longitude = 0;
+            string coordinates = "";
+
+            double latitudeStore = 0;
+            double longitudeStore = 0;
+            string coordinatesStore = "";
+
+            var storeAddress = await _unitOfWork.Repository<Store>().GetAll()
+                    .FirstOrDefaultAsync(b => b.Id == request.StoreId);
+            string _storeAddress = storeAddress.StoreAddress;
+            string address = request.CustomerCommune + " " + request.CustomerDistrict + " " + request.CustomerCity;
+            GeocodingResponse geocodingResponse = await ConvertAddress(address);
+            if (geocodingResponse.status == "OK" && geocodingResponse.results.Count > 0)
+            {
+                var location = geocodingResponse.results[0].geometry.location;
+                 latitude = location.lat;
+                 longitude = location.lng;
+                 coordinates = $"{latitude},{longitude}";
+            }
+
+            GeocodingResponse geocodingStoreResponse = await ConvertAddress(_storeAddress);
+            if (geocodingStoreResponse.status == "OK" && geocodingStoreResponse.results.Count > 0)
+            {
+                var locationStore = geocodingStoreResponse.results[0].geometry.location;
+                latitudeStore = locationStore.lat;
+                longitudeStore = locationStore.lng;
+                coordinatesStore = $"{latitudeStore},{longitudeStore}";
+            }
+
+            string distanceText ="";
+            int distanceValue = 0;
+            string durationText = "";
+            int durationValue = 0;
+
+            DistanceMatrixResponse distanceMatrixResonse = await GetDistanceAndTime(coordinatesStore, coordinates);
+
+            if (distanceMatrixResonse.status == "OK" && distanceMatrixResonse.rows.Count > 0)
+            {
+                // Lấy thông tin từ hàng và phần tử đầu tiên (hoặc tùy theo vị trí cụ thể bạn muốn)
+                var row = distanceMatrixResonse.rows[0];
+                var element = row.elements[0];
+
+                // Lấy giá trị khoảng cách và thời gian dự kiến
+                 distanceText = element.distance.text;
+                 distanceValue = element.distance.value;
+                 durationText = element.duration.text;
+                 durationValue = element.duration.value;
+            }
+
+
+            decimal _distance = distanceValue / 1000;
+            decimal distance = Math.Round(_distance, 1); //đơn vị (km)
+
+            if ((durationValue / 60) < 60)
+            {
+                durationValue = durationValue / 60; //đơn vị (phút)
+            }
+
+            if ((durationValue / 60 ) > 60)
+            {
+                durationValue = durationValue / 360; //đơn vị (giờ)
+            }
+
+
+            // Giá của đơn hàng
+
             if (request.StoreId.HasValue)
             {
                 var priceL = await _unitOfWork.Repository<PriceL>().GetAll()
@@ -534,50 +609,50 @@ namespace LocalShipper.Service.Services.Implement
                     var firstId = id.FirstOrDefault();
 
                     var secondItem = id.Skip(1).FirstOrDefault();
-                    if (GetPriceItemId(priceItems, (double)request.DistancePrice) == priceItems.FirstOrDefault().Id)
+                    if (GetPriceItemId(priceItems, (double)distance) == priceItems.FirstOrDefault().Id)
                     {
 
                         price1 = priceItems
-                       .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                       .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
                        .Select(b => (decimal)b.Price)
                        .FirstOrDefault();
                         max1 = priceItems
-                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice && firstId == priceItems.FirstOrDefault().Id)
+                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance && firstId == priceItems.FirstOrDefault().Id)
                                 .Select(b => (decimal)b.MaxDistance)
                                 .FirstOrDefault();
                         maxAmount1 = priceItems
-                                .Where(b => b.MaxDistance < (double)request.DistancePrice)
+                                .Where(b => b.MaxDistance < (double)distance)
                                 .Select(b => (decimal)b.MaxAmount)
                                 .FirstOrDefault();
                         min1 = priceItems
-                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice && firstId == priceItems.FirstOrDefault().Id)
+                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance && firstId == priceItems.FirstOrDefault().Id)
                                 .Select(b => (decimal)b.MinDistance)
                                 .FirstOrDefault();
                         minAmount1 = priceItems
-                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice && firstId == priceItems.FirstOrDefault().Id)
+                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance && firstId == priceItems.FirstOrDefault().Id)
                                 .Select(b => (decimal)b.MinAmount)
                                 .FirstOrDefault();
-                        if (request.DistancePrice >= min1 && request.DistancePrice <= max1)
+                        if (distance >= min1 && distance <= max1)
                         {
                             distancePrice = priceItems
-                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
                                 .Select(b => b.Price)
                                 .FirstOrDefault();
                             distancePriceMax1 = priceItems
-                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
                                 .Select(b => (decimal)b.MaxDistance)
                                 .FirstOrDefault();
-                            if (request.DistancePrice <= distancePriceMax1 && request.DistancePrice >= 1)
+                            if (distance <= distancePriceMax1 && distance >= 1)
                             {
-                                distancePrice = request.DistancePrice * distancePrice;
+                                distancePrice = distance * distancePrice;
 
 
                             }
-                            else if (request.DistancePrice < 1)
+                            else if (distance < 1)
                             {
                                 distancePrice = minAmount1;
                             }
-                            else if (request.DistancePrice > max1)
+                            else if (distance > max1)
                             {
                                 distancePrice = maxAmount1;
 
@@ -586,42 +661,42 @@ namespace LocalShipper.Service.Services.Implement
                         }
 
                     }
-                      
-                    else if (GetPriceItemId(priceItems, (double)request.DistancePrice) == priceItems.Skip(1).FirstOrDefault().Id || request.DistancePrice > maxDistance.Value)
+
+                    else if (GetPriceItemId(priceItems, (double)distance) == priceItems.Skip(1).FirstOrDefault().Id || distance > maxDistance.Value)
                     {
 
                         max2 = priceItems
-                            .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                            .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
                             .Select(b => (decimal)b.MaxDistance)
                             .FirstOrDefault();
                         maxAmount2 = priceItems
-                               .Where(b => b.MaxDistance < (double)request.DistancePrice)
+                               .Where(b => b.MaxDistance < (double)distance)
                                .Select(b => (decimal)b.MaxAmount)
                                .FirstOrDefault();
                         min2 = priceItems
-                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
                                 .Select(b => (decimal)b.MinDistance)
                                 .FirstOrDefault();
                         minAmount2 = priceItems
-                                .Where(b => b.MinDistance <= (double)request.DistancePrice && b.MaxDistance >= (double)request.DistancePrice)
+                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
                                 .Select(b => (decimal)b.MinAmount)
                                 .FirstOrDefault();
 
                         decimal max = (decimal)priceItems.FirstOrDefault().MaxDistance;
                         decimal price = (decimal)priceItems.FirstOrDefault().Price;
-                        if (request.DistancePrice >= min2 && request.DistancePrice <= max2)
+                        if (distance >= min2 && distance <= max2)
                         {
                             var distancePrice2 = priceItems
                                 .Where(b => b.MinDistance >= (double)min2 && b.MaxDistance <= (double)max2)
                                 .Select(b => b.Price)
                                 .FirstOrDefault();
-                            distancePrice = max * price + (request.DistancePrice - max) * distancePrice2;
+                            distancePrice = max * price + (distance - max) * distancePrice2;
                         }
-                        else if (request.DistancePrice > max2 && request.DistancePrice <= min2)
+                        else if (distance > max2 && distance <= min2)
                         {
                             distancePrice = minAmount2;
                         }
-                        else if (request.DistancePrice > max2)
+                        else if (distance > max2)
                         {
                             distancePrice = maxAmount2;
                         }
@@ -636,8 +711,8 @@ namespace LocalShipper.Service.Services.Implement
             var newOrder = new Order
             {
                 StoreId = request.StoreId.HasValue ? request.StoreId.Value : 0,
-                TrackingNumber = request.TrackingNumber.Trim(),
-                Distance = request.Distance,
+                TrackingNumber = trackingNumber,
+                Distance = distance,
                 DistancePrice = distancePrice,
                 SubtotalPrice = request.SubtotalPrice,
                 Cod = request.Cod,
@@ -664,6 +739,75 @@ namespace LocalShipper.Service.Services.Implement
             var orderResponse = _mapper.Map<OrderCreateResponse>(newOrder);
            
             return orderResponse;
+        }
+
+        public async Task<GeocodingResponse> ConvertAddress(string address)
+        {
+            string apiKey = "AIzaSyBBHXLtEw2nMmiMq7dBZHKytUwhzezi7UU";
+            string geocodingApiUrl = "https://maps.googleapis.com/maps/api/geocode/json";
+
+            using (var httpClient = new HttpClient())
+            {
+                var requestUri = $"{geocodingApiUrl}?address={Uri.EscapeDataString(address)}&key={apiKey}";
+                var response = await httpClient.GetAsync(requestUri);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var result = Newtonsoft.Json.JsonConvert.DeserializeObject<GeocodingResponse>(content);
+                    return result;
+                }
+                else
+                {
+                    throw new Exception($"Failed to retrieve geocoding data. Status code: {response.StatusCode}");
+                }
+            }
+        }
+
+        public async Task<DistanceMatrixResponse> GetDistanceAndTime(string origins, string destinations)
+        {
+            string apiKey = "AIzaSyBBHXLtEw2nMmiMq7dBZHKytUwhzezi7UU"; 
+            string distanceMatrixApiUrl = "https://maps.googleapis.com/maps/api/distancematrix/json";
+
+            using (var httpClient = new HttpClient())
+            {
+                var requestUri = $"{distanceMatrixApiUrl}?origins={origins}&destinations={destinations}&mode=driving&key={apiKey}";
+                var response = await httpClient.GetAsync(requestUri);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var result = Newtonsoft.Json.JsonConvert.DeserializeObject<DistanceMatrixResponse>(content);
+                    return result;
+                }
+                else
+                {
+                    throw new Exception($"Failed to retrieve distance and time data. Status code: {response.StatusCode}");
+                }
+            }
+        }
+
+        public async Task<string> GenerateRandomTrackingNumber(int numberOfLetters, int numberOfDigits)
+        {
+            string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
+            string digits = "0123456789"; 
+
+            Random random = new Random();
+
+            StringBuilder trackingNumberBuilder = new StringBuilder();
+            for (int i = 0; i < numberOfLetters; i++)
+            {
+                char randomLetter = letters[random.Next(letters.Length)];
+                trackingNumberBuilder.Append(randomLetter);
+            }
+
+            for (int i = 0; i < numberOfDigits; i++)
+            {
+                char randomDigit = digits[random.Next(digits.Length)];
+                trackingNumberBuilder.Append(randomDigit);
+            }
+
+            return trackingNumberBuilder.ToString();
         }
 
 
