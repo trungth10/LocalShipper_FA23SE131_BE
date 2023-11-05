@@ -146,8 +146,8 @@ namespace LocalShipper.Service.Services.Implement
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Route không tồn tại", routeId.ToString());
             }
-            route.FromStation = request.FromStation.Trim();
-            route.ToStation = request.ToStation.Trim();
+            route.FromStation = request.FromStation;
+            route.ToStation = request.ToStation;
             route.CreatedDate = request.CreatedDate;
             route.StartDate = request.StartDate;
             route.Eta = request.Eta;
