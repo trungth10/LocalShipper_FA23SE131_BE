@@ -536,7 +536,7 @@ namespace LocalShipper.Service.Services.Implement
             var storeAddress = await _unitOfWork.Repository<Store>().GetAll()
                     .FirstOrDefaultAsync(b => b.Id == request.StoreId);
             string _storeAddress = storeAddress.StoreAddress;
-            string address = request.CustomerCommune + " " + request.CustomerDistrict + " " + request.CustomerCity;
+            string address = request.CustomerCommune + ", " + request.CustomerDistrict + ", " + request.CustomerCity;
             GeocodingResponse geocodingResponse = await ConvertAddress(address);
             if (geocodingResponse.status == "OK" && geocodingResponse.results.Count > 0)
             {

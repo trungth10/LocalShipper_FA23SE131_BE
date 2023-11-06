@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Google.OrTools.ConstraintSolver;
 using LocalShipper.Data.Models;
 using LocalShipper.Data.UnitOfWork;
 using LocalShipper.Service.DTOs.Request;
@@ -17,6 +18,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -70,52 +72,7 @@ namespace LocalShipper.Service.Services.Implement
             return routeResponse;
         }
 
-        //SHIPPER
-        //Add Order to Route
-        public async Task<List<OrderResponse>> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId)
-        {
-
-            var orders = await _unitOfWork.Repository<Order>()
-                                         .GetAll()
-                                         .Include(o => o.Store)
-                                         .Include(o => o.Shipper)
-                                         .Include(o => o.Action)
-                                         .Include(o => o.Type)
-                                         .Include(o => o.Route)
-                                         .Where(o => id.Contains(o.Id))
-                                         .ToListAsync();
-
-            if (orders.Count == 0)
-            {
-                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy đơn hàng", id.ToString());
-            }
-
-
-
-            foreach (var order in orders)
-            {
-                order.RouteId = routeId;
-                await _unitOfWork.Repository<Order>().Update(order, order.Id);
-                await _unitOfWork.CommitAsync();
-            }
-
-            var route = await _unitOfWork.Repository<RouteEdge>().GetAll()
-                .FirstOrDefaultAsync(r => r.Id == routeId);
-            var countOrder = await _unitOfWork.Repository<Order>()
-                    .GetAll()
-                    .Where(a => a.RouteId == routeId)
-                    .CountAsync();
-
-            route.Quantity = countOrder;
-            await _unitOfWork.Repository<RouteEdge>().Update(route, route.Id);
-            await _unitOfWork.CommitAsync();
-
-
-            var orderResponse = _mapper.Map<List<OrderResponse>>(orders);
-
-
-            return orderResponse;
-        }
+        
         public async Task<RouteEdgeResponse> CreateRoute(CreateRouteRequest request)
         {
             var storeNames = await _unitOfWork.Repository<Store>().GetAll().Select(s => s.Id).ToListAsync();
@@ -251,7 +208,7 @@ namespace LocalShipper.Service.Services.Implement
           
             var route = new RouteEdge
             {
-                Name = "Lộ trình gợi ý #" + code,
+                Name = "Lộ trình gợi ý " + code,
                 StartDate = request.StartDate,
                 Quantity = countOrder,
                 Status = (int)RouteEdgeStatusEnum.IDLE,
@@ -315,6 +272,151 @@ namespace LocalShipper.Service.Services.Implement
                 }
             }
         }
+
+        //SHIPPER
+        //Add Order to Route
+        public async Task<List<OrderResponse>> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId)
+        {
+
+            var orders = await _unitOfWork.Repository<Order>()
+                                         .GetAll()
+                                         .Include(o => o.Store)
+                                         .Include(o => o.Shipper)
+                                         .Include(o => o.Action)
+                                         .Include(o => o.Type)
+                                         .Include(o => o.Route)
+                                         .Where(o => id.Contains(o.Id))
+                                         .ToListAsync();
+
+            if (orders.Count == 0)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy đơn hàng", id.ToString());
+            }
+
+
+            
+
+
+            foreach (var order in orders)
+            {
+                order.RouteId = routeId;
+                await _unitOfWork.Repository<Order>().Update(order, order.Id);
+                await _unitOfWork.CommitAsync();
+            }
+
+            List<string> fullAddresses = new List<string>();
+
+            foreach (var order in orders)
+            {
+                string storeAddress = order.Store.StoreAddress;
+
+                string customerAddress = $"{order.CustomerCommune}, {order.CustomerDistrict}, {order.CustomerCity}";
+
+                if (!fullAddresses.Contains(storeAddress))
+                {
+                    fullAddresses.Add(storeAddress);
+                }
+                fullAddresses.Add(customerAddress);
+            }
+
+            var distanceMatrix = await GetDistanceMatrix(fullAddresses);
+
+            var route = await _unitOfWork.Repository<RouteEdge>().GetAll()
+                .FirstOrDefaultAsync(r => r.Id == routeId);
+            var countOrder = await _unitOfWork.Repository<Order>()
+                    .GetAll()
+                    .Where(a => a.RouteId == routeId)
+                    .CountAsync();
+
+            route.Quantity = countOrder;
+            await _unitOfWork.Repository<RouteEdge>().Update(route, route.Id);
+            await _unitOfWork.CommitAsync();
+            List<int> tspSolution = await SolveTSPAsync(distanceMatrix);
+            List<string> orderedAddresses = tspSolution.Select(index => fullAddresses[index]).ToList();
+
+
+            var orderResponse = _mapper.Map<List<OrderResponse>>(orders);
+
+
+            return orderResponse;
+        }
+
+
+        public async Task<long[,]> GetDistanceMatrix(List<string> locations)
+        {
+            string apiKey = "AIzaSyBBHXLtEw2nMmiMq7dBZHKytUwhzezi7UU";
+            string distanceMatrixApiUrl = "https://maps.googleapis.com/maps/api/distancematrix/json";
+
+            using (var httpClient = new HttpClient())
+            {
+                var origins = string.Join("|", locations.Select(location => Uri.EscapeDataString(location)));
+                var destinations = string.Join("|", locations.Select(location => Uri.EscapeDataString(location)));
+
+                var requestUri = $"{distanceMatrixApiUrl}?origins={origins}&destinations={destinations}&key={apiKey}";
+                var response = await httpClient.GetAsync(requestUri);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var result = Newtonsoft.Json.JsonConvert.DeserializeObject<DistanceMatrixResponse>(content);
+
+                    if (result.status == "OK")
+                    {
+                        int numLocations = result.destination_addresses.Count;
+                        long[,] distanceMatrix = new long[numLocations, numLocations];
+
+                        for (int i = 0; i < numLocations; i++)
+                        {
+                            for (int j = 0; j < numLocations; j++)
+                            {
+                                distanceMatrix[i, j] = result.rows[i].elements[j].distance.value;
+                            }
+                        }
+
+                        return distanceMatrix;
+                    }
+                    else
+                    {
+                        throw new Exception("Failed to retrieve distance matrix data from the response.");
+                    }
+                }
+                else
+                {
+                    throw new Exception($"Failed to retrieve distance matrix data. Status code: {response.StatusCode}");
+                }
+            }
+        }
+
+        public async Task<List<int>> SolveTSPAsync(long[,] distanceMatrix)
+        {
+            RoutingIndexManager manager = new RoutingIndexManager(distanceMatrix.GetLength(0), 1, 0);
+            RoutingModel routing = new RoutingModel(manager);
+
+            int transitCallbackIndex = routing.RegisterTransitCallback((long fromIndex, long toIndex) =>
+            {
+                var fromNode = manager.IndexToNode(fromIndex);
+                var toNode = manager.IndexToNode(toIndex);
+                return distanceMatrix[fromNode, toNode];
+            });
+
+            routing.SetArcCostEvaluatorOfAllVehicles(transitCallbackIndex);
+
+
+            Assignment solution = routing.Solve();
+
+            List<int> tspSolution = new List<int>();
+            long index = routing.Start(0);
+            while (!routing.IsEnd(index))
+            {
+                tspSolution.Add(manager.IndexToNode(index));
+                index = solution.Value(routing.NextVar(index));
+            }
+            tspSolution.Add(manager.IndexToNode(index));
+
+            return tspSolution;
+        }
+
+
 
     }
 }
