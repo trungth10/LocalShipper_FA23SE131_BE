@@ -131,96 +131,118 @@ namespace LocalShipper.Service.Services.Implement
 
         //GET
         public async Task<List<ShipperResponse>> GetShipper(int? id, string? fullName, string? email, string? phone,
-            string? address, int? transportId, int? accountId, int? zoneId, int? status, string? fcmToken, int? walletId, int? pageNumber, int? pageSize)
+       string? address, int? transportId, int? accountId, int? zoneId, int? status, string? fcmToken, int? walletId, int? pageNumber, int? pageSize)
         {
-
-            var shippers = _unitOfWork.Repository<Shipper>().GetAll().Include(t => t.Transport)
-                                                              .Include(t => t.Account)
-                                                              .Include(t => t.Zone)
-                                                              .Include(t => t.Wallet)
-                                                              .Where(t => id == 0 || t.Id == id)
-                                                              .Where(t => string.IsNullOrWhiteSpace(fullName) || t.FullName.Contains(fullName.Trim()))
-                                                              .Where(t => string.IsNullOrWhiteSpace(email) || t.EmailShipper.Contains(email.Trim()))
-                                                              .Where(t => string.IsNullOrWhiteSpace(phone) || t.PhoneShipper.Contains(phone.Trim()))
-                                                              .Where(t => string.IsNullOrWhiteSpace(address) || t.AddressShipper.Contains(address.Trim()))
-                                                              .Where(t => transportId == 0 || t.TransportId == transportId)
-                                                              .Where(t => accountId == 0 || t.AccountId == accountId)
-                                                              .Where(t => zoneId == 0 || t.ZoneId == zoneId)
-                                                              .Where(t => status == 0 || t.Status == status)
-                                                              .Where(t => string.IsNullOrWhiteSpace(fcmToken) || t.Fcmtoken.Contains(fcmToken.Trim()))
-                                                              .Where(t => walletId == 0 || t.WalletId == walletId);
+            var shippers = _unitOfWork.Repository<Shipper>()
+                .GetAll()
+                .Include(t => t.Transport)
+                .Include(t => t.Account)
+                .Include(t => t.Zone)
+                .Include(t => t.Wallet)
+                .Include(t => t.RouteEdges)
+                .ThenInclude(re => re.Orders)
+                .Where(t => id == 0 || t.Id == id)
+                .Where(t => string.IsNullOrWhiteSpace(fullName) || t.FullName.Contains(fullName.Trim()))
+                .Where(t => string.IsNullOrWhiteSpace(email) || t.EmailShipper.Contains(email.Trim()))
+                .Where(t => string.IsNullOrWhiteSpace(phone) || t.PhoneShipper.Contains(phone.Trim()))
+                .Where(t => string.IsNullOrWhiteSpace(address) || t.AddressShipper.Contains(address.Trim()))
+                .Where(t => transportId == 0 || t.TransportId == transportId)
+                .Where(t => accountId == 0 || t.AccountId == accountId)
+                .Where(t => zoneId == 0 || t.ZoneId == zoneId)
+                .Where(t => status == 0 || t.Status == status)
+                .Where(t => string.IsNullOrWhiteSpace(fcmToken) || t.Fcmtoken.Contains(fcmToken.Trim()))
+                .Where(t => walletId == 0 || t.WalletId == walletId);
 
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
+
             // Áp dụng phân trang nếu có thông số pageNumber và pageSize
             if (pageNumber.HasValue && pageSize.HasValue)
             {
-                shippers = shippers.Skip((pageNumber.Value - 1) * pageSize.Value)
-                                       .Take(pageSize.Value);
+                shippers = shippers.Skip((pageNumber.Value - 1) * pageSize.Value).Take(pageSize.Value);
             }
 
             var shipperList = await shippers.ToListAsync();
-            if (shipperList == null)
+            var shipperResponses = new List<ShipperResponse>();
+
+            foreach (var shipper in shipperList)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Shipper không có hoặc không tồn tại", id.ToString());
+                var shipperResponse = new ShipperResponse
+                {
+                    Id = shipper.Id,
+                    FullName = shipper.FullName,
+                    EmailShipper = shipper.EmailShipper,
+                    PhoneShipper = shipper.PhoneShipper,
+                    AddressShipper = shipper.AddressShipper,
+                    TransportId = (int)shipper.TransportId,
+                    AccountId = shipper.AccountId,
+                    ZoneId = (int)shipper.ZoneId,
+                    Fcmtoken = shipper.Fcmtoken,
+                    Status = (ShipperStatusEnum)shipper.Status,
+                    WalletId = shipper.WalletId,
+                    Transport = shipper.Transport != null ? new TransportResponse
+                    {
+                        Id = shipper.Transport.Id,
+                        TypeId = shipper.Transport.TypeId,
+                        LicencePlate = shipper.Transport.LicencePlate,
+                        TransportColor = shipper.Transport.TransportColor,
+                        TransportImage = shipper.Transport.TransportImage,
+                        TransportRegistration = shipper.Transport.TransportRegistration,
+                        Active = (bool)shipper.Transport.Active,
+                    } : null,
+                    Account = shipper.Account != null ? new AccountResponse
+                    {
+                        Id = shipper.Account.Id,
+                        Fullname = shipper.Account.Fullname,
+                        Phone = shipper.Account.Phone,
+                        Email = shipper.Account.Email,
+                        RoleId = shipper.Account.RoleId,
+                        Active = shipper.Account.Active,
+                        FcmToken = shipper.Account.FcmToken,
+                        CreateDate = shipper.Account.CreateDate,
+                        ImageUrl = shipper.Account.ImageUrl,
+                    } : null,
+                    Zone = shipper.Zone != null ? new ZoneResponse
+                    {
+                        Id = shipper.Zone.Id,
+                        ZoneName = shipper.Zone.ZoneName,
+                        ZoneDescription = shipper.Zone.ZoneDescription,
+                        Latitude = shipper.Zone.Latitude,
+                        Longitude = shipper.Zone.Longitude,
+                        Radius = shipper.Zone.Radius,
+                        CreatedAt = shipper.Zone.CreatedAt,
+                        UpdateAt = shipper.Zone.UpdateAt,
+                        Active = shipper.Zone.Active,
+                    } : null,
+                    Wallet = shipper.Wallet != null ? new WalletResponse
+                    {
+                        Id = shipper.Wallet.Id,
+                        Balance = shipper.Wallet.Balance,
+                        CreatedAt = shipper.Wallet.CreatedAt,
+                        UpdatedAt = shipper.Wallet.UpdatedAt,
+                    } : null,
+                    Orders = null, 
+                    Route = null,
+                };
+
+               
+                var routeEdges = shipper.RouteEdges.Where(a => a.Status == 2).ToList();
+                if (routeEdges.Any())
+                {
+                   
+                    var orders = routeEdges.SelectMany(a => a.Orders).ToList();
+                    shipperResponse.Orders = _mapper.Map<List<OrderWithShipperResponse>>(orders);
+                    shipperResponse.Route = _mapper.Map<List<RouteEdgeWithShipperResponse>>(routeEdges);
+                }
+
+                shipperResponses.Add(shipperResponse);
             }
-            var shipperResponses = shipperList.Select(shipper => new ShipperResponse
-            {
-                Id = shipper.Id,
-                FullName = shipper.FullName,
-                EmailShipper = shipper.EmailShipper,
-                PhoneShipper = shipper.PhoneShipper,
-                AddressShipper = shipper.AddressShipper,
-                TransportId = (int)shipper.TransportId,
-                AccountId = shipper.AccountId,
-                ZoneId = (int)shipper.ZoneId,
-                Fcmtoken = shipper.Fcmtoken,
-                Status = (ShipperStatusEnum)shipper.Status,
-                WalletId = shipper.WalletId,
-                Transport = shipper.Transport != null ? new TransportResponse
-                {
-                    Id = shipper.Transport.Id,
-                    TypeId = shipper.Transport.TypeId,
-                    LicencePlate = shipper.Transport.LicencePlate,
-                    TransportColor = shipper.Transport.TransportColor,
-                    TransportImage = shipper.Transport.TransportImage,
-                    TransportRegistration = shipper.Transport.TransportRegistration,
-                    Active = (bool)shipper.Transport.Active,
-                } : null,
-                Account = shipper.Account != null ? new AccountResponse
-                {
-                    Id = shipper.Account.Id,
-                    Fullname = shipper.Account.Fullname,
-                    Phone = shipper.Account.Phone,
-                    Email = shipper.Account.Email,
-                    RoleId = shipper.Account.RoleId,
-                    Active = shipper.Account.Active,
-                    FcmToken = shipper.Account.FcmToken,
-                    CreateDate = shipper.Account.CreateDate,
-                    ImageUrl = shipper.Account.ImageUrl,
-                } : null,
-                Zone = shipper.Zone != null ? new ZoneResponse
-                {
-                    Id = shipper.Zone.Id,
-                    ZoneName = shipper.Zone.ZoneName,
-                    ZoneDescription = shipper.Zone.ZoneDescription,
-                    Latitude = shipper.Zone.Latitude,
-                    Longitude = shipper.Zone.Longitude,
-                    Radius = shipper.Zone.Radius,
-                    CreatedAt = shipper.Zone.CreatedAt,
-                    UpdateAt = shipper.Zone.UpdateAt,
-                    Active = shipper.Zone.Active,
-                } : null,
-                Wallet = shipper.Wallet != null ? new WalletResponse
-                {
-                    Id = shipper.Wallet.Id,
-                    Balance = shipper.Wallet.Balance,
-                    CreatedAt = shipper.Wallet.CreatedAt,
-                    UpdatedAt = shipper.Wallet.UpdatedAt,
-                } : null
-            }).ToList();
+
             return shipperResponses;
         }
+
+
+
 
         //GET List
         //public async Task<List<ShipperResponse>> GetListShipper(int? zoneId = null)

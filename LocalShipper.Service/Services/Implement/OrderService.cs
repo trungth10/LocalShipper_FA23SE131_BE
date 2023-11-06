@@ -588,6 +588,7 @@ namespace LocalShipper.Service.Services.Implement
             {
                 durationValue = durationValue / 360; //đơn vị (giờ)
             }
+          
 
 
             // Giá của đơn hàng
@@ -732,6 +733,7 @@ namespace LocalShipper.Service.Services.Implement
                 TypeId = request.TypeId,
                 CreateTime = DateTime.Now,
                 OrderTime = request.OrderTime,
+                Eta = durationValue,
                 Status = (int)OrderStatusEnum.IDLE,
             };
             await _unitOfWork.Repository<Order>().InsertAsync(newOrder);

@@ -198,6 +198,7 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.DistancePrice)
                     .HasColumnType("decimal(10, 2)")
                     .HasColumnName("distance_price");
+                entity.Property(e => e.Eta) .HasColumnName("ETA");
 
                 entity.Property(e => e.OrderTime)
                     .HasColumnType("datetime")

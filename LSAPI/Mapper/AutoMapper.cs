@@ -14,6 +14,8 @@ namespace LSAPI.Mapper
             CreateMap<Shipper, ShipperResponse>().ReverseMap();
             CreateMap<Order, OrderResponse>().ReverseMap();
             CreateMap<Order, OrderCreateResponse>().ReverseMap();
+            CreateMap<Order, OrderWithShipperResponse>().ReverseMap();
+
             CreateMap<PackageAction, PackageActionResponse>().ReverseMap();
             CreateMap<PackageType, PackageTypeResponse>().ReverseMap();
             CreateMap<Store, StoreResponse>().ReverseMap();
@@ -25,6 +27,7 @@ namespace LSAPI.Mapper
 
             CreateMap<WalletTransaction, WalletTransactionResponse>().ReverseMap();
             CreateMap<RouteEdge, RouteEdgeResponse>().ReverseMap();
+            CreateMap<RouteEdge, RouteEdgeWithShipperResponse>().ReverseMap();
         }
     }
 }

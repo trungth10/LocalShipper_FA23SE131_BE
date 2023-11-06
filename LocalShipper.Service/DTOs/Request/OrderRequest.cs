@@ -31,6 +31,7 @@ namespace LocalShipper.Service.DTOs.Request
         public string CustomerEmail { get; set; }
         public int ActionId { get; set; }
         public int TypeId { get; set; }
+        public int? Eta { get; set; }
     }
 
     public class OrderRequestForCreate
@@ -54,7 +55,7 @@ namespace LocalShipper.Service.DTOs.Request
         public string CustomerEmail { get; set; }
         public int ActionId { get; set; }
         public int TypeId { get; set; }
-
+        public int? Eta { get; set; }
     }
     public class OrderRequestForUpdate
     {
@@ -79,6 +80,7 @@ namespace LocalShipper.Service.DTOs.Request
         public string CustomerEmail { get; set; }
         public int ActionId { get; set; }
         public int TypeId { get; set; }
+        public int? Eta { get; set; }
     }
 
     public class OrderRequestV2
@@ -102,6 +104,6 @@ namespace LocalShipper.Service.DTOs.Request
         public IEnumerable<string>? customer_email { get; set; }
         public IEnumerable<int>? actionId { get; set; }
         public IEnumerable<int>? typeId { get; set; }
-
+        public int? Eta { get; set; }
     }
 }
