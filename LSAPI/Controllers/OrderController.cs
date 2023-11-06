@@ -26,7 +26,7 @@ namespace LSAPI.Controllers
             _orderService = orderService;
         }
 
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
+       [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/orders")]
         public async Task<ActionResult<OrderResponse>> GetOrder(int zoneId, int id, int status, int storeId, int shipperId,
                                      string tracking_number, string cancel_reason, decimal distance, decimal distance_price,

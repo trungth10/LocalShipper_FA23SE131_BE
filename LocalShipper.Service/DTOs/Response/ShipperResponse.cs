@@ -28,7 +28,7 @@ namespace LocalShipper.Service.DTOs.Response
         public WalletResponse Wallet { get; set; }
         public ZoneResponse Zone { get; set; }
         public List<RouteEdgeWithShipperResponse> Route { get; set; }
-        public List<OrderWithShipperResponse> Orders { get; set; }
+        public List<OrderWithShipperResponse> OrdersInRoute { get; set; }
         
 
     }

@@ -221,7 +221,7 @@ namespace LocalShipper.Service.Services.Implement
                         CreatedAt = shipper.Wallet.CreatedAt,
                         UpdatedAt = shipper.Wallet.UpdatedAt,
                     } : null,
-                    Orders = null, 
+                    OrdersInRoute = null, 
                     Route = null,
                 };
 
@@ -231,7 +231,7 @@ namespace LocalShipper.Service.Services.Implement
                 {
                    
                     var orders = routeEdges.SelectMany(a => a.Orders).ToList();
-                    shipperResponse.Orders = _mapper.Map<List<OrderWithShipperResponse>>(orders);
+                    shipperResponse.OrdersInRoute = _mapper.Map<List<OrderWithShipperResponse>>(orders);
                     shipperResponse.Route = _mapper.Map<List<RouteEdgeWithShipperResponse>>(routeEdges);
                 }
 
