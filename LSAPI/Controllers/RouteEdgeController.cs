@@ -96,7 +96,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        //[Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("shipper/api/routes-auto")]
         public async Task<ActionResult<OrderResponse>> CreateRouteSuggest(int shiperId, int money, SuggestEnum suggest, int capacityLow, int capacityHight, CreateRouteRequestAuto request)
         {
