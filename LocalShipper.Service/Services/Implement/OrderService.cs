@@ -424,7 +424,7 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Order không có hoặc không tồn tại", id.ToString());
             }
 
-            if (routeId != null || routeId != 0)
+            /*if (routeId != null || routeId != 0)
             {              
                 List<string> fullAddresses = new List<string>();
 
@@ -454,7 +454,7 @@ namespace LocalShipper.Service.Services.Implement
                     return storeIndex + customerIndex;
                 }).ToList();
 
-            }      
+            }*/      
 
             var orderResponse = _mapper.Map<List<OrderResponse>>(orderList);
             return orderResponse;
