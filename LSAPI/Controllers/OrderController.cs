@@ -26,7 +26,7 @@ namespace LSAPI.Controllers
             _orderService = orderService;
         }
 
-       [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        //[Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/orders")]
         public async Task<ActionResult<OrderResponse>> GetOrder(int zoneId, int id, int status, int storeId, int shipperId,
                                      string tracking_number, string cancel_reason, decimal distance, decimal distance_price,
@@ -147,7 +147,7 @@ namespace LSAPI.Controllers
         //SHIPPER
         [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPut("shipper/api/orders")]
-        public async Task<ActionResult<MessageResponse>> ShipperToStatusOrder(int id, int shipperId, string cancelReason, OrderStatusEnum status)
+        public async Task<ActionResult<MessageResponse>> ShipperToStatusOrder(int id, int shipperId, string cancelReason, OrderStatusEnum status, int? routesId)
         {
             try
             {
@@ -159,7 +159,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Id phải là số nguyên dương");
                 }
-                var rs = await _orderService.ShipperToStatusOrder(id, shipperId, cancelReason, status);
+                var rs = await _orderService.ShipperToStatusOrder(id, shipperId, cancelReason, status, routesId);
                 return Ok(rs);
             }
             catch (Exception ex)

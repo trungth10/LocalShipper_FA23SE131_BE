@@ -14,6 +14,7 @@ using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Utilities.Collections;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -29,16 +30,18 @@ namespace LocalShipper.Service.Services.Implement
     {
         private readonly IUnitOfWork _unitOfWork;
         private IMapper _mapper;
+        private IRouteService _routeService;
 
-        public OrderService(IMapper mapper, IUnitOfWork unitOfWork)
+        public OrderService(IMapper mapper, IUnitOfWork unitOfWork, IRouteService routeService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _routeService = routeService;
         }
 
 
         //SHIPPER -> ORDER
-        public async Task<OrderResponse> ShipperToStatusOrder(int id, int shipperId, string? cancelReason, OrderStatusEnum status)
+        public async Task<OrderResponse> ShipperToStatusOrder(int id, int shipperId, string? cancelReason, OrderStatusEnum status, int? routesId)
         {
             var order = await _unitOfWork.Repository<Order>()
              .GetAll()
@@ -79,7 +82,7 @@ namespace LocalShipper.Service.Services.Implement
 
             //Shipper thao tác Order
 
-            if (status == OrderStatusEnum.ACCEPTED && string.IsNullOrWhiteSpace(cancelReason))
+            if (status == OrderStatusEnum.ACCEPTED && string.IsNullOrWhiteSpace(cancelReason) && (routesId == null || routesId == 0))
             {
                 order.Status = (int)status;
                 order.ShipperId = shipperId;
@@ -121,7 +124,7 @@ namespace LocalShipper.Service.Services.Implement
 
             }
 
-            if (status == OrderStatusEnum.WAITING && string.IsNullOrWhiteSpace(cancelReason))
+            if (status == OrderStatusEnum.WAITING && string.IsNullOrWhiteSpace(cancelReason) && (routesId == null || routesId == 0))
             {
                 order.Status = (int)status;
                 order.ShipperId = shipperId;
@@ -139,7 +142,7 @@ namespace LocalShipper.Service.Services.Implement
             }
 
 
-            if (status == OrderStatusEnum.INPROCESS && string.IsNullOrWhiteSpace(cancelReason))
+            if (status == OrderStatusEnum.INPROCESS && string.IsNullOrWhiteSpace(cancelReason) && (routesId == null || routesId == 0))
             {
                 order.Status = (int)status;
                 order.PickupTime = DateTime.Now;
@@ -156,7 +159,7 @@ namespace LocalShipper.Service.Services.Implement
                 await _unitOfWork.CommitAsync();
             }
 
-            if (status == OrderStatusEnum.ASSIGNING && string.IsNullOrWhiteSpace(cancelReason))
+            if (status == OrderStatusEnum.ASSIGNING && string.IsNullOrWhiteSpace(cancelReason) && (routesId == null || routesId == 0))
             {
                 order.Status = (int)status;
                 order.PickupTime = DateTime.Now;
@@ -173,7 +176,7 @@ namespace LocalShipper.Service.Services.Implement
                 await _unitOfWork.CommitAsync();
             }
 
-            if (status == OrderStatusEnum.IDLE && string.IsNullOrWhiteSpace(cancelReason))
+            if (status == OrderStatusEnum.IDLE && string.IsNullOrWhiteSpace(cancelReason) && (routesId == null || routesId == 0))
             {
                 order.Status = (int)status;
                 order.ShipperId = null;
@@ -191,6 +194,26 @@ namespace LocalShipper.Service.Services.Implement
 
             if (status == OrderStatusEnum.COMPLETED && string.IsNullOrWhiteSpace(cancelReason))
             {
+                if(routesId != null || routesId != 0)
+                {
+                    bool areAllOtherOrdersCompleted = await _unitOfWork.Repository<Order>()
+                                                 .GetAll()
+                                                 .Where(o => o.RouteId == routesId && o.Id != id)
+                                                 .AllAsync(o => o.Status == (int)OrderStatusEnum.COMPLETED || o.Status == (int)OrderStatusEnum.RETURN);
+
+
+                    if (areAllOtherOrdersCompleted)
+                    {
+                        var route = await _unitOfWork.Repository<RouteEdge>().FindAsync(a => a.Id == routesId);
+                        if (route != null)
+                        {
+                            route.Status = (int)RouteEdgeStatusEnum.COMPLETE;
+                            await _unitOfWork.Repository<RouteEdge>().Update(route, route.Id);
+                            await _unitOfWork.CommitAsync();
+                        }
+                    }
+                }
+
                 order.Status = (int)status;
                 order.CompleteTime = DateTime.Now;
                 OrderHistory orderHistory = new OrderHistory
@@ -206,7 +229,7 @@ namespace LocalShipper.Service.Services.Implement
 
             }
 
-            if (status == OrderStatusEnum.CANCELLED && string.IsNullOrWhiteSpace(cancelReason))
+            if (status == OrderStatusEnum.CANCELLED && string.IsNullOrWhiteSpace(cancelReason) && (routesId == null || routesId == 0))
             {
                 order.Status = (int)status;
                 order.CompleteTime = DateTime.Now;
@@ -224,7 +247,7 @@ namespace LocalShipper.Service.Services.Implement
             }
 
 
-            if (status == OrderStatusEnum.RETURN)
+            if (status == OrderStatusEnum.RETURN && (routesId == null || routesId == 0))
             {
                 orderCancel.Status = (int)status;
                 orderCancel.CompleteTime = DateTime.Now;
@@ -396,11 +419,42 @@ namespace LocalShipper.Service.Services.Implement
 
             var orderList = await orders.ToListAsync();
 
-
             if (orderList == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Order không có hoặc không tồn tại", id.ToString());
             }
+
+            if (routeId != null || routeId != 0)
+            {              
+                List<string> fullAddresses = new List<string>();
+
+                foreach (var order in orders)
+                {
+                    string storeAddress = order.Store.StoreAddress;
+
+                    string customerAddress = $"{order.CustomerCommune}, {order.CustomerDistrict}, {order.CustomerCity}";
+
+                    if (!fullAddresses.Contains(storeAddress))
+                    {
+                        fullAddresses.Add(storeAddress);
+                    }
+                    fullAddresses.Add(customerAddress);
+                }
+
+                var distanceMatrix = await _routeService.GetDistanceMatrix(fullAddresses);
+                List<int> tspSolution = await _routeService.SolveTSPAsync(distanceMatrix);
+                List<string> orderedAddresses = tspSolution.Select(index => fullAddresses[index]).ToList();
+
+                orderList = orderList.OrderBy(order =>
+                {
+                    var storeAddress = order.Store.StoreAddress;
+                    var customerAddress = $"{order.CustomerCommune}, {order.CustomerDistrict}, {order.CustomerCity}";
+                    var storeIndex = orderedAddresses.IndexOf(storeAddress);
+                    var customerIndex = orderedAddresses.IndexOf(customerAddress);
+                    return storeIndex + customerIndex;
+                }).ToList();
+
+            }      
 
             var orderResponse = _mapper.Map<List<OrderResponse>>(orderList);
             return orderResponse;

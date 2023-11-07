@@ -25,5 +25,8 @@ namespace LocalShipper.Service.Services.Interface
         Task<List<OrderResponse>> UpdateOrderRouteId(IEnumerable<int> orderid);
 
         Task<GeocodingResponse> ConvertAddress(string address);
+        Task<long[,]> GetDistanceMatrix(List<string> locations);
+
+        Task<List<int>> SolveTSPAsync(long[,] distanceMatrix);
     }
 }

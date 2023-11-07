@@ -72,7 +72,7 @@ namespace LocalShipper.Service.Services.Implement
             return routeResponse;
         }
 
-        
+
         public async Task<RouteEdgeResponse> CreateRoute(CreateRouteRequest request)
         {
             var storeNames = await _unitOfWork.Repository<Store>().GetAll().Select(s => s.Id).ToListAsync();
@@ -165,52 +165,93 @@ namespace LocalShipper.Service.Services.Implement
              .Where(o => o.ShipperId == shiperId && o.PickupTime == null && o.RouteId == null)
             ;
 
+            IEnumerable<Order> filteredOrders = null;
+            IEnumerable<Order> _filteredOrders = null;
+            IEnumerable<Order> largestGroup = null;
 
             if (suggest == SuggestEnum.DISTRICT && (money == null || money == 0) && (capacityLow == null || capacityLow == 0) && (capacityHight == null || capacityHight == 0))
             {
-                orderSuggest.GroupBy(o => o.CustomerDistrict)
-                            .Where(group => group.Count() > 1)
-                            .SelectMany(group => group)
-                            .ToListAsync();
+                var groupedOrders = orderSuggest.AsEnumerable()
+                                                .GroupBy(o => o.CustomerDistrict)
+                                                .Where(group => group.Count() > 1)
+                                                .OrderByDescending(group => group.Count())
+                                                .SelectMany(group => group);
+
+                filteredOrders = groupedOrders.ToList();
             }
             if (suggest == SuggestEnum.ACTION && (money == null || money == 0) && (capacityLow == null || capacityLow == 0) && (capacityHight == null || capacityHight == 0))
             {
-                orderSuggest.GroupBy(o => o.ActionId)
-                            .Where(group => group.Count() > 1)
-                            .SelectMany(group => group)
-                            .ToListAsync();
+                var groupedOrders = orderSuggest.AsEnumerable()
+                                                .GroupBy(o => o.ActionId)
+                                                .Where(group => group.Count() > 1)
+                                                .OrderByDescending(group => group.Count())
+                                                .SelectMany(group => group);
+
+                filteredOrders = groupedOrders.ToList();
             }
             if (suggest == SuggestEnum.TYPE && (money == null || money == 0) && (capacityLow == null || capacityLow == 0) && (capacityHight == null || capacityHight == 0))
             {
-                orderSuggest.GroupBy(o => o.TypeId)
-                            .Where(group => group.Count() > 1)
-                            .SelectMany(group => group)
-                            .ToListAsync();
-            }          
-            if (suggest == SuggestEnum.CAPACITY && (money == null || money == 0) )
+                var groupedOrders = orderSuggest.AsEnumerable()
+                                                 .GroupBy(o => o.TypeId)
+                                                 .Where(group => group.Count() > 1)
+                                                 .OrderByDescending(group => group.Count())
+                                                 .SelectMany(group => group);
+
+                filteredOrders = groupedOrders.ToList();
+            }
+            if (suggest == SuggestEnum.CAPACITY && (money == null || money == 0))
             {
-                orderSuggest.Where(a => capacityLow <= a.Capacity && a.Capacity <= capacityHight).ToListAsync();
+                 _filteredOrders = orderSuggest.Where(a => capacityLow <= a.Capacity && a.Capacity <= capacityHight).ToList();
             }
             if (suggest == SuggestEnum.COD && (capacityLow == null || capacityLow == 0) && (capacityHight == null || capacityHight == 0))
             {
-                orderSuggest.Where(a => a.Cod <= money).ToListAsync();
+                _filteredOrders  =  orderSuggest.Where(a => a.Cod <= money).ToList();
+             
             }
 
             Random random = new Random();
-            int randomNumber = random.Next(10, 99); 
+            int randomNumber = random.Next(10, 99);
 
             string randomLetters = new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 3).Select(s => s[random.Next(s.Length)]).ToArray());
-      
+
             string code = randomLetters + randomNumber.ToString();
 
-            var countOrder = await orderSuggest
-                   .CountAsync();
-          
+
+
+            
+                
+            
+
+            
+            if (suggest == SuggestEnum.COD || suggest == SuggestEnum.CAPACITY)
+            {
+                 largestGroup = _filteredOrders;
+            }
+            if(suggest == SuggestEnum.DISTRICT)
+            {
+                largestGroup = filteredOrders.GroupBy(o => o.CustomerDistrict)
+                                            .OrderByDescending(group => group.Count())
+                                            .First();
+            }
+            if (suggest == SuggestEnum.ACTION)
+            {
+                largestGroup = filteredOrders.GroupBy(o => o.CustomerDistrict)
+                                            .OrderByDescending(group => group.Count())
+                                            .First();
+            }
+            if (suggest == SuggestEnum.TYPE)
+            {
+                largestGroup = filteredOrders.GroupBy(o => o.CustomerDistrict)
+                                            .OrderByDescending(group => group.Count())
+                                            .First();
+            }
+            int count = largestGroup.Count();
+
             var route = new RouteEdge
             {
                 Name = "Lộ trình gợi ý " + code,
                 StartDate = request.StartDate,
-                Quantity = countOrder,
+                Quantity = count,
                 Status = (int)RouteEdgeStatusEnum.IDLE,
                 ShipperId = shiperId,
             };
@@ -218,11 +259,12 @@ namespace LocalShipper.Service.Services.Implement
             await _unitOfWork.Repository<RouteEdge>().InsertAsync(route);
             await _unitOfWork.CommitAsync();
 
-            foreach (var order in orderSuggest)
+           
+
+            foreach (var order in largestGroup)
             {
                 order.RouteId = route.Id;
                 await _unitOfWork.Repository<Order>().Update(order, order.Id);
-               
             }
             await _unitOfWork.CommitAsync();
 
@@ -239,7 +281,7 @@ namespace LocalShipper.Service.Services.Implement
 
             foreach (var order in orders)
             {
-                order.RouteId = null; 
+                order.RouteId = null;
                 await _unitOfWork.Repository<Order>().Update(order, order.Id);
             }
 
@@ -262,7 +304,7 @@ namespace LocalShipper.Service.Services.Implement
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var content = await response.Content.ReadAsStringAsync();                   
+                    var content = await response.Content.ReadAsStringAsync();
                     var result = Newtonsoft.Json.JsonConvert.DeserializeObject<GeocodingResponse>(content);
                     return result;
                 }
@@ -294,7 +336,7 @@ namespace LocalShipper.Service.Services.Implement
             }
 
 
-            
+
 
 
             foreach (var order in orders)
