@@ -19,6 +19,5 @@ namespace LocalShipper.Service.DTOs.Request
         public int ZoneId { get; set; }
         public int? Status { get; set; }
         public string Fcmtoken { get; set; }
-        public int? WalletId { get; set; }
     }
 }

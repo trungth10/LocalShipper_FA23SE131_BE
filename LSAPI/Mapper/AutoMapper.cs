@@ -11,7 +11,7 @@ namespace LSAPI.Mapper
     {
         public AutoMapperProfile()
         {
-            CreateMap<Shipper, ShipperResponse>().ReverseMap();
+            CreateMap<Shipper, ShipperResponse>(); 
             CreateMap<Order, OrderResponse>().ReverseMap();
             CreateMap<Order, OrderCreateResponse>().ReverseMap();
             CreateMap<Order, OrderWithShipperResponse>().ReverseMap();

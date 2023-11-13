@@ -124,7 +124,6 @@ namespace LocalShipper.Service.Services.Implement
                 ZoneId = request.ZoneId,
                 Status = (ShipperStatusEnum)request.Status,
                 Fcmtoken = request.Fcmtoken,
-                WalletId = request.WalletId
             };
             return createdShipperResponse;
         }

@@ -154,12 +154,12 @@ namespace LocalShipper.Service.Services.Implement
 
         //SHIPPER
         //Suggest Order
-        public async Task<List<OrderResponse>> CreateRouteSuggest(int shiperId, int money, SuggestEnum suggest, int capacityLow, int capacityHight, CreateRouteRequestAuto request,double shipperLatitude, double shipperLongitude)
+        public async Task<RouteEdgeResponse> CreateRouteSuggest(int shiperId, int money, SuggestEnum suggest, int capacityLow, int capacityHight, CreateRouteRequestAuto request,double shipperLatitude, double shipperLongitude)
         {
 
             var orderSuggest = _unitOfWork.Repository<Order>().GetAll()
              .Include(o => o.Store)
-             //.Include(o => o.Shipper)
+             .Include(o => o.Shipper)
              .Include(o => o.Action)
              .Include(o => o.Type)
              .Include(o => o.Route)
@@ -329,8 +329,9 @@ namespace LocalShipper.Service.Services.Implement
             }
             await _unitOfWork.CommitAsync();
 
-            var orderResponse = _mapper.Map<List<OrderResponse>>(largestGroup);
-            return orderResponse;
+            /* var orderResponse = _mapper.Map<RouteEdgeResponse>(route);
+             return orderResponse;*/
+            return _mapper.Map<RouteEdge, RouteEdgeResponse>(route);
         }
 
         public async Task<List<OrderResponse>> UpdateOrderRouteId(IEnumerable<int> orderid)

@@ -21,11 +21,9 @@ namespace LocalShipper.Service.DTOs.Response
         public int ZoneId { get; set; }
         public ShipperStatusEnum Status { get; set; }
         public string Fcmtoken { get; set; }
-        public int? WalletId { get; set; }
         //public OrderResponse Order { get; set; }
         public TransportResponse Transport { get; set; }
         public AccountResponse Account { get; set; }
-        public WalletResponse Wallet { get; set; }
         public ZoneResponse Zone { get; set; }
         public List<RouteEdgeWithShipperResponse> Route { get; set; }
         public List<OrderWithShipperResponse> OrdersInRoute { get; set; }
