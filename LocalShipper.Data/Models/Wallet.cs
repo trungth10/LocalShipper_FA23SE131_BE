@@ -8,8 +8,7 @@ namespace LocalShipper.Data.Models
     public partial class Wallet
     {
         public Wallet()
-        {
-            Shippers = new HashSet<Shipper>();
+        {          
             Stores = new HashSet<Store>();
             WalletTransactionFromWallets = new HashSet<WalletTransaction>();
             WalletTransactionToWallets = new HashSet<WalletTransaction>();
@@ -19,8 +18,11 @@ namespace LocalShipper.Data.Models
         public decimal Balance { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public int? Type { get; set; }
+        public int? ShipperId { get; set; }
 
-        public virtual ICollection<Shipper> Shippers { get; set; }
+        public virtual Shipper Shipper { get; set; }
+        
         public virtual ICollection<Store> Stores { get; set; }
         public virtual ICollection<WalletTransaction> WalletTransactionFromWallets { get; set; }
         public virtual ICollection<WalletTransaction> WalletTransactionToWallets { get; set; }

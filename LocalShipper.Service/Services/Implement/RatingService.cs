@@ -59,7 +59,7 @@ namespace LocalShipper.Service.Services.Implement
                     ZoneId = (int)rating.Shipper.ZoneId,
                     Status = (Helpers.ShipperStatusEnum)rating.Shipper.Status,
                     Fcmtoken = rating.Shipper.Fcmtoken,
-                    WalletId = rating.Shipper.WalletId,
+                    //WalletId = rating.Shipper.WalletId,
                 } : null,
                 Store = rating.ByStore != null ? new StoreResponse
                 {

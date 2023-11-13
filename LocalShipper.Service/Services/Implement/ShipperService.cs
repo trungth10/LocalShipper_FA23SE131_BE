@@ -88,11 +88,11 @@ namespace LocalShipper.Service.Services.Implement
             }
 
             //Check walletId trùng
-            var walletIdExisted = await _unitOfWork.Repository<Shipper>().FindAsync(x => x.WalletId == request.WalletId);
-            if (walletIdExisted != null)
-            {
-                throw new CrudException(HttpStatusCode.BadRequest, "WalletId đã tồn tại", request.WalletId.ToString());
-            }
+            //var walletIdExisted = await _unitOfWork.Repository<Shipper>().FindAsync(x => x.WalletId == request.WalletId);
+            //if (walletIdExisted != null)
+            //{
+            //    throw new CrudException(HttpStatusCode.BadRequest, "WalletId đã tồn tại", request.WalletId.ToString());
+            //}
 
 
 
@@ -107,7 +107,7 @@ namespace LocalShipper.Service.Services.Implement
                 ZoneId = request.ZoneId,
                 Status = request.Status,
                 Fcmtoken = request.Fcmtoken,
-                WalletId = request.WalletId
+                //WalletId = request.WalletId
             };
             await _unitOfWork.Repository<Shipper>().InsertAsync(shipper);
             await _unitOfWork.CommitAsync();
@@ -150,8 +150,8 @@ namespace LocalShipper.Service.Services.Implement
                 .Where(t => accountId == 0 || t.AccountId == accountId)
                 .Where(t => zoneId == 0 || t.ZoneId == zoneId)
                 .Where(t => status == 0 || t.Status == status)
-                .Where(t => string.IsNullOrWhiteSpace(fcmToken) || t.Fcmtoken.Contains(fcmToken.Trim()))
-                .Where(t => walletId == 0 || t.WalletId == walletId);
+                .Where(t => string.IsNullOrWhiteSpace(fcmToken) || t.Fcmtoken.Contains(fcmToken.Trim()));
+                //.Where(t => walletId == 0 || t.WalletId == walletId);
 
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
@@ -179,7 +179,7 @@ namespace LocalShipper.Service.Services.Implement
                     ZoneId = (int)shipper.ZoneId,
                     Fcmtoken = shipper.Fcmtoken,
                     Status = (ShipperStatusEnum)shipper.Status,
-                    WalletId = shipper.WalletId,
+                    //WalletId = shipper.WalletId,
                     Transport = shipper.Transport != null ? new TransportResponse
                     {
                         Id = shipper.Transport.Id,
@@ -214,13 +214,13 @@ namespace LocalShipper.Service.Services.Implement
                         UpdateAt = shipper.Zone.UpdateAt,
                         Active = shipper.Zone.Active,
                     } : null,
-                    Wallet = shipper.Wallet != null ? new WalletResponse
-                    {
-                        Id = shipper.Wallet.Id,
-                        Balance = shipper.Wallet.Balance,
-                        CreatedAt = shipper.Wallet.CreatedAt,
-                        UpdatedAt = shipper.Wallet.UpdatedAt,
-                    } : null,
+                    //Wallet = shipper.Wallet != null ? new WalletResponse
+                    //{
+                    //    Id = shipper.Wallet.Id,
+                    //    Balance = shipper.Wallet.Balance,
+                    //    CreatedAt = shipper.Wallet.CreatedAt,
+                    //    UpdatedAt = shipper.Wallet.UpdatedAt,
+                    //} : null,
                     OrdersInRoute = null, 
                     Route = null,
                 };
@@ -350,7 +350,7 @@ namespace LocalShipper.Service.Services.Implement
                 shipper.AccountId = shipperRequest.AccountId;
                 shipper.ZoneId = shipperRequest.ZoneId;
                 shipper.Fcmtoken = shipperRequest.Fcmtoken;
-                shipper.WalletId = shipperRequest.WalletId;
+                //shipper.WalletId = shipperRequest.WalletId;
 
                 //Check Email trùng
                 var emailExisted = await _unitOfWork.Repository<Shipper>()
@@ -388,13 +388,13 @@ namespace LocalShipper.Service.Services.Implement
                 }
 
                 //Check walletId trùng
-                var walletIdExisted = await _unitOfWork.Repository<Shipper>()
-                    .GetAll()
-                    .FirstOrDefaultAsync(a => a.WalletId == shipperRequest.WalletId && a.Id != id);
-                if (walletIdExisted != null)
-                {
-                    throw new CrudException(HttpStatusCode.BadRequest, "Wallet Id đã tồn tại cho một tài khoản khác.", id.ToString());
-                }
+                //var walletIdExisted = await _unitOfWork.Repository<Shipper>()
+                //    .GetAll()
+                //    .FirstOrDefaultAsync(a => a.WalletId == shipperRequest.WalletId && a.Id != id);
+                //if (walletIdExisted != null)
+                //{
+                //    throw new CrudException(HttpStatusCode.BadRequest, "Wallet Id đã tồn tại cho một tài khoản khác.", id.ToString());
+                //}
 
 
                 await _unitOfWork.Repository<Shipper>().Update(shipper, id);
@@ -412,7 +412,7 @@ namespace LocalShipper.Service.Services.Implement
                     ZoneId = (int)shipper.ZoneId,
                     Status = (ShipperStatusEnum)shipper.Status,
                     Fcmtoken = shipper.Fcmtoken,
-                    WalletId = shipper.WalletId,
+                    //WalletId = shipper.WalletId,
 
 
                     Transport = shipper.Transport != null ? new TransportResponse
@@ -449,13 +449,13 @@ namespace LocalShipper.Service.Services.Implement
                         UpdateAt = shipper.Zone.UpdateAt,
                         Active = shipper.Zone.Active,
                     } : null,
-                    Wallet = shipper.Wallet != null ? new WalletResponse
-                    {
-                        Id = shipper.Wallet.Id,
-                        Balance = shipper.Wallet.Balance,
-                        CreatedAt = shipper.Wallet.CreatedAt,
-                        UpdatedAt = shipper.Wallet.UpdatedAt,
-                    } : null
+                    //Wallet = shipper.Wallet != null ? new WalletResponse
+                    //{
+                    //    Id = shipper.Wallet.Id,
+                    //    Balance = shipper.Wallet.Balance,
+                    //    CreatedAt = shipper.Wallet.CreatedAt,
+                    //    UpdatedAt = shipper.Wallet.UpdatedAt,
+                    //} : null
                 };
 
                 return updatedShipperResponse;

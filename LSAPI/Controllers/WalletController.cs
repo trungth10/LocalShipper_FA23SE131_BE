@@ -69,7 +69,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        /*[Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("create-wallet-transaction")]
         public async Task<ActionResult<WalletTransactionResponse>> CreateWalletTrans([FromBody] WalletTransactionRequest request)
         {
@@ -94,42 +94,42 @@ namespace LSAPI.Controllers
             {
                 return BadRequest($"Giao dịch thất bại: {ex.Message}");
             }
-        }*/
+        }
 
-       /* [Authorize(AuthenticationSchemes = "Bearer")]
-        [HttpPut("update-wallet-transaction")]
-        public async Task<ActionResult<WalletTransactionResponse>> UpdateWalletTrans(int id, WalletTransactionRequest request)
-        {
-            try
-            {
-                if (id == 0)
-                {
-                    return BadRequest("Vui lòng nhập Id");
-                }
-                if (id < 0)
-                {
-                    return BadRequest("Id phải là số nguyên dương");
-                }
-                if (request.FromWalletId <= 0)
-                {
-                    return BadRequest("FromWalletId phải là số nguyên dương");
-                }
-                if (request.ToWalletId <= 0)
-                {
-                    return BadRequest("ToWalletId phải là số nguyên dương");
-                }
-                if (request.Amount <= 0)
-                {
-                    return BadRequest("Amount phải > 0");
-                }
-                var response = await _walletTransService.UpdateWalletTrans(id, request);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Cập nhật giao dịch thất bại: {ex.Message}");
-            }
-        }*/
+        /* [Authorize(AuthenticationSchemes = "Bearer")]
+         [HttpPut("update-wallet-transaction")]
+         public async Task<ActionResult<WalletTransactionResponse>> UpdateWalletTrans(int id, WalletTransactionRequest request)
+         {
+             try
+             {
+                 if (id == 0)
+                 {
+                     return BadRequest("Vui lòng nhập Id");
+                 }
+                 if (id < 0)
+                 {
+                     return BadRequest("Id phải là số nguyên dương");
+                 }
+                 if (request.FromWalletId <= 0)
+                 {
+                     return BadRequest("FromWalletId phải là số nguyên dương");
+                 }
+                 if (request.ToWalletId <= 0)
+                 {
+                     return BadRequest("ToWalletId phải là số nguyên dương");
+                 }
+                 if (request.Amount <= 0)
+                 {
+                     return BadRequest("Amount phải > 0");
+                 }
+                 var response = await _walletTransService.UpdateWalletTrans(id, request);
+                 return Ok(response);
+             }
+             catch (Exception ex)
+             {
+                 return BadRequest($"Cập nhật giao dịch thất bại: {ex.Message}");
+             }
+         }*/
 
         [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpDelete("delete-wallet-transaction")]
@@ -156,11 +156,11 @@ namespace LSAPI.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet()]
-        public async Task<ActionResult<WalletResponse>> GetWallet(int id, decimal balance, int? pageNumber, int? pageSize)
+        public async Task<ActionResult<WalletResponse>> GetWallet(int id, decimal balance, int shipperId, int type, int? pageNumber, int? pageSize)
         {
             try
             {
-                var rs = await _walletService.GetWallet(id, balance, pageNumber, pageSize);
+                var rs = await _walletService.GetWallet(id, balance, shipperId, type, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)

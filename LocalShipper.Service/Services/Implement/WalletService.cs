@@ -30,12 +30,14 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //Get Wallet  
-        public async Task<List<WalletResponse>> GetWallet(int? id, decimal? balance, int? pageNumber, int? pageSize)
+        public async Task<List<WalletResponse>> GetWallet(int? id, decimal? balance,int? shipperId, int? type, int? pageNumber, int? pageSize)
         {
 
             var wallets = _unitOfWork.Repository<Wallet>().GetAll()
                                                               .Where(a => id == 0 || a.Id == id)
-                                                              .Where(a => balance == 0 || a.Balance == balance);
+                                                              .Where(a => balance == 0 || a.Balance == balance)
+                                                              .Where(a => shipperId == 0 || a.ShipperId == shipperId)
+                                                              .Where(a => type ==0 || a.Type == type);
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
             // Áp dụng phân trang nếu có thông số pageNumber và pageSize
@@ -55,7 +57,9 @@ namespace LocalShipper.Service.Services.Implement
                 Id = wallets.Id,
                 Balance = wallets.Balance,
                 CreatedAt = wallets.CreatedAt,
-                UpdatedAt = wallets.UpdatedAt
+                UpdatedAt = wallets.UpdatedAt,
+                ShipperId = wallets.ShipperId,
+                Type = wallets.Type,
             }).ToList();
             return walletResponses;
         }
@@ -77,7 +81,22 @@ namespace LocalShipper.Service.Services.Implement
             Wallet wallet = new Wallet
             {
                 Balance = request.Balance,
+                Type= request.Type,
+                ShipperId = request.ShipperId
             };
+
+            if (wallet.Type == 1 && wallet.Balance < 100000)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Số dư của loại ví Type 1 phải là ít nhất 100,000", "");
+            }
+            else if (wallet.Type == 3 && wallet.Balance < 300000)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Số dư của loại ví Type 3 phải là ít nhất 300,000", "");
+            }
+            else if (wallet.Type == 2 && wallet.Balance <= 0)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Số dư của loại ví Type 2 phải là số dương", "");
+            }
             await _unitOfWork.Repository<Wallet>().InsertAsync(wallet);
             await _unitOfWork.CommitAsync();
 
@@ -87,7 +106,10 @@ namespace LocalShipper.Service.Services.Implement
                Id= wallet.Id,
                Balance = wallet.Balance,
                CreatedAt = wallet.CreatedAt,
-               UpdatedAt = wallet.UpdatedAt
+               UpdatedAt = wallet.UpdatedAt,
+               ShipperId = wallet.ShipperId,
+               Type= wallet.Type,
+               
             };
             return walletResponse;
         }

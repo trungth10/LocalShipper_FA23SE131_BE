@@ -64,8 +64,8 @@ namespace LocalShipper.Service.Services.Implement
             var walletTransResponses = _mapper.Map<List<WalletTransactionResponse>>(walletTransList);
             return walletTransResponses;
         }
-    
-        
+
+
         //GET count
         public async Task<int> GetTotalWalletTransCount()
         {
@@ -79,82 +79,100 @@ namespace LocalShipper.Service.Services.Implement
         //CREATE Wallet Transaction
         public async Task<WalletTransactionResponse> CreateWalletTrans(WalletTransactionRequest request)
         {
-
-            var fronWalletCheck = await _unitOfWork.Repository<Wallet>().FindAsync(x => x.Id == request.FromWalletId);
-            if (fronWalletCheck == null)
+            var fromWalletCheck = await _unitOfWork.Repository<Wallet>().FindAsync(x => x.Id == request.FromWalletId);
+            if (fromWalletCheck == null)
             {
                 throw new CrudException(HttpStatusCode.BadRequest, "Không tìm thấy ví gửi", request.FromWalletId.ToString());
             }
+
             var toWalletCheck = await _unitOfWork.Repository<Wallet>().FindAsync(x => x.Id == request.ToWalletId);
             if (toWalletCheck == null)
             {
                 throw new CrudException(HttpStatusCode.BadRequest, "Không tìm thấy ví nhận", request.ToWalletId.ToString());
             }
 
-            WalletTransaction walletTrans = new WalletTransaction
-            {
-                TransactionType = request.TransactionType,
-                FromWalletId = request.FromWalletId,
-                ToWalletId = request.ToWalletId,
-                Amount = request.Amount,
-                Description = request.Description,
-            };
 
-            //Update ví gửi
-            var fromWallet = await _unitOfWork.Repository<Wallet>()
-               .GetAll()
-               .FirstOrDefaultAsync(a => a.Id == request.FromWalletId);
-
-            if (fromWallet.Balance < request.Amount)
+            if (((fromWalletCheck.Type == 1 && (toWalletCheck.Type == 2 || toWalletCheck.Type == 3)) ||
+               ((fromWalletCheck.Type == 2 || fromWalletCheck.Type == 3) && toWalletCheck.Type == 1))
+               &&!(fromWalletCheck.Type == 3 && toWalletCheck.Type == 2)
+               &&!(fromWalletCheck.Type == 2 && toWalletCheck.Type == 3))
             {
-                throw new CrudException(HttpStatusCode.BadRequest, "Không đủ tiền để thực hiện giao dịch", request.ToWalletId.ToString());
+                if (fromWalletCheck.Type == 1 && fromWalletCheck.Balance <= 100000)
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "không thể chuyển nếu ví này còn dưới 100.000", "");
+                }
+                if (fromWalletCheck.Type == 3 && (DateTime.Now - fromWalletCheck.CreatedAt.GetValueOrDefault()).Days < 30)
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "ví này phải có thời gian là 30 ngày kể từ lúc kích hoạt mới để được chuyển", "");
+                }
+                WalletTransaction walletTrans = new WalletTransaction
+                {
+                    TransactionType = request.TransactionType,
+                    FromWalletId = request.FromWalletId,
+                    ToWalletId = request.ToWalletId,
+                    Amount = request.Amount,
+                    Description = request.Description,
+                };
+                // Update ví gửi
+                var fromWallet = await _unitOfWork.Repository<Wallet>()
+                   .GetAll()
+                   .FirstOrDefaultAsync(a => a.Id == request.FromWalletId);
+
+                if (fromWallet.Balance < request.Amount)
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "Không đủ tiền để thực hiện giao dịch", request.ToWalletId.ToString());
+                }
+
+                fromWallet.Balance -= request.Amount;
+                fromWallet.UpdatedAt = DateTime.Now;
+
+                await _unitOfWork.Repository<Wallet>().Update(fromWallet, request.FromWalletId);
+                await _unitOfWork.CommitAsync();
+
+                // Update ví nhận
+                var toWallet = await _unitOfWork.Repository<Wallet>()
+                   .GetAll()
+                   .FirstOrDefaultAsync(a => a.Id == request.ToWalletId);
+                
+                toWallet.Balance += request.Amount;
+                toWallet.UpdatedAt = DateTime.Now;
+
+                await _unitOfWork.Repository<Wallet>().Update(toWallet, request.ToWalletId);
+                await _unitOfWork.CommitAsync();
+
+                await _unitOfWork.Repository<WalletTransaction>().InsertAsync(walletTrans);
+                await _unitOfWork.CommitAsync();
+
+                var walletTransResponses = _mapper.Map<WalletTransactionResponse>(walletTrans);
+                return walletTransResponses;
             }
-
-            fromWallet.Balance = fromWallet.Balance - request.Amount;
-            fromWallet.UpdatedAt = DateTime.Now;
-
-            await _unitOfWork.Repository<Wallet>().Update(fromWallet, request.FromWalletId);
-            await _unitOfWork.CommitAsync();
-            //Update ví nhận
-            var toWallet = await _unitOfWork.Repository<Wallet>()
-               .GetAll()
-               .FirstOrDefaultAsync(a => a.Id == request.ToWalletId);
-
-            toWallet.Balance = toWallet.Balance + request.Amount;
-            toWallet.UpdatedAt = DateTime.Now;
-
-            await _unitOfWork.Repository<Wallet>().Update(toWallet, request.ToWalletId);
-            await _unitOfWork.CommitAsync();
-
-
-            await _unitOfWork.Repository<WalletTransaction>().InsertAsync(walletTrans);
-            await _unitOfWork.CommitAsync();
-
-
-            var walletTransResponses = _mapper.Map<WalletTransactionResponse>(walletTrans);
-            return walletTransResponses;
+            else
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "loại ví giao dịch không phù hợp", "");
+            }
         }
 
+
         //UPDATE WalletTransaction
-         public async Task<WalletTransactionResponse> UpdateWalletTrans(int id, WalletTransactionRequest request)
-         {
-             var walletTrans = await _unitOfWork.Repository<WalletTransaction>()
-                 .GetAll()
-                 .Include(o => o.FromWallet)
-                 .Include(o => o.ToWallet)
-                 .Include(o => o.Order)
-                 .FirstOrDefaultAsync(a => a.Id == id);
+        public async Task<WalletTransactionResponse> UpdateWalletTrans(int id, WalletTransactionRequest request)
+        {
+            var walletTrans = await _unitOfWork.Repository<WalletTransaction>()
+                .GetAll()
+                .Include(o => o.FromWallet)
+                .Include(o => o.ToWallet)
+                .Include(o => o.Order)
+                .FirstOrDefaultAsync(a => a.Id == id);
 
-             if (walletTrans == null)
-             {
-                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy giao dịch", id.ToString());
-             }
+            if (walletTrans == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy giao dịch", id.ToString());
+            }
 
-             walletTrans.TransactionType = request.TransactionType;
-             walletTrans.Description = request.Description;
+            walletTrans.TransactionType = request.TransactionType;
+            walletTrans.Description = request.Description;
 
-             await _unitOfWork.Repository<WalletTransaction>().Update(walletTrans, id);
-             await _unitOfWork.CommitAsync();
+            await _unitOfWork.Repository<WalletTransaction>().Update(walletTrans, id);
+            await _unitOfWork.CommitAsync();
 
             var walletTransResponses = _mapper.Map<WalletTransactionResponse>(walletTrans);
             return walletTransResponses;
