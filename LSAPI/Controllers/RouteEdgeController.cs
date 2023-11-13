@@ -77,7 +77,7 @@ namespace LSAPI.Controllers
 
        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("shipper/api/routes")]
-        public async Task<ActionResult<RouteEdgeResponse>> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId)
+        public async Task<ActionResult<RouteEdgeResponse>> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId, double shipperLatitude, double shipperLongitude)
         {
             try
             {
@@ -86,7 +86,7 @@ namespace LSAPI.Controllers
                     return BadRequest("Id không hợp lệ");
                 }
 
-                var response = await _routeService.AddOrderToRoute(id, shipperId, routeId);
+                var response = await _routeService.AddOrderToRoute(id, shipperId, routeId, shipperLatitude, shipperLongitude);
 
                 return Ok(response);
             }
@@ -98,7 +98,7 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("shipper/api/routes-auto")]
-        public async Task<ActionResult<OrderResponse>> CreateRouteSuggest(int shiperId, int money, SuggestEnum suggest, int capacityLow, int capacityHight, CreateRouteRequestAuto request)
+        public async Task<ActionResult<OrderResponse>> CreateRouteSuggest(int shiperId, int money, SuggestEnum suggest, int capacityLow, int capacityHight, CreateRouteRequestAuto request,double shipperLatitude, double shipperLongitude)
         {
             try
             {
@@ -107,7 +107,7 @@ namespace LSAPI.Controllers
                     return BadRequest("Id không hợp lệ");
                 }
 
-                var response = await _routeService.CreateRouteSuggest(shiperId, money, suggest, capacityLow, capacityHight, request);
+                var response = await _routeService.CreateRouteSuggest(shiperId, money, suggest, capacityLow, capacityHight, request, shipperLatitude, shipperLatitude);
 
                 return Ok(response);
             }

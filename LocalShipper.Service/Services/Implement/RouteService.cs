@@ -154,12 +154,12 @@ namespace LocalShipper.Service.Services.Implement
 
         //SHIPPER
         //Suggest Order
-        public async Task<List<OrderResponse>> CreateRouteSuggest(int shiperId, int money, SuggestEnum suggest, int capacityLow, int capacityHight, CreateRouteRequestAuto request)
+        public async Task<List<OrderResponse>> CreateRouteSuggest(int shiperId, int money, SuggestEnum suggest, int capacityLow, int capacityHight, CreateRouteRequestAuto request,double shipperLatitude, double shipperLongitude)
         {
 
             var orderSuggest = _unitOfWork.Repository<Order>().GetAll()
              .Include(o => o.Store)
-             .Include(o => o.Shipper)
+             //.Include(o => o.Shipper)
              .Include(o => o.Action)
              .Include(o => o.Type)
              .Include(o => o.Route)
@@ -246,12 +246,72 @@ namespace LocalShipper.Service.Services.Implement
                                             .OrderByDescending(group => group.Count())
                                             .First();
             }
+
+
+            List<(double Latitude, double Longitude)> fullLatLng = new List<(double, double)>();
+            List<int[]> pickupsDeliveriesList = new List<int[]>();
+            fullLatLng.Add((shipperLatitude, shipperLongitude));
+
+            Dictionary<(double Latitude, double Longitude), int> locationIndexMap = new Dictionary<(double, double), int>
+{
+    { (shipperLatitude, shipperLongitude), 0 }
+};
+
+            foreach (var order in largestGroup)
+            {
+                string storeAddress = order.Store.StoreAddress;
+                var storeCoordinates = await ConvertAddress(storeAddress);
+                string customerAddress = $"{order.CustomerCommune}, {order.CustomerDistrict}, {order.CustomerCity}";
+                var customerCoordinates = await ConvertAddress(customerAddress);
+
+                if (!locationIndexMap.ContainsKey(storeCoordinates))
+                {
+                    locationIndexMap.Add(storeCoordinates, fullLatLng.Count);
+                    fullLatLng.Add(storeCoordinates);
+                }
+                locationIndexMap.Add(customerCoordinates, fullLatLng.Count);
+                fullLatLng.Add(customerCoordinates);
+                int pickupIndex = locationIndexMap[storeCoordinates];
+                int deliveryIndex = fullLatLng.Count - 1;
+                pickupsDeliveriesList.Add(new int[] { pickupIndex, deliveryIndex });
+            }
+
+            var distanceMatrix = await GetDistanceMatrix(fullLatLng);
+
+            int[][] pickupsDeliveriesArray = pickupsDeliveriesList.ToArray();
+
+
+
+            (List<int> _route, List<(int, int)> pickupDeliveries) = await SolvePDPAsync(distanceMatrix, pickupsDeliveriesArray);
+
+            List<int> pdpSolution = _route;
+            List<string> sortedAddresses = new List<string>();
+            List<string> sortedAddressesConvert = new List<string>();
+
+            foreach (var index in pdpSolution)
+            {
+                if (index != 0)
+                {
+                    var coordinates = fullLatLng[index];
+
+                    var address = locationIndexMap.FirstOrDefault(x => x.Value == index).Key;
+
+                    sortedAddresses.Add($"{address.Latitude}, {address.Longitude}");
+
+                    var formattedAddress = await ConvertLatLng(coordinates.Latitude, coordinates.Longitude);
+                    sortedAddressesConvert.Add(formattedAddress);
+                }
+
+            }
+
             int count = largestGroup.Count();
 
             var route = new RouteEdge
             {
                 Name = "Lộ trình gợi ý " + code,
                 StartDate = request.StartDate,
+                FromStation = sortedAddressesConvert.First(),
+                ToStation = sortedAddressesConvert.Last(),
                 Quantity = count,
                 Status = (int)RouteEdgeStatusEnum.IDLE,
                 ShipperId = shiperId,
@@ -269,7 +329,7 @@ namespace LocalShipper.Service.Services.Implement
             }
             await _unitOfWork.CommitAsync();
 
-            var orderResponse = _mapper.Map<List<OrderResponse>>(orderSuggest);
+            var orderResponse = _mapper.Map<List<OrderResponse>>(largestGroup);
             return orderResponse;
         }
 
@@ -330,7 +390,7 @@ namespace LocalShipper.Service.Services.Implement
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var result = Newtonsoft.Json.JsonConvert.DeserializeObject<GeocodingResponse>(content);
-                    return (result.results[0].address_components[0].short_name);
+                    return (result.results[0].formatted_address);
                 }
                 else
                 {
@@ -342,7 +402,7 @@ namespace LocalShipper.Service.Services.Implement
 
         //SHIPPER
         //Add Order to Route
-        public async Task<RouteEdgeResponse> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId)
+        public async Task<RouteEdgeResponse> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId, double shipperLatitude, double shipperLongitude)
         {
 
             var orders = await _unitOfWork.Repository<Order>()
@@ -371,6 +431,62 @@ namespace LocalShipper.Service.Services.Implement
                 await _unitOfWork.CommitAsync();
             }
 
+            List<(double Latitude, double Longitude)> fullLatLng = new List<(double, double)>();
+            List<int[]> pickupsDeliveriesList = new List<int[]>();
+            fullLatLng.Add((shipperLatitude, shipperLongitude));
+
+            Dictionary<(double Latitude, double Longitude), int> locationIndexMap = new Dictionary<(double, double), int>
+{
+    { (shipperLatitude, shipperLongitude), 0 }
+};
+
+            foreach (var order in orders)
+            {
+                string storeAddress = order.Store.StoreAddress;
+                var storeCoordinates = await ConvertAddress(storeAddress);
+                string customerAddress = $"{order.CustomerCommune}, {order.CustomerDistrict}, {order.CustomerCity}";
+                var customerCoordinates = await ConvertAddress(customerAddress);
+
+                if (!locationIndexMap.ContainsKey(storeCoordinates))
+                {
+                    locationIndexMap.Add(storeCoordinates, fullLatLng.Count);
+                    fullLatLng.Add(storeCoordinates);
+                }
+                locationIndexMap.Add(customerCoordinates, fullLatLng.Count);
+                fullLatLng.Add(customerCoordinates);
+                int pickupIndex = locationIndexMap[storeCoordinates];
+                int deliveryIndex = fullLatLng.Count - 1;
+                pickupsDeliveriesList.Add(new int[] { pickupIndex, deliveryIndex });
+            }
+
+            var distanceMatrix = await GetDistanceMatrix(fullLatLng);
+
+            int[][] pickupsDeliveriesArray = pickupsDeliveriesList.ToArray();
+
+
+
+            (List<int> _route, List<(int, int)> pickupDeliveries) = await SolvePDPAsync(distanceMatrix, pickupsDeliveriesArray);
+
+            List<int> pdpSolution = _route;
+            List<string> sortedAddresses = new List<string>();
+            List<string> sortedAddressesConvert = new List<string>();
+
+            foreach (var index in pdpSolution)
+            {
+                if (index != 0)
+                {
+                    var coordinates = fullLatLng[index];
+
+                    var address = locationIndexMap.FirstOrDefault(x => x.Value == index).Key;
+
+                    sortedAddresses.Add($"{address.Latitude}, {address.Longitude}");
+
+                    var formattedAddress = await ConvertLatLng(coordinates.Latitude, coordinates.Longitude);
+                    sortedAddressesConvert.Add(formattedAddress);
+                }
+
+            }
+
             var route = await _unitOfWork.Repository<RouteEdge>().GetAll()
                 .FirstOrDefaultAsync(r => r.Id == routeId);
             var countOrder = await _unitOfWork.Repository<Order>()
@@ -379,10 +495,13 @@ namespace LocalShipper.Service.Services.Implement
                     .CountAsync();
 
             route.Quantity = countOrder;
+            route.FromStation = sortedAddressesConvert.First();
+            route.ToStation = sortedAddressesConvert.Last();
             await _unitOfWork.Repository<RouteEdge>().Update(route, route.Id);
             await _unitOfWork.CommitAsync();
-  
-            return  _mapper.Map<RouteEdge, RouteEdgeResponse>(route); ;
+
+
+            return  _mapper.Map<RouteEdge, RouteEdgeResponse>(route); 
         }
 
         public async Task<long[,]> GetDistanceMatrix(List<(double Latitude, double Longitude)> location)
