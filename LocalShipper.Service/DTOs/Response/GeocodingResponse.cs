@@ -26,6 +26,7 @@ namespace LocalShipper.Service.DTOs.Response
     {
         public Geometry geometry { get; set; }
         public List<AddressComponent> address_components { get; set; }
+        public string formatted_address { get; set; }
     }
 
     public class GeocodingResponse
