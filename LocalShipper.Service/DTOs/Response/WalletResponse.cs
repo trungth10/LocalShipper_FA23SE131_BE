@@ -12,5 +12,7 @@ namespace LocalShipper.Service.DTOs.Response
         public decimal Balance { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public int? Type { get; set; }
+        public int? ShipperId { get; set; }
     }
 }

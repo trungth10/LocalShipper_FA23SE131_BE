@@ -368,7 +368,7 @@ namespace LocalShipper.Service.Services.Implement
                                 AddressShipper = account.Shippers.Single().AddressShipper,
                                 TransportId = account.Shippers.Single().TransportId,
                                 ZoneId = account.Shippers.Single().ZoneId,
-                                WalletId = account.Shippers.Single().WalletId,
+                                //WalletId = account.Shippers.Single().WalletId,
                                 AccountId = account.Id,
                                 Active = account.Active,
                                 FcmToken = account.FcmToken,

@@ -560,7 +560,7 @@ namespace LocalShipper.Data.Models
 
                 entity.Property(e => e.Type).HasColumnName("type");
 
-                entity.Property(e => e.WalletId).HasColumnName("walletId");
+
 
                 entity.Property(e => e.ZoneId).HasColumnName("zoneId");
 
@@ -575,10 +575,7 @@ namespace LocalShipper.Data.Models
                     .HasForeignKey(d => d.TransportId)
                     .HasConstraintName("FK_Shipper_Transport");
 
-                entity.HasOne(d => d.Wallet)
-                    .WithMany(p => p.Shippers)
-                    .HasForeignKey(d => d.WalletId)
-                    .HasConstraintName("FK_Shipper_Wallet");
+
 
                 entity.HasOne(d => d.Zone)
                     .WithMany(p => p.Shippers)
@@ -732,6 +729,8 @@ namespace LocalShipper.Data.Models
                 entity.ToTable("Wallet");
 
                 entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Type).HasColumnName("type");
+                entity.Property(e => e.ShipperId).HasColumnName("shipperId");
 
                 entity.Property(e => e.Balance)
                     .HasColumnType("decimal(10, 2)")
@@ -747,6 +746,11 @@ namespace LocalShipper.Data.Models
                     .HasColumnType("datetime")
                     .HasColumnName("updated_at")
                     .HasDefaultValueSql("(getdate())");
+
+                entity.HasOne(d => d.Shipper)
+                   .WithMany(p => p.Wallet)
+                   .HasForeignKey(d => d.ShipperId)
+                   .HasConstraintName("FK_Wallet_Shipper");
             });
 
             modelBuilder.Entity<WalletTransaction>(entity =>
