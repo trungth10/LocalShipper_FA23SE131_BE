@@ -33,7 +33,7 @@ namespace LSAPI.Controllers
                                      decimal subtotal_price, decimal COD, decimal totalPrice, string other, int routeId,
                                      int capacity, int package_weight, int package_width, int package_height, int package_length,
                                      string customer_city, string customer_commune, string customer_district, string customer_phone,
-                                     string customer_name, string customer_email, int actionId, int typeId, int? pageNumber, int? pageSize)
+                                     string customer_name, string customer_email, int actionId, int typeId, int? pageNumber, int? pageSize, double shipperLatitude, double shipperLongitude)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace LSAPI.Controllers
                     tracking_number, cancel_reason, distance, distance_price, subtotal_price, COD, totalPrice, other,
                     routeId, capacity, package_weight, package_width, package_height, package_length,
                     customer_city, customer_commune, customer_district, customer_phone, customer_name,
-                    customer_email, actionId, typeId, pageNumber, pageSize);
+                    customer_email, actionId, typeId, pageNumber, pageSize, shipperLatitude, shipperLongitude);
 
 
                 return Ok(response);

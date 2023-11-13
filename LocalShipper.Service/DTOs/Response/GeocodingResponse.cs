@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace LocalShipper.Service.DTOs.Response
 {
+    public class AddressComponent
+    {
+        public string long_name { get; set; }
+        public string short_name { get; set; }
+    }
     public class Location
     {
         public double lat { get; set; }
@@ -20,6 +25,7 @@ namespace LocalShipper.Service.DTOs.Response
     public class Result
     {
         public Geometry geometry { get; set; }
+        public List<AddressComponent> address_components { get; set; }
     }
 
     public class GeocodingResponse

@@ -41,6 +41,7 @@ namespace LocalShipper.Service.DTOs.Response
         public int ActionId { get; set; }
         public int TypeId { get; set; }
         public int? Eta { get; set; }
+        public List<string> SortedAddresses { get; set; }
 
         public StoreResponse Store {get; set;}
         public ShipperResponse Shipper { get; set;}
@@ -126,4 +127,14 @@ namespace LocalShipper.Service.DTOs.Response
         public int? Eta { get; set; }
 
     }
+
+    public class TSPResponse
+    {
+        public int RouteId { get; set; }
+        public int ShipperId { get; set; }
+        public List<string> SortedAddresses { get; set; }
+
+    }
+
+
 }

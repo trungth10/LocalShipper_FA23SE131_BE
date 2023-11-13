@@ -11,6 +11,7 @@ using MailKit.Search;
 using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Asn1.Ocsp;
 using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Utilities.Net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -201,12 +202,12 @@ namespace LocalShipper.Service.Services.Implement
             }
             if (suggest == SuggestEnum.CAPACITY && (money == null || money == 0))
             {
-                 _filteredOrders = orderSuggest.Where(a => capacityLow <= a.Capacity && a.Capacity <= capacityHight).ToList();
+                _filteredOrders = orderSuggest.Where(a => capacityLow <= a.Capacity && a.Capacity <= capacityHight).ToList();
             }
             if (suggest == SuggestEnum.COD && (capacityLow == null || capacityLow == 0) && (capacityHight == null || capacityHight == 0))
             {
-                _filteredOrders  =  orderSuggest.Where(a => a.Cod <= money).ToList();
-             
+                _filteredOrders = orderSuggest.Where(a => a.Cod <= money).ToList();
+
             }
 
             Random random = new Random();
@@ -218,16 +219,16 @@ namespace LocalShipper.Service.Services.Implement
 
 
 
-            
-                
-            
 
-            
+
+
+
+
             if (suggest == SuggestEnum.COD || suggest == SuggestEnum.CAPACITY)
             {
-                 largestGroup = _filteredOrders;
+                largestGroup = _filteredOrders;
             }
-            if(suggest == SuggestEnum.DISTRICT)
+            if (suggest == SuggestEnum.DISTRICT)
             {
                 largestGroup = filteredOrders.GroupBy(o => o.CustomerDistrict)
                                             .OrderByDescending(group => group.Count())
@@ -259,7 +260,7 @@ namespace LocalShipper.Service.Services.Implement
             await _unitOfWork.Repository<RouteEdge>().InsertAsync(route);
             await _unitOfWork.CommitAsync();
 
-           
+
 
             foreach (var order in largestGroup)
             {
@@ -292,21 +293,21 @@ namespace LocalShipper.Service.Services.Implement
         }
 
 
-        public async Task<GeocodingResponse> ConvertAddress(string address)
+        public async Task<(double Latitude, double Longitude)> ConvertAddress(string address)
         {
-            string apiKey = "AIzaSyBBHXLtEw2nMmiMq7dBZHKytUwhzezi7UU";
-            string geocodingApiUrl = "https://maps.googleapis.com/maps/api/geocode/json";
+            string apiKey = "Y3afHdEef5El4LnR3o4FjwSdMWpXIhKnA5hvHCrj";
+            string geocodingApiUrl = "https://rsapi.goong.io/Geocode";
 
             using (var httpClient = new HttpClient())
             {
-                var requestUri = $"{geocodingApiUrl}?address={Uri.EscapeDataString(address)}&key={apiKey}";
+                var requestUri = $"{geocodingApiUrl}?address={Uri.EscapeDataString(address)}&api_key={apiKey}";
                 var response = await httpClient.GetAsync(requestUri);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var result = Newtonsoft.Json.JsonConvert.DeserializeObject<GeocodingResponse>(content);
-                    return result;
+                    return (result.results[0].geometry.location.lat, result.results[0].geometry.location.lng);
                 }
                 else
                 {
@@ -315,9 +316,33 @@ namespace LocalShipper.Service.Services.Implement
             }
         }
 
+        public async Task<string> ConvertLatLng(double lat, double lng)
+        {
+            string apiKey = "Y3afHdEef5El4LnR3o4FjwSdMWpXIhKnA5hvHCrj";
+            string geocodingApiUrl = "https://rsapi.goong.io/Geocode";
+
+            using (var httpClient = new HttpClient())
+            {
+                var requestUri = $"{geocodingApiUrl}?latlng={lat},{lng}&api_key={apiKey}";
+                var response = await httpClient.GetAsync(requestUri);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var result = Newtonsoft.Json.JsonConvert.DeserializeObject<GeocodingResponse>(content);
+                    return (result.results[0].address_components[0].short_name);
+                }
+                else
+                {
+                    throw new Exception($"Failed to retrieve geocoding data. Status code: {response.StatusCode}");
+                }
+            }
+        }
+
+
         //SHIPPER
         //Add Order to Route
-        public async Task<List<OrderResponse>> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId)
+        public async Task<RouteEdgeResponse> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId)
         {
 
             var orders = await _unitOfWork.Repository<Order>()
@@ -346,23 +371,6 @@ namespace LocalShipper.Service.Services.Implement
                 await _unitOfWork.CommitAsync();
             }
 
-            List<string> fullAddresses = new List<string>();
-
-            foreach (var order in orders)
-            {
-                string storeAddress = order.Store.StoreAddress;
-
-                string customerAddress = $"{order.CustomerCommune}, {order.CustomerDistrict}, {order.CustomerCity}";
-
-                if (!fullAddresses.Contains(storeAddress))
-                {
-                    fullAddresses.Add(storeAddress);
-                }
-                fullAddresses.Add(customerAddress);
-            }
-
-            var distanceMatrix = await GetDistanceMatrix(fullAddresses);
-
             var route = await _unitOfWork.Repository<RouteEdge>().GetAll()
                 .FirstOrDefaultAsync(r => r.Id == routeId);
             var countOrder = await _unitOfWork.Repository<Order>()
@@ -373,28 +381,21 @@ namespace LocalShipper.Service.Services.Implement
             route.Quantity = countOrder;
             await _unitOfWork.Repository<RouteEdge>().Update(route, route.Id);
             await _unitOfWork.CommitAsync();
-            List<int> tspSolution = await SolveTSPAsync(distanceMatrix);
-            List<string> orderedAddresses = tspSolution.Select(index => fullAddresses[index]).ToList();
-
-
-            var orderResponse = _mapper.Map<List<OrderResponse>>(orders);
-
-
-            return orderResponse;
+  
+            return  _mapper.Map<RouteEdge, RouteEdgeResponse>(route); ;
         }
 
-
-        public async Task<long[,]> GetDistanceMatrix(List<string> locations)
+        public async Task<long[,]> GetDistanceMatrix(List<(double Latitude, double Longitude)> location)
         {
-            string apiKey = "AIzaSyBBHXLtEw2nMmiMq7dBZHKytUwhzezi7UU";
-            string distanceMatrixApiUrl = "https://maps.googleapis.com/maps/api/distancematrix/json";
+            string apiKey = "Y3afHdEef5El4LnR3o4FjwSdMWpXIhKnA5hvHCrj";
+            string distanceMatrixApiUrl = "https://rsapi.goong.io/DistanceMatrix";
 
             using (var httpClient = new HttpClient())
             {
-                var origins = string.Join("|", locations.Select(location => Uri.EscapeDataString(location)));
-                var destinations = string.Join("|", locations.Select(location => Uri.EscapeDataString(location)));
+                var origins = string.Join("%7C", location.Select(location => $"{location.Latitude},{location.Longitude}"));
+                var destinations = string.Join("%7C", location.Select(location => $"{location.Latitude},{location.Longitude}"));
 
-                var requestUri = $"{distanceMatrixApiUrl}?origins={origins}&destinations={destinations}&key={apiKey}";
+                var requestUri = $"{distanceMatrixApiUrl}?origins={origins}&destinations={destinations}&vehicle=car&api_key={apiKey}";
                 var response = await httpClient.GetAsync(requestUri);
 
                 if (response.IsSuccessStatusCode)
@@ -402,9 +403,9 @@ namespace LocalShipper.Service.Services.Implement
                     var content = await response.Content.ReadAsStringAsync();
                     var result = Newtonsoft.Json.JsonConvert.DeserializeObject<DistanceMatrixResponse>(content);
 
-                    if (result.status == "OK")
+                    if (result != null && result.rows != null && result.rows.Count > 0)
                     {
-                        int numLocations = result.destination_addresses.Count;
+                        int numLocations = location.Count;
                         long[,] distanceMatrix = new long[numLocations, numLocations];
 
                         for (int i = 0; i < numLocations; i++)
@@ -419,18 +420,20 @@ namespace LocalShipper.Service.Services.Implement
                     }
                     else
                     {
-                        throw new Exception("Failed to retrieve distance matrix data from the response.");
+                        throw new Exception("Không thể lấy dữ liệu ma trận khoảng cách từ phản hồi.");
                     }
                 }
                 else
                 {
-                    throw new Exception($"Failed to retrieve distance matrix data. Status code: {response.StatusCode}");
+                    throw new Exception($"Không thể lấy dữ liệu ma trận khoảng cách. Mã trạng thái: {response.StatusCode}");
                 }
             }
         }
 
+
         public async Task<List<int>> SolveTSPAsync(long[,] distanceMatrix)
         {
+              
             RoutingIndexManager manager = new RoutingIndexManager(distanceMatrix.GetLength(0), 1, 0);
             RoutingModel routing = new RoutingModel(manager);
 
@@ -457,6 +460,109 @@ namespace LocalShipper.Service.Services.Implement
 
             return tspSolution;
         }
+
+        public async Task<(List<int>, List<(int, int)>)> SolvePDPAsync(long[,] distanceMatrix, int[][] pickupsDeliveries)
+        {
+            RoutingIndexManager manager = new RoutingIndexManager(distanceMatrix.GetLength(0), 1, 0);
+            RoutingModel routing = new RoutingModel(manager);
+
+            int transitCallbackIndex = routing.RegisterTransitCallback((long fromIndex, long toIndex) =>
+            {
+                var fromNode = manager.IndexToNode(fromIndex);
+                var toNode = manager.IndexToNode(toIndex);
+                return distanceMatrix[fromNode, toNode];
+            });
+
+            routing.SetArcCostEvaluatorOfAllVehicles(transitCallbackIndex);         
+
+            foreach (var pair in pickupsDeliveries)
+            {
+                long pickupNode = manager.NodeToIndex(pair[0]);
+                long deliveryNode = manager.NodeToIndex(pair[1]);
+                routing.AddPickupAndDelivery(pickupNode, deliveryNode);
+            }
+
+            Assignment solution = routing.Solve();
+
+            List<int> route = new List<int>();
+            long index = routing.Start(0);
+            while (!routing.IsEnd(index))
+            {
+                route.Add(manager.IndexToNode(index));
+                index = solution.Value(routing.NextVar(index));
+            }
+            route.Add(manager.IndexToNode(index));
+
+            List<(int, int)> pickupDeliveriesResult = new List<(int, int)>();
+            foreach (var pair in pickupsDeliveries)
+            {
+                long pickupNode = manager.NodeToIndex(pair[0]);
+                long deliveryNode = manager.NodeToIndex(pair[1]);
+                pickupDeliveriesResult.Add((route.IndexOf((int)pickupNode), route.IndexOf((int)deliveryNode)));
+            }
+
+            return (route, pickupDeliveriesResult);
+        }
+
+       /* public async Task<(List<int>, List<(int, int)>)> SolvePDPAsync(long[,] distanceMatrix, int[][] pickupsDeliveries)
+        {
+            RoutingIndexManager manager = new RoutingIndexManager(distanceMatrix.GetLength(0), 1, 0);
+            RoutingModel routing = new RoutingModel(manager);
+
+            int transitCallbackIndex = routing.RegisterTransitCallback((long fromIndex, long toIndex) =>
+            {
+                var fromNode = manager.IndexToNode(fromIndex);
+                var toNode = manager.IndexToNode(toIndex);
+                return distanceMatrix[fromNode, toNode];
+            });
+
+            routing.SetArcCostEvaluatorOfAllVehicles(transitCallbackIndex);
+
+            foreach (var pair in pickupsDeliveries)
+            {
+                long pickupNode = manager.NodeToIndex(pair[0]);
+                long deliveryNode = manager.NodeToIndex(pair[1]);
+                routing.AddPickupAndDelivery(pickupNode, deliveryNode);
+            }
+
+            Assignment solution = routing.Solve();
+
+            List<int> route = new List<int>();
+            long index = routing.Start(0);
+            while (!routing.IsEnd(index))
+            {
+                route.Add(manager.IndexToNode(index));
+                index = solution.Value(routing.NextVar(index));
+            }
+            route.Add(manager.IndexToNode(index));
+
+            List<(int, int)> pickupDeliveriesResult = new List<(int, int)>();
+
+            Dictionary<int, List<int>> pickupDeliveryMap = new Dictionary<int, List<int>>();
+
+            foreach (var pair in pickupsDeliveries)
+            {
+                int pickupPoint = pair[0];
+                int deliveryPoint = pair[1];
+
+                if (!pickupDeliveryMap.ContainsKey(pickupPoint))
+                {
+                    pickupDeliveryMap[pickupPoint] = new List<int>();
+                }
+
+                pickupDeliveryMap[pickupPoint].Add(deliveryPoint);
+            }
+
+            foreach (var pickupPoint in pickupDeliveryMap.Keys)
+            {
+                foreach (var deliveryPoint in pickupDeliveryMap[pickupPoint])
+                {
+                    pickupDeliveriesResult.Add((route.IndexOf(pickupPoint), route.IndexOf(deliveryPoint)));
+                }
+            }
+
+            return (route, pickupDeliveriesResult);
+        }*/
 
 
 

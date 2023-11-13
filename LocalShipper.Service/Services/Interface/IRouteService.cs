@@ -14,7 +14,7 @@ namespace LocalShipper.Service.Services.Interface
 
         Task<List<RouteEdgeResponse>> GetRoute(int? id, string? fromStation, string? toStation, int? quantity, int? progress, int? priority, int? status, int? shipperId, int? pageNumber, int? pageSize);
 
-        Task<List<OrderResponse>> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId);
+        Task<RouteEdgeResponse> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId);
         Task<RouteEdgeResponse> UpdateRoute(int routeId, RouteRequest request);
 
         Task<MessageResponse> DeleteRoute(int routeId);
@@ -24,9 +24,11 @@ namespace LocalShipper.Service.Services.Interface
 
         Task<List<OrderResponse>> UpdateOrderRouteId(IEnumerable<int> orderid);
 
-        Task<GeocodingResponse> ConvertAddress(string address);
-        Task<long[,]> GetDistanceMatrix(List<string> locations);
-
+        Task<(double Latitude, double Longitude)> ConvertAddress(string address);
+        Task<long[,]> GetDistanceMatrix(List<(double Latitude, double Longitude)> location);
         Task<List<int>> SolveTSPAsync(long[,] distanceMatrix);
+
+        Task<(List<int>, List<(int, int)>)> SolvePDPAsync(long[,] distanceMatrix, int[][] pickupsDeliveries);
+
     }
 }

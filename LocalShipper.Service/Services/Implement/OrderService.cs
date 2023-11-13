@@ -367,7 +367,7 @@ namespace LocalShipper.Service.Services.Implement
                                      decimal? subtotal_price, decimal? COD, decimal? totalPrice, string? other, int? routeId,
                                      int? capacity, int? package_weight, int? package_width, int? package_height, int? package_length,
                                      string? customer_city, string? customer_commune, string? customer_district, string? customer_phone,
-                                     string? customer_name, string? customer_email, int? actionId, int? typeId, int? pageNumber, int? pageSize)
+                                     string? customer_name, string? customer_email, int? actionId, int? typeId, int? pageNumber, int? pageSize, double? shipperLatitude, double? shipperLongitude)
         {
 
             var orders = _unitOfWork.Repository<Order>().GetAll()
@@ -407,7 +407,6 @@ namespace LocalShipper.Service.Services.Implement
 
 
 
-
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
             // Áp dụng phân trang nếu có thông số pageNumber và pageSize
@@ -424,41 +423,76 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Order không có hoặc không tồn tại", id.ToString());
             }
 
-            /*if (routeId != null || routeId != 0)
-            {              
-                List<string> fullAddresses = new List<string>();
+            var orderResponse = _mapper.Map<List<OrderResponse>>(orderList);
+
+            if (routeId != 0)
+            {
+                List<(double Latitude, double Longitude)> fullLatLng = new List<(double, double)>();
+                List<int[]> pickupsDeliveriesList = new List<int[]>();
+                fullLatLng.Add((shipperLatitude.Value, shipperLongitude.Value));
+
+                Dictionary<(double Latitude, double Longitude), int> locationIndexMap = new Dictionary<(double, double), int>
+{
+    { (shipperLatitude.Value, shipperLongitude.Value), 0 }
+};
 
                 foreach (var order in orders)
                 {
                     string storeAddress = order.Store.StoreAddress;
-
+                    var storeCoordinates = await _routeService.ConvertAddress(storeAddress);
                     string customerAddress = $"{order.CustomerCommune}, {order.CustomerDistrict}, {order.CustomerCity}";
+                    var customerCoordinates = await _routeService.ConvertAddress(customerAddress);
 
-                    if (!fullAddresses.Contains(storeAddress))
+                    if (!locationIndexMap.ContainsKey(storeCoordinates))
                     {
-                        fullAddresses.Add(storeAddress);
+                        locationIndexMap.Add(storeCoordinates, fullLatLng.Count);
+                        fullLatLng.Add(storeCoordinates);
                     }
-                    fullAddresses.Add(customerAddress);
+                    locationIndexMap.Add(customerCoordinates, fullLatLng.Count);
+                    fullLatLng.Add(customerCoordinates);
+                    int pickupIndex = locationIndexMap[storeCoordinates];
+                    int deliveryIndex = fullLatLng.Count - 1;
+                    pickupsDeliveriesList.Add(new int[] { pickupIndex, deliveryIndex });
                 }
 
-                var distanceMatrix = await _routeService.GetDistanceMatrix(fullAddresses);
-                List<int> tspSolution = await _routeService.SolveTSPAsync(distanceMatrix);
-                List<string> orderedAddresses = tspSolution.Select(index => fullAddresses[index]).ToList();
+                var distanceMatrix = await _routeService.GetDistanceMatrix(fullLatLng);
 
-                orderList = orderList.OrderBy(order =>
+                int[][] pickupsDeliveriesArray = pickupsDeliveriesList.ToArray();
+
+
+
+                (List<int> _route, List<(int, int)> pickupDeliveries) = await _routeService.SolvePDPAsync(distanceMatrix, pickupsDeliveriesArray);
+
+                List<int> pdpSolution = _route;
+                List<string> sortedAddresses = new List<string>();
+
+                foreach (var index in pdpSolution)
                 {
-                    var storeAddress = order.Store.StoreAddress;
-                    var customerAddress = $"{order.CustomerCommune}, {order.CustomerDistrict}, {order.CustomerCity}";
-                    var storeIndex = orderedAddresses.IndexOf(storeAddress);
-                    var customerIndex = orderedAddresses.IndexOf(customerAddress);
-                    return storeIndex + customerIndex;
-                }).ToList();
+                    if (index != 0)
+                    {
+                        var coordinates = fullLatLng[index];
 
-            }*/      
+                        var address = locationIndexMap.FirstOrDefault(x => x.Value == index).Key;
 
-            var orderResponse = _mapper.Map<List<OrderResponse>>(orderList);
+                        sortedAddresses.Add($"{address.Latitude}, {address.Longitude}");
+                    }
+                }
+
+
+                foreach (var orderResponseItem in orderResponse)
+                {
+                    orderResponseItem.SortedAddresses = sortedAddresses;
+                }
+
+            }
+
+        
+            
+           
             return orderResponse;
         }
+
+
 
         //GET Order v2
         public async Task<List<OrderResponse>> GetOrderV2( OrderRequestV2 request,int? pageNumber, int? pageSize)
@@ -490,7 +524,6 @@ namespace LocalShipper.Service.Services.Implement
                                                        .Where(a => !request.actionId.Any() || request.actionId.Contains(a.ActionId))
                                                        .Where(a => !request.typeId.Any() || request.typeId.Contains(a.TypeId))
                                                        ;
-
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
             // Áp dụng phân trang nếu có thông số pageNumber và pageSize
@@ -616,13 +649,11 @@ namespace LocalShipper.Service.Services.Implement
 
             DistanceMatrixResponse distanceMatrixResonse = await GetDistanceAndTime(coordinatesStore, coordinates);
 
-            if (distanceMatrixResonse.status == "OK" && distanceMatrixResonse.rows.Count > 0)
+            if (distanceMatrixResonse.rows[0].elements[0].status == "OK" && distanceMatrixResonse.rows.Count > 0)
             {
-                // Lấy thông tin từ hàng và phần tử đầu tiên (hoặc tùy theo vị trí cụ thể bạn muốn)
                 var row = distanceMatrixResonse.rows[0];
                 var element = row.elements[0];
 
-                // Lấy giá trị khoảng cách và thời gian dự kiến
                  distanceText = element.distance.text;
                  distanceValue = element.distance.value;
                  durationText = element.duration.text;
@@ -799,12 +830,12 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<GeocodingResponse> ConvertAddress(string address)
         {
-            string apiKey = "AIzaSyBBHXLtEw2nMmiMq7dBZHKytUwhzezi7UU";
-            string geocodingApiUrl = "https://maps.googleapis.com/maps/api/geocode/json";
+            string apiKey = "Y3afHdEef5El4LnR3o4FjwSdMWpXIhKnA5hvHCrj";
+            string geocodingApiUrl = "https://rsapi.goong.io/Geocode";
 
             using (var httpClient = new HttpClient())
             {
-                var requestUri = $"{geocodingApiUrl}?address={Uri.EscapeDataString(address)}&key={apiKey}";
+                var requestUri = $"{geocodingApiUrl}?address={Uri.EscapeDataString(address)}&api_key={apiKey}";
                 var response = await httpClient.GetAsync(requestUri);
 
                 if (response.IsSuccessStatusCode)
@@ -822,12 +853,12 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<DistanceMatrixResponse> GetDistanceAndTime(string origins, string destinations)
         {
-            string apiKey = "AIzaSyBBHXLtEw2nMmiMq7dBZHKytUwhzezi7UU"; 
-            string distanceMatrixApiUrl = "https://maps.googleapis.com/maps/api/distancematrix/json";
+            string apiKey = "Y3afHdEef5El4LnR3o4FjwSdMWpXIhKnA5hvHCrj"; 
+            string distanceMatrixApiUrl = "https://rsapi.goong.io/DistanceMatrix";
 
             using (var httpClient = new HttpClient())
             {
-                var requestUri = $"{distanceMatrixApiUrl}?origins={origins}&destinations={destinations}&mode=driving&key={apiKey}";
+                var requestUri = $"{distanceMatrixApiUrl}?origins={origins}&destinations={destinations}&vehicle=car&api_key={apiKey}";
                 var response = await httpClient.GetAsync(requestUri);
 
                 if (response.IsSuccessStatusCode)

@@ -75,7 +75,7 @@ namespace LSAPI.Controllers
         }
 
 
-        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+       [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("shipper/api/routes")]
         public async Task<ActionResult<RouteEdgeResponse>> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId)
         {
