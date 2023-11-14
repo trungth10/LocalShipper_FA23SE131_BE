@@ -35,6 +35,9 @@ namespace LocalShipper.Service.DTOs.Response
         public string CustomerCity { get; set; }
         public string CustomerCommune { get; set; }
         public string CustomerDistrict { get; set; }
+
+        public double CustomerLat { get; set; }
+        public double CustomerLng { get; set; }
         public string CustomerPhone { get; set; }
         public string CustomerName { get; set; }
         public string CustomerEmail { get; set; }

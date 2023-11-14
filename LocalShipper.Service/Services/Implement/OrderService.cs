@@ -486,9 +486,24 @@ namespace LocalShipper.Service.Services.Implement
 
             }
 
-        
-            
-           
+           /* foreach (var orderResponseLatLng in orderResponse)
+            {
+                foreach (var order in orders)
+                {
+                    string storeAddress = order.Store.StoreAddress;
+                    var storeCoordinates = await _routeService.ConvertAddress(storeAddress);
+                    orderResponseLatLng.Store.StoreLat = storeCoordinates.Latitude;
+                    orderResponseLatLng.Store.StoreLng = storeCoordinates.Longitude;
+
+                    string customerAddress = $"{order.CustomerCommune}, {order.CustomerDistrict}, {order.CustomerCity}";
+                    var customerCoordinates = await _routeService.ConvertAddress(customerAddress);
+                    orderResponseLatLng.CustomerLat = customerCoordinates.Latitude;
+                    orderResponseLatLng.CustomerLng = customerCoordinates.Longitude;
+
+                }
+                
+            }*/
+
             return orderResponse;
         }
 

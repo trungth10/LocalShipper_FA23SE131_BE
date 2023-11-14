@@ -12,6 +12,8 @@ namespace LocalShipper.Service.DTOs.Response
         public int Id { get; set; }
         public string StoreName { get; set; }
         public string StoreAddress { get; set; }
+        public double StoreLat { get; set; }
+        public double StoreLng { get; set; }
         public string StorePhone { get; set; }
         public string StoreEmail { get; set; }
         public TimeSpan? OpenTime { get; set; }
