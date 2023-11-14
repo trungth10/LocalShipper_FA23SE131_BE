@@ -40,6 +40,9 @@ namespace LocalShipper.Data.Models
         public string CustomerCity { get; set; }
         public string CustomerCommune { get; set; }
         public string CustomerDistrict { get; set; }
+        public float? CustomerLat { get; set; }
+        public float? CustomerLng { get; set; }
+
         public string CustomerPhone { get; set; }
         public string CustomerName { get; set; }
         public string CustomerEmail { get; set; }
