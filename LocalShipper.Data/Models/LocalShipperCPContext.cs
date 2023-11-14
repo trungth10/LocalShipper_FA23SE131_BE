@@ -178,6 +178,14 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.CustomerDistrict)
                     .HasMaxLength(255)
                     .HasColumnName("customer_district");
+                entity.Property(e => e.CustomerLat)
+                    .HasColumnType("float")
+                    .HasColumnName("customerLat");
+
+                entity.Property(e => e.CustomerLng)
+                    .HasColumnType("float")
+                    .HasColumnName("customerLng");
+                    
 
                 entity.Property(e => e.CustomerEmail)
                     .HasMaxLength(100)
@@ -198,7 +206,7 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.DistancePrice)
                     .HasColumnType("decimal(10, 2)")
                     .HasColumnName("distance_price");
-                entity.Property(e => e.Eta) .HasColumnName("ETA");
+                entity.Property(e => e.Eta).HasColumnName("ETA");
 
                 entity.Property(e => e.OrderTime)
                     .HasColumnType("datetime")
@@ -626,6 +634,14 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.WalletId).HasColumnName("walletId");
 
                 entity.Property(e => e.ZoneId).HasColumnName("zoneId");
+
+                entity.Property(e => e.StoreLat)
+                    .HasColumnName("storeLat")
+                    .HasColumnType("float");
+
+                entity.Property(e => e.StoreLng)
+                    .HasColumnName("storeLng")
+                    .HasColumnType("float");
 
                 entity.HasOne(d => d.Account)
                     .WithMany(p => p.Stores)

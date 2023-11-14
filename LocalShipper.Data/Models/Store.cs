@@ -28,6 +28,9 @@ namespace LocalShipper.Data.Models
         public int? ZoneId { get; set; }
         public int WalletId { get; set; }
         public int AccountId { get; set; }
+        public float? StoreLat { get; set; }
+        public float? StoreLng { get; set; }
+
 
         public virtual Account Account { get; set; }
         public virtual Template Template { get; set; }
