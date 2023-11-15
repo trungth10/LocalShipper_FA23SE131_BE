@@ -20,11 +20,12 @@ namespace LocalShipper.Service.Services.Implement
     {
         private readonly IUnitOfWork _unitOfWork;
         private IMapper _mapper;
-
-        public StoreService(IMapper mapper, IUnitOfWork unitOfWork)
+        private IRouteService _routeService;
+        public StoreService(IMapper mapper, IUnitOfWork unitOfWork, IRouteService routeService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _routeService = routeService;
         }
 
         public async Task<List<StoreResponse>> GetStore(int? id, string? storeName, int? status, int? zoneId, int? walletId, int? accountId, int? pageNumber, int? pageSize)
@@ -78,6 +79,10 @@ namespace LocalShipper.Service.Services.Implement
             {
                 throw new CrudException(HttpStatusCode.BadRequest, "AccountId đã tồn tại", request.AccountId.ToString());
             }
+
+             string storeAddress = request.StoreAddress;
+             var storeCoordinates = await _routeService.ConvertAddress(storeAddress);
+
             var newStore = new Store
             {
                 StoreName = request.StoreName.Trim(),
@@ -87,12 +92,14 @@ namespace LocalShipper.Service.Services.Implement
                 OpenTime = request.OpenTime,
                 CloseTime = request.CloseTime,
                 StoreDescription = request.StoreDescription.Trim(),
-                Status = request.Status ?? 0, 
+                Status = request.Status ?? 0,
                 TemplateId = request.TemplateId,
                 ZoneId = request.ZoneId,
                 WalletId = request.WalletId,
                 AccountId = request.AccountId,
-            };
+                StoreLat = (float)storeCoordinates.Latitude,
+                StoreLng = (float)storeCoordinates.Longitude
+        };
 
           
             await _unitOfWork.Repository<Store>().InsertAsync(newStore);

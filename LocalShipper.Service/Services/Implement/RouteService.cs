@@ -256,19 +256,18 @@ namespace LocalShipper.Service.Services.Implement
 {
     { (shipperLatitude, shipperLongitude), 0 }
 };
-
+       
             foreach (var order in largestGroup)
-            {
-                string storeAddress = order.Store.StoreAddress;
-                var storeCoordinates = await ConvertAddress(storeAddress);
-                string customerAddress = $"{order.CustomerCommune}, {order.CustomerDistrict}, {order.CustomerCity}";
-                var customerCoordinates = await ConvertAddress(customerAddress);
+            {            
+                var storeCoordinates = ((double)order.Store.StoreLat, (double)order.Store.StoreLng);              
+                var customerCoordinates = ((double)order.CustomerLat, (double)order.CustomerLng);
 
                 if (!locationIndexMap.ContainsKey(storeCoordinates))
                 {
                     locationIndexMap.Add(storeCoordinates, fullLatLng.Count);
                     fullLatLng.Add(storeCoordinates);
                 }
+
                 locationIndexMap.Add(customerCoordinates, fullLatLng.Count);
                 fullLatLng.Add(customerCoordinates);
                 int pickupIndex = locationIndexMap[storeCoordinates];
@@ -356,7 +355,7 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<(double Latitude, double Longitude)> ConvertAddress(string address)
         {
-            string apiKey = "Y3afHdEef5El4LnR3o4FjwSdMWpXIhKnA5hvHCrj";
+            string apiKey = "Mhb5fDCqtwRuLPj27DtTxqcO0ygKX4IsS2KxWw0B";
             string geocodingApiUrl = "https://rsapi.goong.io/Geocode";
 
             using (var httpClient = new HttpClient())
@@ -379,7 +378,7 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<string> ConvertLatLng(double lat, double lng)
         {
-            string apiKey = "Y3afHdEef5El4LnR3o4FjwSdMWpXIhKnA5hvHCrj";
+            string apiKey = "Mhb5fDCqtwRuLPj27DtTxqcO0ygKX4IsS2KxWw0B";
             string geocodingApiUrl = "https://rsapi.goong.io/Geocode";
 
             using (var httpClient = new HttpClient())
@@ -443,11 +442,10 @@ namespace LocalShipper.Service.Services.Implement
 
             foreach (var order in orders)
             {
-                string storeAddress = order.Store.StoreAddress;
-                var storeCoordinates = await ConvertAddress(storeAddress);
-                string customerAddress = $"{order.CustomerCommune}, {order.CustomerDistrict}, {order.CustomerCity}";
-                var customerCoordinates = await ConvertAddress(customerAddress);
-
+               
+                var storeCoordinates = ((double)order.Store.StoreLat, (double)order.Store.StoreLng);
+               
+                var customerCoordinates = ((double)order.CustomerLat, (double)order.CustomerLng);
                 if (!locationIndexMap.ContainsKey(storeCoordinates))
                 {
                     locationIndexMap.Add(storeCoordinates, fullLatLng.Count);
@@ -507,7 +505,7 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<long[,]> GetDistanceMatrix(List<(double Latitude, double Longitude)> location)
         {
-            string apiKey = "Y3afHdEef5El4LnR3o4FjwSdMWpXIhKnA5hvHCrj";
+            string apiKey = "Mhb5fDCqtwRuLPj27DtTxqcO0ygKX4IsS2KxWw0B";
             string distanceMatrixApiUrl = "https://rsapi.goong.io/DistanceMatrix";
 
             using (var httpClient = new HttpClient())

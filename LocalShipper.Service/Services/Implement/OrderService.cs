@@ -438,11 +438,8 @@ namespace LocalShipper.Service.Services.Implement
 
                 foreach (var order in orders)
                 {
-                    string storeAddress = order.Store.StoreAddress;
-                    var storeCoordinates = await _routeService.ConvertAddress(storeAddress);
-                    string customerAddress = $"{order.CustomerCommune}, {order.CustomerDistrict}, {order.CustomerCity}";
-                    var customerCoordinates = await _routeService.ConvertAddress(customerAddress);
-
+                    var storeCoordinates = ((double)order.Store.StoreLat, (double)order.Store.StoreLng);
+                    var customerCoordinates = ((double)order.CustomerLat, (double)order.CustomerLng);
                     if (!locationIndexMap.ContainsKey(storeCoordinates))
                     {
                         locationIndexMap.Add(storeCoordinates, fullLatLng.Count);
@@ -458,8 +455,6 @@ namespace LocalShipper.Service.Services.Implement
                 var distanceMatrix = await _routeService.GetDistanceMatrix(fullLatLng);
 
                 int[][] pickupsDeliveriesArray = pickupsDeliveriesList.ToArray();
-
-
 
                 (List<int> _route, List<(int, int)> pickupDeliveries) = await _routeService.SolvePDPAsync(distanceMatrix, pickupsDeliveriesArray);
 
@@ -477,7 +472,6 @@ namespace LocalShipper.Service.Services.Implement
                         sortedAddresses.Add($"{address.Latitude}, {address.Longitude}");
                     }
                 }
-
 
                 foreach (var orderResponseItem in orderResponse)
                 {
@@ -808,6 +802,9 @@ namespace LocalShipper.Service.Services.Implement
                 }
             }
 
+             string customerAddress = $"{request.CustomerCommune}, {request.CustomerDistrict}, {request.CustomerCity}";
+             var customerCoordinates = await ConvertAddress(customerAddress);
+
 
             var newOrder = new Order
             {
@@ -826,6 +823,8 @@ namespace LocalShipper.Service.Services.Implement
                 CustomerCity = request.CustomerCity.Trim(),
                 CustomerCommune = request.CustomerCommune.Trim(),
                 CustomerDistrict = request.CustomerDistrict.Trim(),
+                CustomerLat = (float)customerCoordinates.results[0].geometry.location.lat,
+                CustomerLng = (float)customerCoordinates.results[0].geometry.location.lng,
                 CustomerEmail = request.CustomerEmail.Trim(),
                 CustomerName = request.CustomerName.Trim(),
                 CustomerPhone = request.CustomerPhone.Trim(),
@@ -845,7 +844,7 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<GeocodingResponse> ConvertAddress(string address)
         {
-            string apiKey = "Y3afHdEef5El4LnR3o4FjwSdMWpXIhKnA5hvHCrj";
+            string apiKey = "Mhb5fDCqtwRuLPj27DtTxqcO0ygKX4IsS2KxWw0B";
             string geocodingApiUrl = "https://rsapi.goong.io/Geocode";
 
             using (var httpClient = new HttpClient())
@@ -868,7 +867,7 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<DistanceMatrixResponse> GetDistanceAndTime(string origins, string destinations)
         {
-            string apiKey = "Y3afHdEef5El4LnR3o4FjwSdMWpXIhKnA5hvHCrj"; 
+            string apiKey = "Mhb5fDCqtwRuLPj27DtTxqcO0ygKX4IsS2KxWw0B"; 
             string distanceMatrixApiUrl = "https://rsapi.goong.io/DistanceMatrix";
 
             using (var httpClient = new HttpClient())
