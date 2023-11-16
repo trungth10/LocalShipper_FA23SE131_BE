@@ -29,6 +29,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<List<int>> SolveTSPAsync(long[,] distanceMatrix);
 
         Task<(List<int>, List<(int, int)>)> SolvePDPAsync(long[,] distanceMatrix, int[][] pickupsDeliveries);
+        Task<string> ConvertLatLng(double lat, double lng);
 
     }
 }

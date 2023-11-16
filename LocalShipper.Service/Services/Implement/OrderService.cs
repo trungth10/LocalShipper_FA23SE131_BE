@@ -460,6 +460,7 @@ namespace LocalShipper.Service.Services.Implement
 
                 List<int> pdpSolution = _route;
                 List<string> sortedAddresses = new List<string>();
+                List<string> sortedAddressesName = new List<string>();
 
                 foreach (var index in pdpSolution)
                 {
@@ -470,33 +471,20 @@ namespace LocalShipper.Service.Services.Implement
                         var address = locationIndexMap.FirstOrDefault(x => x.Value == index).Key;
 
                         sortedAddresses.Add($"{address.Latitude}, {address.Longitude}");
+
+                        var addressName = await _routeService.ConvertLatLng(address.Latitude, address.Longitude);
+                        sortedAddressesName.Add(addressName);
                     }
                 }
 
                 foreach (var orderResponseItem in orderResponse)
                 {
                     orderResponseItem.SortedAddresses = sortedAddresses;
+                    orderResponseItem.SortedAddressesName = sortedAddressesName;
                 }
 
             }
 
-           /* foreach (var orderResponseLatLng in orderResponse)
-            {
-                foreach (var order in orders)
-                {
-                    string storeAddress = order.Store.StoreAddress;
-                    var storeCoordinates = await _routeService.ConvertAddress(storeAddress);
-                    orderResponseLatLng.Store.StoreLat = storeCoordinates.Latitude;
-                    orderResponseLatLng.Store.StoreLng = storeCoordinates.Longitude;
-
-                    string customerAddress = $"{order.CustomerCommune}, {order.CustomerDistrict}, {order.CustomerCity}";
-                    var customerCoordinates = await _routeService.ConvertAddress(customerAddress);
-                    orderResponseLatLng.CustomerLat = customerCoordinates.Latitude;
-                    orderResponseLatLng.CustomerLng = customerCoordinates.Longitude;
-
-                }
-                
-            }*/
 
             return orderResponse;
         }

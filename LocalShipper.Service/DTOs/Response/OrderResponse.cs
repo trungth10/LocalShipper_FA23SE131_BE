@@ -45,6 +45,7 @@ namespace LocalShipper.Service.DTOs.Response
         public int TypeId { get; set; }
         public int? Eta { get; set; }
         public List<string> SortedAddresses { get; set; }
+        public List<string> SortedAddressesName { get; set; }
 
         public StoreResponse Store {get; set;}
         public ShipperResponse Shipper { get; set;}
