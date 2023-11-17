@@ -104,16 +104,8 @@ namespace LocalShipper.Service.Services.Implement
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Route không tồn tại", routeId.ToString());
             }
-            route.FromStation = request.FromStation;
-            route.ToStation = request.ToStation;
-            route.CreatedDate = request.CreatedDate;
-            route.StartDate = request.StartDate;
-            route.Eta = request.Eta;
-            route.Quantity = request.Quantity;
-            route.Progress = request.Progress;
-            route.Priority = request.Priority;
-            route.Status = request.Status;
-            route.ShipperId = request.ShipperId;
+            route.Name= request.Name.Trim();
+            route.Status = request.Status.HasValue ? request.Status.Value : route.Status;
 
 
             await _unitOfWork.Repository<RouteEdge>().Update(route, route.Id);
