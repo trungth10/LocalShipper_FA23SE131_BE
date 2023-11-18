@@ -33,7 +33,9 @@ namespace LSAPI
 
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddCors();
+            
+               
             var emailConfig = new EmailConfiguration
             {
                 From = "ht10102001@gmail.com", // Địa chỉ email của người gửi
@@ -113,13 +115,7 @@ namespace LSAPI
                 });
             });
 
-            services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(builder =>
-                {
-                    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-                });
-            });
+          
 
 
             services.AddScoped<IGenericRepository<Account>, GenericRepository<Account>>();
@@ -198,11 +194,11 @@ namespace LSAPI
             app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LSAPI v1"));
-
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseCors();
+           
             app.UseAuthorization();
             app.UseAuthentication();
             
