@@ -113,6 +113,15 @@ namespace LSAPI
                 });
             });
 
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                });
+            });
+
+
             services.AddScoped<IGenericRepository<Account>, GenericRepository<Account>>();
             services.AddScoped<IShipperService, ShipperService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -193,7 +202,7 @@ namespace LSAPI
 
             app.UseHttpsRedirection();
             app.UseRouting();
-
+            app.UseCors();
             app.UseAuthorization();
             app.UseAuthentication();
             
