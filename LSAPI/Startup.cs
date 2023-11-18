@@ -115,9 +115,9 @@ namespace LSAPI
 
             services.AddCors(options =>
             {
-                options.AddDefaultPolicy(policy =>
+                options.AddDefaultPolicy(builder =>
                 {
-                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                 });
             });
 
