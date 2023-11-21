@@ -129,7 +129,7 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //GET
-        public async Task<List<ShipperResponse>> GetShipper(int? id, string? fullName, string? email, string? phone,
+        public async Task<List<ShipperResponse>> GetShipper(int? id,int? storeId, string? fullName, string? email, string? phone,
        string? address, int? transportId, int? accountId, int? zoneId, int? status, string? fcmToken, int? walletId, int? pageNumber, int? pageSize)
         {
             var shippers = _unitOfWork.Repository<Shipper>()
@@ -141,6 +141,7 @@ namespace LocalShipper.Service.Services.Implement
                 .Include(t => t.RouteEdges)
                 .ThenInclude(re => re.Orders)
                 .Where(t => id == 0 || t.Id == id)
+                .Where(t => storeId == 0 || t.StoreId == storeId)
                 .Where(t => string.IsNullOrWhiteSpace(fullName) || t.FullName.Contains(fullName.Trim()))
                 .Where(t => string.IsNullOrWhiteSpace(email) || t.EmailShipper.Contains(email.Trim()))
                 .Where(t => string.IsNullOrWhiteSpace(phone) || t.PhoneShipper.Contains(phone.Trim()))
@@ -175,6 +176,7 @@ namespace LocalShipper.Service.Services.Implement
                     AddressShipper = shipper.AddressShipper,
                     TransportId = (int)shipper.TransportId,
                     AccountId = shipper.AccountId,
+                    StoreId =shipper.StoreId,
                     ZoneId = (int)shipper.ZoneId,
                     Fcmtoken = shipper.Fcmtoken,
                     Status = (ShipperStatusEnum)shipper.Status,
