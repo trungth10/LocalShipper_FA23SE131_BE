@@ -18,6 +18,7 @@ namespace LocalShipper.Service.DTOs.Response
         public string AddressShipper { get; set; }
         public int TransportId { get; set; }
         public int AccountId { get; set; }
+        public int? StoreId { get; set; }
         public int ZoneId { get; set; }
         public ShipperStatusEnum Status { get; set; }
         public string Fcmtoken { get; set; }

@@ -52,9 +52,9 @@ namespace LSAPI.Controllers
             }
         }
 
-        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        //[Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet()]
-        public async Task<ActionResult<List<ShipperResponse>>> GetShipper(int id, string fullName,
+        public async Task<ActionResult<List<ShipperResponse>>> GetShipper(int id, int storeId, string fullName,
                                             string email, string phone,
                                             string address, int transportId, int accountId, int zoneId, int status, string fcmToken, int walletId, int? pageNumber, int? pageSize)
         {
@@ -73,7 +73,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Id không hợp lệ");
                 }
-                var rs = await _shipperService.GetShipper(id, fullName, email, phone, address, transportId, accountId, zoneId, status, fcmToken, walletId, pageNumber, pageSize);
+                var rs = await _shipperService.GetShipper(id, storeId, fullName, email, phone, address, transportId, accountId, zoneId, status, fcmToken, walletId, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)
