@@ -12,9 +12,12 @@
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Google.OrTools" Version="9.8.3296" />
-    <PackageReference Include="Google.OrTools.runtime.win-x64" Version="9.8.3296" />
     <PackageReference Include="Google.Protobuf" Version="3.25.1" />
+    <PackageReference Include="Kingdom.OrTools.Core" Version="2.19.1.16195" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.17" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" />
+    <PackageReference Include="Microsoft.Data.SqlClient.SNI" Version="5.1.1" />
+    <PackageReference Include="Microsoft.Data.SqlClient.SNI.runtime" Version="5.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.17">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -29,6 +32,20 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="RestSharp" Version="110.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Google.OrTools">
+      <HintPath>bin\Google.OrTools.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Google.Protobuf">
+      <HintPath>bin\Google.Protobuf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="localsolvernet">
+      <HintPath>bin\localsolvernet.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

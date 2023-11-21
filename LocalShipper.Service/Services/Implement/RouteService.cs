@@ -19,7 +19,8 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-
+using localsolver;
+using Newtonsoft.Json;
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -27,11 +28,14 @@ namespace LocalShipper.Service.Services.Implement
     {
         private readonly IUnitOfWork _unitOfWork;
         private IMapper _mapper;
+        private const string AzureFunctionUrl = "https://localshipperor.azurewebsites.net/api/SolvePDP?code=flGXgZMvGEvpVHsBeuekD6UdYMIcrZP-NSTddJ1JUTvKAzFuviD5og==";
+        private readonly HttpClient _httpClient;
 
-        public RouteService(IMapper mapper, IUnitOfWork unitOfWork)
+        public RouteService(IMapper mapper, IUnitOfWork unitOfWork, HttpClient httpClient)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _httpClient = httpClient;
         }
 
         //GET  
@@ -272,10 +276,31 @@ namespace LocalShipper.Service.Services.Implement
             int[][] pickupsDeliveriesArray = pickupsDeliveriesList.ToArray();
 
 
+            var requestData = new
+            {
+                _distanceMatrix = distanceMatrix,
+                pickupsDeliveries = pickupsDeliveriesArray
+            };
 
-            (List<int> _route, List<(int, int)> pickupDeliveries) = await SolvePDPAsync(distanceMatrix, pickupsDeliveriesArray);
+            var jsonRequestData = JsonConvert.SerializeObject(requestData);
+            var content = new StringContent(jsonRequestData, Encoding.UTF8, "application/json");
 
-            List<int> pdpSolution = _route;
+            var response = await _httpClient.PostAsync(AzureFunctionUrl, content);
+
+            List<int> pdpSolution = new List<int>();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<dynamic>(jsonResponse);
+
+                pdpSolution = result.Value.SortedRoute.ToObject<List<int>>();
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+            }
+
             List<string> sortedAddresses = new List<string>();
             List<string> sortedAddressesConvert = new List<string>();
 
@@ -455,10 +480,32 @@ namespace LocalShipper.Service.Services.Implement
             int[][] pickupsDeliveriesArray = pickupsDeliveriesList.ToArray();
 
 
+            var requestData = new
+            {
+                _distanceMatrix = distanceMatrix,
+                pickupsDeliveries = pickupsDeliveriesArray
+            };
 
-            (List<int> _route, List<(int, int)> pickupDeliveries) = await SolvePDPAsync(distanceMatrix, pickupsDeliveriesArray);
+            var jsonRequestData = JsonConvert.SerializeObject(requestData);
+            var content = new StringContent(jsonRequestData, Encoding.UTF8, "application/json");
 
-            List<int> pdpSolution = _route;
+            var response = await _httpClient.PostAsync(AzureFunctionUrl, content);
+
+            List<int> pdpSolution = new List<int>();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<dynamic>(jsonResponse);
+
+                pdpSolution = result.Value.SortedRoute.ToObject<List<int>>();
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+            }
+
+
             List<string> sortedAddresses = new List<string>();
             List<string> sortedAddressesConvert = new List<string>();
 
@@ -614,69 +661,129 @@ namespace LocalShipper.Service.Services.Implement
             return (route, pickupDeliveriesResult);
         }
 
+        /* public async Task<(List<int>, List<(int, int)>)> SolvePDPAsync(long[,] distanceMatrix, int[][] pickupsDeliveries)
+         {
+             RoutingIndexManager manager = new RoutingIndexManager(distanceMatrix.GetLength(0), 1, 0);
+             RoutingModel routing = new RoutingModel(manager);
+
+             int transitCallbackIndex = routing.RegisterTransitCallback((long fromIndex, long toIndex) =>
+             {
+                 var fromNode = manager.IndexToNode(fromIndex);
+                 var toNode = manager.IndexToNode(toIndex);
+                 return distanceMatrix[fromNode, toNode];
+             });
+
+             routing.SetArcCostEvaluatorOfAllVehicles(transitCallbackIndex);
+
+             foreach (var pair in pickupsDeliveries)
+             {
+                 long pickupNode = manager.NodeToIndex(pair[0]);
+                 long deliveryNode = manager.NodeToIndex(pair[1]);
+                 routing.AddPickupAndDelivery(pickupNode, deliveryNode);
+             }
+
+             Assignment solution = routing.Solve();
+
+             List<int> route = new List<int>();
+             long index = routing.Start(0);
+             while (!routing.IsEnd(index))
+             {
+                 route.Add(manager.IndexToNode(index));
+                 index = solution.Value(routing.NextVar(index));
+             }
+             route.Add(manager.IndexToNode(index));
+
+             List<(int, int)> pickupDeliveriesResult = new List<(int, int)>();
+
+             Dictionary<int, List<int>> pickupDeliveryMap = new Dictionary<int, List<int>>();
+
+             foreach (var pair in pickupsDeliveries)
+             {
+                 int pickupPoint = pair[0];
+                 int deliveryPoint = pair[1];
+
+                 if (!pickupDeliveryMap.ContainsKey(pickupPoint))
+                 {
+                     pickupDeliveryMap[pickupPoint] = new List<int>();
+                 }
+
+                 pickupDeliveryMap[pickupPoint].Add(deliveryPoint);
+             }
+
+             foreach (var pickupPoint in pickupDeliveryMap.Keys)
+             {
+                 foreach (var deliveryPoint in pickupDeliveryMap[pickupPoint])
+                 {
+                     pickupDeliveriesResult.Add((route.IndexOf(pickupPoint), route.IndexOf(deliveryPoint)));
+                 }
+             }
+
+             return (route, pickupDeliveriesResult);
+         }*/
 
 
-       /* public async Task<(List<int>, List<(int, int)>)> SolvePDPAsync(long[,] distanceMatrix, int[][] pickupsDeliveries)
+
+
+        public async Task<(List<int>, List<(int, int)>)> SolvePDPLocal(long[,] distanceMatrix, int[][] pickupsDeliveries)
         {
-            RoutingIndexManager manager = new RoutingIndexManager(distanceMatrix.GetLength(0), 1, 0);
-            RoutingModel routing = new RoutingModel(manager);
-
-            int transitCallbackIndex = routing.RegisterTransitCallback((long fromIndex, long toIndex) =>
+            using (var localsolver = new LocalSolver())
             {
-                var fromNode = manager.IndexToNode(fromIndex);
-                var toNode = manager.IndexToNode(toIndex);
-                return distanceMatrix[fromNode, toNode];
-            });
+                var model = localsolver.GetModel();
+                var nbNodes = distanceMatrix.GetLength(0);
 
-            routing.SetArcCostEvaluatorOfAllVehicles(transitCallbackIndex);
+                // Decision variables
+                var sequence = model.List(nbNodes);
 
-            foreach (var pair in pickupsDeliveries)
-            {
-                long pickupNode = manager.NodeToIndex(pair[0]);
-                long deliveryNode = manager.NodeToIndex(pair[1]);
-                routing.AddPickupAndDelivery(pickupNode, deliveryNode);
-            }
+                // Create LocalSolver arrays to access them with "at" operators
+                var distMatrix = model.Array(distanceMatrix);
 
-            Assignment solution = routing.Solve();
+                // Set up transit callback
+                var transitCallback = model.CreateLambdaFunction((fromNode, toNode) => distMatrix[fromNode][toNode]);
+                var totalDistance = model.Sum(model.Range(1, model.Count(sequence)), transitCallback);
 
-            List<int> route = new List<int>();
-            long index = routing.Start(0);
-            while (!routing.IsEnd(index))
-            {
-                route.Add(manager.IndexToNode(index));
-                index = solution.Value(routing.NextVar(index));
-            }
-            route.Add(manager.IndexToNode(index));
+                // All nodes must be visited exactly once
+                model.Constraint(model.Partition(sequence));
 
-            List<(int, int)> pickupDeliveriesResult = new List<(int, int)>();
-
-            Dictionary<int, List<int>> pickupDeliveryMap = new Dictionary<int, List<int>>();
-
-            foreach (var pair in pickupsDeliveries)
-            {
-                int pickupPoint = pair[0];
-                int deliveryPoint = pair[1];
-
-                if (!pickupDeliveryMap.ContainsKey(pickupPoint))
+                // Pickup-Delivery constraints
+                foreach (var pair in pickupsDeliveries)
                 {
-                    pickupDeliveryMap[pickupPoint] = new List<int>();
+                    var pickupIndex = pair[0];
+                    var deliveryIndex = pair[1];
+                    model.Constraint(model.IndexOf(sequence, pickupIndex) < model.IndexOf(sequence, deliveryIndex));
                 }
 
-                pickupDeliveryMap[pickupPoint].Add(deliveryPoint);
-            }
+                // Convert total distance to LSExpression
+                var totalDistanceExpression = model.Round(100 * totalDistance) / 100;
 
-            foreach (var pickupPoint in pickupDeliveryMap.Keys)
-            {
-                foreach (var deliveryPoint in pickupDeliveryMap[pickupPoint])
+                model.Minimize(totalDistanceExpression); // Objective: minimize total distance
+
+                localsolver.GetParam().SetTimeLimit(500); // Set time limit to 500 ms
+
+                localsolver.Solve();
+
+                // Extract solution
+                var route = new List<int>();
+                for (int i = 0; i < nbNodes; ++i)
                 {
-                    pickupDeliveriesResult.Add((route.IndexOf(pickupPoint), route.IndexOf(deliveryPoint)));
+                    route.Add((int)sequence[i].GetValue());
                 }
+
+                var pickupDeliveriesResult = new List<(int, int)>();
+                foreach (var pair in pickupsDeliveries)
+                {
+                    var pickupNode = pair[0];
+                    var deliveryNode = pair[1];
+                    pickupDeliveriesResult.Add((route.IndexOf(pickupNode), route.IndexOf(deliveryNode)));
+                }
+
+                return (route, pickupDeliveriesResult);
             }
 
-            return (route, pickupDeliveriesResult);
-        }*/
+        }
 
 
 
-    }
+
+
+        }
 }

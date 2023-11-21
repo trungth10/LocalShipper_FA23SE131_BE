@@ -9,6 +9,7 @@ using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Interface;
 using MailKit.Search;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1.Ocsp;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Utilities.Collections;
@@ -31,12 +32,16 @@ namespace LocalShipper.Service.Services.Implement
         private readonly IUnitOfWork _unitOfWork;
         private IMapper _mapper;
         private IRouteService _routeService;
+        private readonly HttpClient _httpClient;
+        private const string AzureFunctionUrl = "https://localshipperor.azurewebsites.net/api/SolvePDP?code=flGXgZMvGEvpVHsBeuekD6UdYMIcrZP-NSTddJ1JUTvKAzFuviD5og==";
 
-        public OrderService(IMapper mapper, IUnitOfWork unitOfWork, IRouteService routeService)
+
+        public OrderService(IMapper mapper, IUnitOfWork unitOfWork, IRouteService routeService, HttpClient httpClient)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _routeService = routeService;
+            _httpClient = httpClient;
         }
 
 
@@ -456,9 +461,32 @@ namespace LocalShipper.Service.Services.Implement
 
                 int[][] pickupsDeliveriesArray = pickupsDeliveriesList.ToArray();
 
-                (List<int> _route, List<(int, int)> pickupDeliveries) = await _routeService.SolvePDPAsync(distanceMatrix, pickupsDeliveriesArray);
+                // (List<int> _route, List<(int, int)> pickupDeliveries) = await _routeService.SolvePDPAsync(distanceMatrix, pickupsDeliveriesArray);
+                var requestData = new
+                {
+                    _distanceMatrix = distanceMatrix,
+                    pickupsDeliveries = pickupsDeliveriesArray
+                };
 
-                List<int> pdpSolution = _route;
+                var jsonRequestData = JsonConvert.SerializeObject(requestData);
+                var content = new StringContent(jsonRequestData, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync(AzureFunctionUrl, content);
+
+                List<int> pdpSolution = new List<int>();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonResponse = await response.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<dynamic>(jsonResponse);
+
+                    pdpSolution = result.Value.SortedRoute.ToObject<List<int>>();
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                }
+
                 List<string> sortedAddresses = new List<string>();
                 List<string> sortedAddressesName = new List<string>();
 

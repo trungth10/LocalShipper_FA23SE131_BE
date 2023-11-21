@@ -21,12 +21,15 @@
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="EntityFramework" Version="6.4.4" />
     <PackageReference Include="Google.OrTools" Version="9.8.3296" />
-    <PackageReference Include="Google.OrTools.runtime.win-x64" Version="9.8.3296" />
     <PackageReference Include="Google.Protobuf" Version="3.25.1" />
     <PackageReference Include="Gurobi.Optimizer" Version="10.0.3" />
+    <PackageReference Include="Kingdom.OrTools.Core" Version="2.19.1.16195" />
     <PackageReference Include="MailKit" Version="4.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.17" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" />
+    <PackageReference Include="Microsoft.Data.SqlClient.SNI" Version="5.1.1" />
+    <PackageReference Include="Microsoft.Data.SqlClient.SNI.runtime" Version="5.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.17" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.17" />
     <PackageReference Include="MimeKit" Version="4.2.0" />
@@ -37,6 +40,20 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LocalShipper.Data\LocalShipper.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Google.OrTools">
+      <HintPath>..\LocalShipper.Data\bin\Google.OrTools.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Google.Protobuf">
+      <HintPath>..\LocalShipper.Data\bin\Google.Protobuf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="localsolvernet">
+      <HintPath>..\LocalShipper.Data\bin\localsolvernet.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -45,6 +45,8 @@ namespace LSAPI
 
             services.AddSingleton(emailConfig);
             services.AddScoped<IEmailService, EmailService>();
+            services.AddHttpClient();
+
 
 
             //services.AddAuthorization(options =>
