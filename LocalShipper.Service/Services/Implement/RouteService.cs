@@ -19,7 +19,6 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using localsolver;
 using Newtonsoft.Json;
 
 namespace LocalShipper.Service.Services.Implement
@@ -720,68 +719,6 @@ namespace LocalShipper.Service.Services.Implement
 
              return (route, pickupDeliveriesResult);
          }*/
-
-
-
-
-        public async Task<(List<int>, List<(int, int)>)> SolvePDPLocal(long[,] distanceMatrix, int[][] pickupsDeliveries)
-        {
-            using (var localsolver = new LocalSolver())
-            {
-                var model = localsolver.GetModel();
-                var nbNodes = distanceMatrix.GetLength(0);
-
-                // Decision variables
-                var sequence = model.List(nbNodes);
-
-                // Create LocalSolver arrays to access them with "at" operators
-                var distMatrix = model.Array(distanceMatrix);
-
-                // Set up transit callback
-                var transitCallback = model.CreateLambdaFunction((fromNode, toNode) => distMatrix[fromNode][toNode]);
-                var totalDistance = model.Sum(model.Range(1, model.Count(sequence)), transitCallback);
-
-                // All nodes must be visited exactly once
-                model.Constraint(model.Partition(sequence));
-
-                // Pickup-Delivery constraints
-                foreach (var pair in pickupsDeliveries)
-                {
-                    var pickupIndex = pair[0];
-                    var deliveryIndex = pair[1];
-                    model.Constraint(model.IndexOf(sequence, pickupIndex) < model.IndexOf(sequence, deliveryIndex));
-                }
-
-                // Convert total distance to LSExpression
-                var totalDistanceExpression = model.Round(100 * totalDistance) / 100;
-
-                model.Minimize(totalDistanceExpression); // Objective: minimize total distance
-
-                localsolver.GetParam().SetTimeLimit(500); // Set time limit to 500 ms
-
-                localsolver.Solve();
-
-                // Extract solution
-                var route = new List<int>();
-                for (int i = 0; i < nbNodes; ++i)
-                {
-                    route.Add((int)sequence[i].GetValue());
-                }
-
-                var pickupDeliveriesResult = new List<(int, int)>();
-                foreach (var pair in pickupsDeliveries)
-                {
-                    var pickupNode = pair[0];
-                    var deliveryNode = pair[1];
-                    pickupDeliveriesResult.Add((route.IndexOf(pickupNode), route.IndexOf(deliveryNode)));
-                }
-
-                return (route, pickupDeliveriesResult);
-            }
-
-        }
-
-
 
 
 
