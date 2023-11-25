@@ -15,7 +15,7 @@ namespace LocalShipper.Data.Repository
     {
         //async
         Task InsertAsync(TEntity entity);
-
+        Task UpdateAsync(TEntity entity, object id);
         Task InsertRangeAsync(IQueryable<TEntity> entities);
 
         DbSet<TEntity> GetAll();

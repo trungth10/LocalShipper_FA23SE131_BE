@@ -17,6 +17,7 @@ using MailKit.Search;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
+using System.IO;
 
 namespace LSAPI.Controllers
 {
@@ -333,6 +334,21 @@ namespace LSAPI.Controllers
             }
 
 
+        }
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPut("api/accounts/upload-image/{accountId}")]
+        public async Task<ActionResult<string>> UploadImageToFirebase(int accountId, IFormFile image)
+        {
+            try
+            {
+                var imageUrl = await _accountService.UploadImageToFirebase(accountId, image);
+                return Ok(imageUrl);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
 
     }

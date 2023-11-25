@@ -22,7 +22,15 @@ namespace LocalShipper.Data.Repository
             Context = context;
             Table = Context.Set<T>();
         }
-
+        public async Task UpdateAsync(T entity, object id)
+        {
+            var existing = await Context.Set<T>().FindAsync(id);
+            if (existing != null)
+            {
+                Context.Entry(existing).CurrentValues.SetValues(entity);
+                await Context.SaveChangesAsync();
+            }
+        }
         public T Find(Func<T, bool> predicate)
         {
             return Table.FirstOrDefault(predicate);
