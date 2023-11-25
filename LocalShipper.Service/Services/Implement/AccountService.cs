@@ -20,7 +20,12 @@ using static System.Net.WebRequestMethods;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Principal;
 using MailKit.Search;
-
+using System.IO;
+using Firebase.Auth;
+using Microsoft.AspNetCore.Hosting;
+using System.Threading;
+using Firebase.Storage;
+using Microsoft.AspNetCore.Http;
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -30,21 +35,30 @@ namespace LocalShipper.Service.Services.Implement
         private IMapper _mapper;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IEmailService _emailService;
+        private readonly IWebHostEnvironment _env;
+        private static string apiKey = "AIzaSyDClgoRpinIEXy6Ho_Upk2mwoKtSc3Kl2M";
+        private static string bucket = "localshipper-fc4a5.appspot.com";
+        private static string authEmail = "tranbacong311@gmail.com";
+        private static string authPassword = "lai1nguoinua";
 
 
-
-        public AccountService(IMapper mapper, IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager, IEmailService emailService)
+        public AccountService(IMapper mapper, IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager, IEmailService emailService, IWebHostEnvironment env)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _emailService = emailService;
+            _env = env;
         }
-        
+
+     
+
+
 
         //Create Account Shipper
         public async Task<AccountResponse> RegisterShipperAccount(RegisterRequest request)
-        {
+        {          
+
             var emailExisted = _unitOfWork.Repository<Account>().Find(x => x.Email == request.Email);
 
             if (emailExisted != null)
@@ -52,16 +66,17 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Email đã tồn tại", request.Email.ToString());
             }
             //string otp = GenerateOTP();
-           // CreatePasswordHash(request.Password, out string passwordHash, salt);
-
+            // CreatePasswordHash(request.Password, out string passwordHash, salt);
+          
             Account account = new Account
-            {               
+            {
                 Fullname = request.FullName,
                 Email = request.Email,
                 Active = false,
                 Phone = request.Phone,
-               // FcmToken = otp,
-                RoleId = request.RoleId,               
+              
+                // FcmToken = otp,
+                RoleId = request.RoleId,
                 Password = request.Password,
             };
 
@@ -81,9 +96,92 @@ namespace LocalShipper.Service.Services.Implement
                 Active = account.Active,
                 FcmToken = account.FcmToken,
                 CreateDate = account.CreateDate,
-                ImageUrl = account.ImageUrl,                   
-            };           
+                ImageUrl = account.ImageUrl,
+            };
         }
+        public async Task<string> UploadImageToFirebase(int accountId, IFormFile image)
+        {
+
+            try
+            {
+
+                var account = await _unitOfWork.Repository<Account>().GetAll().FirstOrDefaultAsync(a => a.Id == accountId);
+
+                if (account == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tài khoản không tồn tại", accountId.ToString());
+                }
+
+             
+                if (image == null || image.Length == 0)
+                {
+                    throw new Exception("Không có tệp tin nào được chọn hoặc tệp tin rỗng.");
+                }
+
+             
+                string fileName = Path.GetFileName(image.FileName);
+                string folderName = "avatars"; 
+                if (_env != null)
+                {
+                    string path = Path.Combine(_env.WebRootPath, $"images/{folderName}");
+                
+
+                   
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+
+                   
+                    using (var fileStream = new FileStream(Path.Combine(path, fileName), FileMode.Create))
+                    {
+                        await image.CopyToAsync(fileStream);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Error: HostingEnvironment is null.");
+                  
+                }
+
+
+              
+                string imagePath = $"{folderName}/{fileName}";
+
+               
+                var auth = new FirebaseAuthProvider(new FirebaseConfig(apiKey));
+                var authResult = await auth.SignInWithEmailAndPasswordAsync(authEmail, authPassword);
+
+               
+                var cancellation = new CancellationTokenSource();
+                var firebaseStorage = new FirebaseStorage(
+                    bucket,
+                    new FirebaseStorageOptions
+                    {
+                        AuthTokenAsyncFactory = () => Task.FromResult(authResult.FirebaseToken),
+                        ThrowOnCancel = true
+                    });
+
+                var uploadTask = firebaseStorage.Child("images").Child(accountId.ToString()).Child(fileName).PutAsync(image.OpenReadStream(), cancellation.Token);
+                var imageUrl = await uploadTask;
+
+                
+                account.ImageUrl = imageUrl;
+
+                await _unitOfWork.Repository<Account>().Update(account, accountId);
+                await _unitOfWork.CommitAsync();
+ 
+
+                return imageUrl;
+            }
+            catch (Exception ex)
+            {
+                
+                Console.WriteLine($"Error uploading image: {ex.Message}");
+                throw;
+            }
+        }
+        
         /*private void CreatePasswordHash(string password, out string passwordHash, byte[] salt)
         {
             using (var hmac = new HMACSHA512(salt))

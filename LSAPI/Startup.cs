@@ -19,17 +19,21 @@ using LocalShipper.Service.Services.Interface;
 using LocalShipper.Data.UnitOfWork;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Hosting.Internal;
+using Microsoft.AspNetCore.Http;
 
 namespace LSAPI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
             Configuration = configuration;
+            WebHostEnvironment = webHostEnvironment;
         }
 
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment WebHostEnvironment { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -122,8 +126,8 @@ namespace LSAPI
                     builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                 });
             });
-
-
+            services.AddSingleton<IWebHostEnvironment>(WebHostEnvironment);
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<IGenericRepository<Account>, GenericRepository<Account>>();
             services.AddScoped<IShipperService, ShipperService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -187,7 +191,7 @@ namespace LSAPI
                 }
 
                 );
-
+               
 
             });         
         }
@@ -200,7 +204,7 @@ namespace LSAPI
             app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LSAPI v1"));
-
+            app.UseStaticFiles();
 
             app.UseHttpsRedirection();
             app.UseRouting();
