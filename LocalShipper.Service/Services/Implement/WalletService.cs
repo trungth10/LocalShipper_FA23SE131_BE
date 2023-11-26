@@ -5,14 +5,20 @@ using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
 using LocalShipper.Service.Exceptions;
 using LocalShipper.Service.Helpers;
+using LocalShipper.Service.Helpers.Momo;
 using LocalShipper.Service.Services.Interface;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1.Ocsp;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,11 +28,14 @@ namespace LocalShipper.Service.Services.Implement
     {
         private readonly IUnitOfWork _unitOfWork;
         private IMapper _mapper;
+        private readonly IOptions<MomoOptionModel> _options;
 
-        public WalletService(IMapper mapper, IUnitOfWork unitOfWork)
+
+        public WalletService(IMapper mapper, IUnitOfWork unitOfWork, IOptions<MomoOptionModel> options)
         {
             _mapper = mapper;
-            _unitOfWork = unitOfWork;            
+            _unitOfWork = unitOfWork;
+            _options = options;
         }
 
         //Get Wallet  
@@ -141,5 +150,82 @@ namespace LocalShipper.Service.Services.Implement
             };
             return walletResponse;
         }
+
+        public async Task<MomoCreatePaymentResponseModel> CreatePaymentAsync(WalletTransactionPayment model)
+        {
+            model.Id = DateTime.UtcNow.Ticks.ToString();
+            model.Description = "Khách hàng: " + model.Name + ". Nội dung: " + model.Description;
+            var rawData =
+                $"partnerCode={_options.Value.PartnerCode}&accessKey={_options.Value.AccessKey}&requestId={model.Id}&amount={model.Amount}&orderId={model.Id}&orderInfo={model.Description}&returnUrl={_options.Value.ReturnUrl}&notifyUrl={_options.Value.NotifyUrl}&extraData=";
+
+            var signature = ComputeHmacSha256(rawData, _options.Value.SecretKey);
+
+            var client = new RestClient(_options.Value.MomoApiUrl);
+            var request = new RestRequest() { Method = Method.Post };
+            request.AddHeader("Content-Type", "application/json; charset=UTF-8");
+
+            // Create an object representing the request data
+            var requestData = new
+            {
+                accessKey = _options.Value.AccessKey,
+                partnerCode = _options.Value.PartnerCode,
+                requestType = _options.Value.RequestType,
+                notifyUrl = _options.Value.NotifyUrl,
+                returnUrl = _options.Value.ReturnUrl,
+                orderId = model.Id,
+                amount = model.Amount.ToString(),
+                orderInfo = model.Description,
+                requestId = model.Id,
+                extraData = "",
+                signature = signature
+            };
+
+            request.AddParameter("application/json", JsonConvert.SerializeObject(requestData), ParameterType.RequestBody);
+
+            var response = await client.ExecuteAsync(request);
+
+            return JsonConvert.DeserializeObject<MomoCreatePaymentResponseModel>(response.Content);
+        }
+
+        public MomoExecuteResponseModel PaymentExecuteAsync(IQueryCollection collection)
+        {
+            var amount = collection.First(s => s.Key == "amount").Value;
+            var orderInfo = collection.First(s => s.Key == "orderInfo").Value;
+            var orderId = collection.First(s => s.Key == "orderId").Value;
+            return new MomoExecuteResponseModel()
+            {
+                Amount = amount,
+                OrderId = orderId,
+                OrderInfo = orderInfo
+            };
+        }
+
+        private string ComputeHmacSha256(string message, string secretKey)
+        {
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            if (secretKey == null)
+            {
+                throw new ArgumentNullException(nameof(secretKey));
+            }
+
+            var keyBytes = Encoding.UTF8.GetBytes(secretKey);
+            var messageBytes = Encoding.UTF8.GetBytes(message);
+
+            byte[] hashBytes;
+
+            using (var hmac = new HMACSHA256(keyBytes))
+            {
+                hashBytes = hmac.ComputeHash(messageBytes);
+            }
+
+            var hashString = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+
+            return hashString;
+        }
+
     }
 }

@@ -1,5 +1,7 @@
 ﻿using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
+using LocalShipper.Service.Helpers.Momo;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +16,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<int> GetTotalWalletCount();
         Task<WalletResponse> CreateWallet(WalletRequest request);
         Task<WalletResponse> UpdateWallet(int id, WalletRequest request);
+        MomoExecuteResponseModel PaymentExecuteAsync(IQueryCollection collection);
+        Task<MomoCreatePaymentResponseModel> CreatePaymentAsync(WalletTransactionPayment model);
     }
 }

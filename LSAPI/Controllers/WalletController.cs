@@ -230,5 +230,19 @@ namespace LSAPI.Controllers
                 return BadRequest($"Cập nhật ví thất bại: {ex.Message}");
             }
         }
+
+        [HttpPost("momo")]
+        public async Task<string> CreatePaymentUrl(WalletTransactionPayment model)
+        {
+            var response = await _walletService.CreatePaymentAsync(model);
+            return response.PayUrl;
+        }
+
+        [HttpGet("execute-momo")]
+        public IActionResult PaymentCallBack()
+        {
+            var response = _walletService.PaymentExecuteAsync(HttpContext.Request.Query);
+            return View(response);
+        }
     }
 }

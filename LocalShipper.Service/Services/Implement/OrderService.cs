@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure.Core;
 using LocalShipper.Data.Models;
 using LocalShipper.Data.Repository;
 using LocalShipper.Data.UnitOfWork;
@@ -615,11 +616,10 @@ namespace LocalShipper.Service.Services.Implement
 
             return null;
         }
-        //Store
-        //CREATE ORDER
-        public async Task<OrderCreateResponse> CreateOrder(OrderRequestForCreate request)
-        {
 
+
+        public async Task<decimal> ConvertAddressToPrice(string addressStore, string address, int storeId)
+        {
             decimal distancePrice = 0;
             decimal distancePriceMax1 = 0;
             decimal max1;
@@ -631,12 +631,7 @@ namespace LocalShipper.Service.Services.Implement
             decimal maxAmount1;
             decimal maxAmount2;
             decimal price1;
-            
 
-
-            string trackingNumber = await GenerateRandomTrackingNumber(3, 3);
-
-            //Lấy kinh độ vĩ độ để -> khoảng cách
             double latitude = 0;
             double longitude = 0;
             string coordinates = "";
@@ -645,20 +640,17 @@ namespace LocalShipper.Service.Services.Implement
             double longitudeStore = 0;
             string coordinatesStore = "";
 
-            var storeAddress = await _unitOfWork.Repository<Store>().GetAll()
-                    .FirstOrDefaultAsync(b => b.Id == request.StoreId);
-            string _storeAddress = storeAddress.StoreAddress;
-            string address = request.CustomerCommune + ", " + request.CustomerDistrict + ", " + request.CustomerCity;
+           
             GeocodingResponse geocodingResponse = await ConvertAddress(address);
             if (geocodingResponse.status == "OK" && geocodingResponse.results.Count > 0)
             {
                 var location = geocodingResponse.results[0].geometry.location;
-                 latitude = location.lat;
-                 longitude = location.lng;
-                 coordinates = $"{latitude},{longitude}";
+                latitude = location.lat;
+                longitude = location.lng;
+                coordinates = $"{latitude},{longitude}";
             }
 
-            GeocodingResponse geocodingStoreResponse = await ConvertAddress(_storeAddress);
+            GeocodingResponse geocodingStoreResponse = await ConvertAddress(addressStore);
             if (geocodingStoreResponse.status == "OK" && geocodingStoreResponse.results.Count > 0)
             {
                 var locationStore = geocodingStoreResponse.results[0].geometry.location;
@@ -667,7 +659,7 @@ namespace LocalShipper.Service.Services.Implement
                 coordinatesStore = $"{latitudeStore},{longitudeStore}";
             }
 
-            string distanceText ="";
+            string distanceText = "";
             int distanceValue = 0;
             string durationText = "";
             int durationValue = 0;
@@ -679,10 +671,10 @@ namespace LocalShipper.Service.Services.Implement
                 var row = distanceMatrixResonse.rows[0];
                 var element = row.elements[0];
 
-                 distanceText = element.distance.text;
-                 distanceValue = element.distance.value;
-                 durationText = element.duration.text;
-                 durationValue = element.duration.value;
+                distanceText = element.distance.text;
+                distanceValue = element.distance.value;
+                durationText = element.duration.text;
+                durationValue = element.duration.value;
             }
 
 
@@ -694,19 +686,14 @@ namespace LocalShipper.Service.Services.Implement
                 durationValue = durationValue / 60; //đơn vị (phút)
             }
 
-            if ((durationValue / 60 ) > 60)
+            if ((durationValue / 60) > 60)
             {
                 durationValue = durationValue / 360; //đơn vị (giờ)
             }
-          
 
-
-            // Giá của đơn hàng
-
-            if (request.StoreId.HasValue)
-            {
+            
                 var priceL = await _unitOfWork.Repository<PriceL>().GetAll()
-                    .FirstOrDefaultAsync(b => b.StoreId == request.StoreId);
+                    .FirstOrDefaultAsync(b => b.StoreId == storeId);
 
                 decimal? maxDistance = await GetMaxDistance(priceL.StoreId);
 
@@ -811,12 +798,84 @@ namespace LocalShipper.Service.Services.Implement
                         {
                             distancePrice = maxAmount2;
                         }
-
-
-
                     }
                 }
+            return distancePrice;
+        }
+
+
+
+        //Store
+        //CREATE ORDER
+        public async Task<OrderCreateResponse> CreateOrder(OrderRequestForCreate request)
+        {
+
+            string trackingNumber = await GenerateRandomTrackingNumber(3, 3);
+
+            //Lấy kinh độ vĩ độ để -> khoảng cách
+            double latitude = 0;
+            double longitude = 0;
+            string coordinates = "";
+
+            double latitudeStore = 0;
+            double longitudeStore = 0;
+            string coordinatesStore = "";
+
+            var storeAddress = await _unitOfWork.Repository<Store>().GetAll()
+                    .FirstOrDefaultAsync(b => b.Id == request.StoreId);
+            string _storeAddress = storeAddress.StoreAddress;
+            string address = request.CustomerCommune + ", " + request.CustomerDistrict + ", " + request.CustomerCity;
+            GeocodingResponse geocodingResponse = await ConvertAddress(address);
+            if (geocodingResponse.status == "OK" && geocodingResponse.results.Count > 0)
+            {
+                var location = geocodingResponse.results[0].geometry.location;
+                 latitude = location.lat;
+                 longitude = location.lng;
+                 coordinates = $"{latitude},{longitude}";
             }
+
+            GeocodingResponse geocodingStoreResponse = await ConvertAddress(_storeAddress);
+            if (geocodingStoreResponse.status == "OK" && geocodingStoreResponse.results.Count > 0)
+            {
+                var locationStore = geocodingStoreResponse.results[0].geometry.location;
+                latitudeStore = locationStore.lat;
+                longitudeStore = locationStore.lng;
+                coordinatesStore = $"{latitudeStore},{longitudeStore}";
+            }
+
+            string distanceText ="";
+            int distanceValue = 0;
+            string durationText = "";
+            int durationValue = 0;
+
+            DistanceMatrixResponse distanceMatrixResonse = await GetDistanceAndTime(coordinatesStore, coordinates);
+
+            if (distanceMatrixResonse.rows[0].elements[0].status == "OK" && distanceMatrixResonse.rows.Count > 0)
+            {
+                var row = distanceMatrixResonse.rows[0];
+                var element = row.elements[0];
+
+                 distanceText = element.distance.text;
+                 distanceValue = element.distance.value;
+                 durationText = element.duration.text;
+                 durationValue = element.duration.value;
+            }
+
+
+            decimal _distance = distanceValue / 1000;
+            decimal distance = Math.Round(_distance, 1); //đơn vị (km)
+
+            if ((durationValue / 60) < 60)
+            {
+                durationValue = durationValue / 60; //đơn vị (phút)
+            }
+
+            if ((durationValue / 60 ) > 60)
+            {
+                durationValue = durationValue / 360; //đơn vị (giờ)
+            }
+  
+            
 
              string customerAddress = $"{request.CustomerCommune}, {request.CustomerDistrict}, {request.CustomerCity}";
              var customerCoordinates = await ConvertAddress(customerAddress);
@@ -827,10 +886,10 @@ namespace LocalShipper.Service.Services.Implement
                 StoreId = request.StoreId.HasValue ? request.StoreId.Value : 0,
                 TrackingNumber = trackingNumber,
                 Distance = distance,
-                DistancePrice = distancePrice,
+                DistancePrice = request.DistancePrice,
                 SubtotalPrice = request.SubtotalPrice,
                 Cod = request.Cod,
-                TotalPrice = distancePrice + request.SubtotalPrice + request.Cod,
+                TotalPrice = request.DistancePrice + request.SubtotalPrice + request.Cod,
                 Capacity = request.Capacity,
                 PackageWeight = request.PackageWeight,
                 PackageHeight = request.PackageHeight,

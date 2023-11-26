@@ -14,4 +14,6 @@ namespace LocalShipper.Service.DTOs.Request
         public decimal Amount { get; set; }
         public string Description { get; set; }
     }
+
+   
 }

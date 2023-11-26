@@ -21,6 +21,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.AspNetCore.Http;
+using LocalShipper.Service.Helpers.Momo;
 
 namespace LSAPI
 {
@@ -157,6 +158,7 @@ namespace LSAPI
     .AddEntityFrameworkStores<LocalShipperCPContext>()
     .AddDefaultTokenProviders();
 
+            services.Configure<MomoOptionModel>(Configuration.GetSection("MomoAPI"));
 
 
             services.AddControllers();
@@ -216,6 +218,8 @@ namespace LSAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+
+
             });
         }
     }

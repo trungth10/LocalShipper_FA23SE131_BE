@@ -12,6 +12,7 @@ using Org.BouncyCastle.Asn1.Ocsp;
 using LocalShipper.Data.Models;
 using MailKit.Search;
 using System.Text.RegularExpressions;
+using Azure.Core;
 
 namespace LSAPI.Controllers
 {
@@ -332,6 +333,36 @@ namespace LSAPI.Controllers
                 return BadRequest($"tạo Order thất bại: {ex.Message}");
             }
            
+        }
+
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [HttpGet("api/orders/convert-distance")]
+        public async Task<ActionResult<OrderResponse>> DistanceToPrice(string addressStore, string address, int storeId)
+        {
+            try
+            {
+                if (storeId < 1)
+                {
+                    return BadRequest("storeId phải là số dương");
+                }
+                if (string.IsNullOrWhiteSpace(addressStore))
+                {
+                    return BadRequest("Địa chỉ Store không được để trống");
+                }
+                if (string.IsNullOrWhiteSpace(address))
+                {
+                    return BadRequest("Địa chỉ của khách hàng không được để trống");
+                }
+
+                var response = await _orderService.ConvertAddressToPrice(addressStore, address, storeId);
+
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Đổi giá đơn hàng thất bại: {ex.Message}");
+            }
         }
 
         [Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]

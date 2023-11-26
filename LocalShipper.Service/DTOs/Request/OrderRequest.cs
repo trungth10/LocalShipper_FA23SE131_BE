@@ -37,7 +37,8 @@ namespace LocalShipper.Service.DTOs.Request
     public class OrderRequestForCreate
     {
 
-        public int? StoreId { get; set; }      
+        public int? StoreId { get; set; }
+        public decimal DistancePrice { get; set; }
         public decimal SubtotalPrice { get; set; }
         public decimal? Cod { get; set; }
         public string Other { get; set; }

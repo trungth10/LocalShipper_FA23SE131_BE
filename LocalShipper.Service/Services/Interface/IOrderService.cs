@@ -32,6 +32,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<List<OrderResponse>> GetOrderSuggest(int id, SuggestEnum suggest, int money);
 
         Task<List<OrderResponse>> GetOrderV2(OrderRequestV2 request, int? pageNumber, int? pageSize);
+        Task<decimal> ConvertAddressToPrice(string addressStore, string address, int storeId);
 
     }
 }

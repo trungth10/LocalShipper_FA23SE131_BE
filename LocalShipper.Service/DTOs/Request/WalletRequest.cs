@@ -12,4 +12,11 @@ namespace LocalShipper.Service.DTOs.Request
         public int Type { get; set; }
         public int ShipperId { get; set; }
     }
+    public class WalletTransactionPayment
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public decimal Amount { get; set; }
+        public string Description { get; set; }
+    }
 }
