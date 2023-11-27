@@ -33,6 +33,7 @@ namespace LocalShipper.Service.Services.Interface
 
         Task<List<OrderResponse>> GetOrderV2(OrderRequestV2 request, int? pageNumber, int? pageSize);
         Task<decimal> ConvertAddressToPrice(string addressStore, string address, int storeId);
+        Task<OrderResponse> GetOrderByCus(int id); 
 
     }
 }

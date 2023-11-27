@@ -67,6 +67,25 @@ namespace LSAPI.Controllers
             }
         }
 
+        [HttpGet("api/orders-cus")]
+        public async Task<ActionResult<OrderResponse>> GetOrderByCus(int id)
+        {
+            try
+            {               
+                if (id < 0)
+                {
+                    return BadRequest("Id không hợp lệ");
+                }
+
+                var response = await _orderService.GetOrderByCus(id);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xem đơn hàng thất bại: {ex.Message}");
+            }
+        }
+
         [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("api/orders/v2")]
         public async Task<ActionResult<OrderResponse>> GetOrderV2( [FromBody] OrderRequestV2 request, int? pageNumber, int? pageSize)

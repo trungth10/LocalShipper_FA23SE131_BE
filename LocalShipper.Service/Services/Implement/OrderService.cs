@@ -518,7 +518,26 @@ namespace LocalShipper.Service.Services.Implement
             return orderResponse;
         }
 
+        public async Task<OrderResponse> GetOrderByCus(int id)
+        {
 
+            var orders = await _unitOfWork.Repository<Order>().GetAll()
+                                                       .Include(o => o.Store)
+                                                       .Include(o => o.Shipper)
+                                                       .Include(o => o.Action)
+                                                       .Include(o => o.Type)
+                                                       .Include(o => o.Route)
+                                                       .Where(a => a.Id == id)
+                                                       .FirstOrDefaultAsync();
+
+            if (orders == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Order không có hoặc không tồn tại", id.ToString());
+            }
+
+            var orderResponse = _mapper.Map<OrderResponse>(orders);
+            return orderResponse;
+        }
 
         //GET Order v2
         public async Task<List<OrderResponse>> GetOrderV2( OrderRequestV2 request,int? pageNumber, int? pageSize)
