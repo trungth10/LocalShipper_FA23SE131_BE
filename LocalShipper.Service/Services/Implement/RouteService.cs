@@ -158,7 +158,7 @@ namespace LocalShipper.Service.Services.Implement
              .Include(o => o.Action)
              .Include(o => o.Type)
              .Include(o => o.Route)
-             .Where(o => o.ShipperId == shiperId && o.PickupTime == null && o.RouteId == null)
+             .Where(o => o.ShipperId == shiperId && o.RouteId == null && o.Status == 4)
             ;
 
             IEnumerable<Order> filteredOrders = null;

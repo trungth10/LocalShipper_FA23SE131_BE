@@ -40,6 +40,7 @@ namespace LocalShipper.Service.DTOs.Request
         public int? StoreId { get; set; }
         public decimal DistancePrice { get; set; }
         public decimal SubtotalPrice { get; set; }
+        public decimal TotalPrice { get; set; }
         public decimal? Cod { get; set; }
         public string Other { get; set; }
         public DateTime? OrderTime { get; set; }
@@ -56,7 +57,6 @@ namespace LocalShipper.Service.DTOs.Request
         public string CustomerEmail { get; set; }
         public int ActionId { get; set; }
         public int TypeId { get; set; }
-        public int? Eta { get; set; }
     }
     public class OrderRequestForUpdate
     {

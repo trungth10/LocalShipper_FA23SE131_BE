@@ -9,6 +9,10 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using MailKit.Security;
+using System.Net.Http;
+using LocalShipper.Service.DTOs.Response;
+using LocalShipper.Service.DTOs.Request;
+using Newtonsoft.Json;
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -55,5 +59,41 @@ namespace LocalShipper.Service.Services.Implement
                 client.Dispose();
             }
         }
+
+        public async Task<EmailValidationResponse> CheckEmailValidity(string email)
+        {
+            string apiKey = "2ca20a55119159634180276afbb156fd720e67d5";
+
+            using (HttpClient client = new HttpClient())
+            {
+                string apiUrl = $"https://api.hunter.io/v2/email-verifier?email={email}&api_key={apiKey}";
+
+                try
+                {
+                    HttpResponseMessage response = await client.GetAsync(apiUrl);
+
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    var validationResponse = JsonConvert.DeserializeObject<ValidationResponse>(responseBody);
+
+                    if (validationResponse.Data.Status.ToLower() == "valid")
+                    {
+                        return new EmailValidationResponse { IsValid = true, Status = "Valid" };
+                    }
+                    else if (validationResponse.Data.Status.ToLower() == "invalid")
+                    {
+                        return new EmailValidationResponse { IsValid = false, Status = validationResponse.Data.Result ?? "Invalid" };
+                    }
+                    else
+                    {
+                        throw new Exception("Không thể xác định trạng thái email.");
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    throw new Exception("Lỗi khi gửi yêu cầu kiểm tra email.", ex);
+                }
+            }
+        }
     }
 }
+

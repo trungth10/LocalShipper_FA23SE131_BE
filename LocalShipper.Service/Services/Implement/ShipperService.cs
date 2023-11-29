@@ -174,13 +174,12 @@ namespace LocalShipper.Service.Services.Implement
                     EmailShipper = shipper.EmailShipper,
                     PhoneShipper = shipper.PhoneShipper,
                     AddressShipper = shipper.AddressShipper,
-                    TransportId = (int)shipper.TransportId,
+                    TransportId = (int?)shipper.TransportId,
                     AccountId = shipper.AccountId,
                     StoreId =shipper.StoreId,
                     ZoneId = (int)shipper.ZoneId,
                     Fcmtoken = shipper.Fcmtoken,
                     Status = (ShipperStatusEnum)shipper.Status,
-                    //WalletId = shipper.WalletId,
                     Transport = shipper.Transport != null ? new TransportResponse
                     {
                         Id = shipper.Transport.Id,
@@ -214,14 +213,7 @@ namespace LocalShipper.Service.Services.Implement
                         CreatedAt = shipper.Zone.CreatedAt,
                         UpdateAt = shipper.Zone.UpdateAt,
                         Active = shipper.Zone.Active,
-                    } : null,
-                    //Wallet = shipper.Wallet != null ? new WalletResponse
-                    //{
-                    //    Id = shipper.Wallet.Id,
-                    //    Balance = shipper.Wallet.Balance,
-                    //    CreatedAt = shipper.Wallet.CreatedAt,
-                    //    UpdatedAt = shipper.Wallet.UpdatedAt,
-                    //} : null,
+                    } : null,                  
                     OrdersInRoute = null, 
                     Route = null,
                 };
@@ -229,8 +221,7 @@ namespace LocalShipper.Service.Services.Implement
                
                 var routeEdges = shipper.RouteEdges.Where(a => a.Status == 2).ToList();
                 if (routeEdges.Any())
-                {
-                   
+                {                
                     var orders = routeEdges.SelectMany(a => a.Orders).ToList();
                     shipperResponse.OrdersInRoute = _mapper.Map<List<OrderWithShipperResponse>>(orders);
                     shipperResponse.Route = _mapper.Map<List<RouteEdgeWithShipperResponse>>(routeEdges);

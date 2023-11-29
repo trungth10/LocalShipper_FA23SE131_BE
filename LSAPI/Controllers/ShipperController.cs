@@ -52,7 +52,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        //[Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Roles.Store + "," + Roles.Staff + "," + Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<ShipperResponse>>> GetShipper(int id, int storeId, string fullName,
                                             string email, string phone,

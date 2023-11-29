@@ -28,5 +28,6 @@ namespace LocalShipper.Service.Services.Interface
 
         Task<string> ChangePassword(int userId, string currentPassword, string newPassword);
        Task<string> ChangePasswordOfForget(string email, string newPassword);
+        Task SendTrackingOrder(string email, string trackingNumber, int orderId);
     }
 }

@@ -20,6 +20,7 @@ using System.Data;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Mail;
 using System.Net.NetworkInformation;
 using System.Security.Policy;
 using System.Text;
@@ -33,16 +34,20 @@ namespace LocalShipper.Service.Services.Implement
         private readonly IUnitOfWork _unitOfWork;
         private IMapper _mapper;
         private IRouteService _routeService;
+        private IAccountService _accountService;
+        private IEmailService _emailService;
         private readonly HttpClient _httpClient;
         private const string AzureFunctionUrl = "https://localshipperor.azurewebsites.net/api/SolvePDP?code=flGXgZMvGEvpVHsBeuekD6UdYMIcrZP-NSTddJ1JUTvKAzFuviD5og==";
 
 
-        public OrderService(IMapper mapper, IUnitOfWork unitOfWork, IRouteService routeService, HttpClient httpClient)
+        public OrderService(IMapper mapper, IUnitOfWork unitOfWork, IRouteService routeService, HttpClient httpClient, IAccountService accountService, IEmailService emailService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _routeService = routeService;
             _httpClient = httpClient;
+            _accountService = accountService;
+            _emailService = emailService;
         }
 
 
@@ -57,6 +62,7 @@ namespace LocalShipper.Service.Services.Implement
              .Include(o => o.Type)
              .Include(o => o.Route)
              .FirstOrDefaultAsync(a => a.Id == id && string.IsNullOrWhiteSpace(cancelReason));
+          
 
             var orderCancel = await _unitOfWork.Repository<Order>()
              .GetAll()
@@ -71,15 +77,11 @@ namespace LocalShipper.Service.Services.Implement
              .GetAll()
              .FirstOrDefaultAsync(a => a.Id == shipperId);
 
-            if (shipper == null)
-            {
-                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy Shipper", order.ToString());
-            }
 
-            if (shipper.Status == (int)ShipperStatusEnum.Offline)
+            /*if (shipper.Status == (int)ShipperStatusEnum.Offline)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Shipper đang ngoại tuyến", order.ToString());
-            }
+            }*/
 
             if (order == null & orderCancel == null)
             {
@@ -108,7 +110,7 @@ namespace LocalShipper.Service.Services.Implement
                     await _unitOfWork.CommitAsync();
                 }
 
-                if (order.Status == (int)OrderStatusEnum.ASSIGNING)
+                if (order.Status == (int)OrderStatusEnum.ASSIGNING && (shipperId == null || shipperId == 0))
                 {
                     if (order.ShipperId != null)
                     {
@@ -117,7 +119,7 @@ namespace LocalShipper.Service.Services.Implement
 
                     OrderHistory orderHistory = new OrderHistory
                     {
-                        FromStatus = (int)OrderStatusEnum.ASSIGNING,
+                        FromStatus = (int)OrderStatusEnum.IDLE,
                         ToStatus = (int)status,
                         OrderId = order.Id,
                         ShipperId = shipperId,
@@ -168,9 +170,8 @@ namespace LocalShipper.Service.Services.Implement
             if (status == OrderStatusEnum.ASSIGNING && string.IsNullOrWhiteSpace(cancelReason) && (routesId == null || routesId == 0))
             {
                 order.Status = (int)status;
-                order.PickupTime = DateTime.Now;
 
-                OrderHistory orderHistory = new OrderHistory
+               /* OrderHistory orderHistory = new OrderHistory
                 {
                     FromStatus = (int)OrderStatusEnum.IDLE,
                     ToStatus = (int)status,
@@ -179,7 +180,7 @@ namespace LocalShipper.Service.Services.Implement
                     Status = (int)OrderHistoryStatusEnum.ACTICE
                 };
                 await _unitOfWork.Repository<OrderHistory>().InsertAsync(orderHistory);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.CommitAsync();*/
             }
 
             if (status == OrderStatusEnum.IDLE && string.IsNullOrWhiteSpace(cancelReason) && (routesId == null || routesId == 0))
@@ -908,7 +909,7 @@ namespace LocalShipper.Service.Services.Implement
                 DistancePrice = request.DistancePrice,
                 SubtotalPrice = request.SubtotalPrice,
                 Cod = request.Cod,
-                TotalPrice = request.DistancePrice + request.SubtotalPrice + request.Cod,
+                TotalPrice = request.TotalPrice,
                 Capacity = request.Capacity,
                 PackageWeight = request.PackageWeight,
                 PackageHeight = request.PackageHeight,
@@ -931,6 +932,8 @@ namespace LocalShipper.Service.Services.Implement
             };
             await _unitOfWork.Repository<Order>().InsertAsync(newOrder);
             await _unitOfWork.CommitAsync();
+
+            await _accountService.SendTrackingOrder(newOrder.CustomerEmail, newOrder.TrackingNumber, newOrder.Id);
             var orderResponse = _mapper.Map<OrderCreateResponse>(newOrder);
            
             return orderResponse;

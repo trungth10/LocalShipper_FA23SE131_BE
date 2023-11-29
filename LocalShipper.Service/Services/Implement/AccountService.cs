@@ -420,7 +420,7 @@ namespace LocalShipper.Service.Services.Implement
         //Store Add Shipper
         public async Task<AccountResponse> RegisterShipperPrivate(int storeId,RegisterRequest request)
         {
-            var emailExisted = _unitOfWork.Repository<Account>().Find(x => x.Email == request.Email);
+            var emailExisted = _unitOfWork.Repository<Account>().Find(x => x.Email == request.Email && x.RoleId == 5);
             var store = _unitOfWork.Repository<Store>().Find(x => x.Id == storeId);
 
             
@@ -484,6 +484,16 @@ namespace LocalShipper.Service.Services.Implement
         {
             string subject = "Tài khoản LocalShipper";
             string content = $"Welcome to LocalShipper. Login email: {email}. Password: {password}. Please download the app:";
+
+            var message = new Message(new List<string> { email }, subject, content);
+            _emailService.SendEmail(message);
+        }
+
+        public async Task SendTrackingOrder(string email, string trackingNumber, int orderId)
+        {
+            string link = $"https://localshipper.vercel.app/tracking-order?orderId={orderId}";
+            string subject = $"Đơn hàng {trackingNumber} - LocalShipper";
+            string content = $"Cảm ơn bạn đã sử dụng LocalShipper, Bấm vào link để theo dõi đơn hàng {link}";
 
             var message = new Message(new List<string> { email }, subject, content);
             _emailService.SendEmail(message);

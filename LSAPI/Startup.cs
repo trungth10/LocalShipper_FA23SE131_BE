@@ -151,6 +151,7 @@ namespace LSAPI
             services.AddScoped<IPriceInZoneService, PriceInZoneService>();
             services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<IRouteService, RouteService>();
+            services.AddScoped<IEmailService, EmailService>();
 
             services.AddAutoMapper(typeof(Startup));
 

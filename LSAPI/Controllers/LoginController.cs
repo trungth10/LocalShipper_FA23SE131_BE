@@ -9,6 +9,8 @@ using LocalShipper.Service.Services.Implement;
 using LocalShipper.Service.DTOs.Request;
 using System;
 using LocalShipper.Service.Services.Interface;
+using LocalShipper.Service.DTOs.Response;
+using Azure;
 
 namespace LSAPI.Controllers
 {
@@ -18,10 +20,12 @@ namespace LSAPI.Controllers
     public class LoginController : ControllerBase
     {
         private readonly ILoginService _iloginService;
+             private readonly IEmailService _iEmailService;
 
-        public LoginController(ILoginService loginService)
+        public LoginController(ILoginService loginService, IEmailService iEmailService)
         {
             _iloginService = loginService;
+            _iEmailService = iEmailService;
         }
 
 
@@ -218,6 +222,22 @@ namespace LSAPI.Controllers
             {
                 // Log lỗi nếu cần
                 return StatusCode(500, "An error occurred while getting user info.");
+            }
+        }
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost("check-email")]
+
+        public async Task<ActionResult<EmailValidationResponse>> CheckEmailValidity(string email)
+        {
+            try
+            {
+                var result = await _iEmailService.CheckEmailValidity(email);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Có lỗi khi kiểm tra email:");
             }
         }
 

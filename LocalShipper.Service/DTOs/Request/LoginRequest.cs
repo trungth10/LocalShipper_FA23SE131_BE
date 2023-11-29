@@ -11,5 +11,9 @@ namespace LocalShipper.Service.DTOs.Request
         public string Email { get; set; }
         public string Password { get; set; }
     }
+    public class EmailValidateRequest
+    {
+        public string Email { get; set; }
+    }
 }
 
