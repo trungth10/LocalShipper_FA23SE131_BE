@@ -75,7 +75,7 @@ namespace LSAPI.Controllers
         }
 
 
-      [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpPost("shipper/api/routes")]
         public async Task<ActionResult<RouteEdgeResponse>> AddOrderToRoute(IEnumerable<int> id, int shipperId, int routeId, double shipperLatitude, double shipperLongitude)
         {
@@ -186,7 +186,7 @@ namespace LSAPI.Controllers
 
 
         [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
-        [HttpDelete("api/routes/routeid")]
+        [HttpDelete("api/routes/delete-order")]
         public async Task<ActionResult<MessageResponse>> DeleteOrderidInRoute(IEnumerable<int> orderid)
         {
             try
@@ -202,5 +202,7 @@ namespace LSAPI.Controllers
             }
 
         }
+
+       
     }
 }
