@@ -44,6 +44,8 @@ namespace LocalShipper.Service.DTOs.Response
         public int ActionId { get; set; }
         public int TypeId { get; set; }
         public int? Eta { get; set; }
+
+        public string? Evidence { get; set; }
         public List<string> SortedAddresses { get; set; }
         public List<string> SortedAddressesName { get; set; }
 
@@ -52,6 +54,8 @@ namespace LocalShipper.Service.DTOs.Response
         public PackageActionResponse PackageAction { get; set;}
         public PackageTypeResponse PackageType { get; set;}
         public RouteEdgeResponse RouteEdge { get; set;}
+
+
 
     }
     public class OrderCreateResponse
@@ -89,6 +93,7 @@ namespace LocalShipper.Service.DTOs.Response
         public int ActionId { get; set; }
         public int TypeId { get; set; }
         public int? Eta { get; set; }
+        public string? Evidence { get; set; }
 
         public StoreResponse Store { get; set; }
         public ShipperResponse Shipper { get; set; }
@@ -129,6 +134,7 @@ namespace LocalShipper.Service.DTOs.Response
         public int ActionId { get; set; }
         public int TypeId { get; set; }
         public int? Eta { get; set; }
+        public string? Evidence { get; set; }
 
     }
 

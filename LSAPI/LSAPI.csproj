@@ -13,6 +13,8 @@
     <PackageReference Include="Google.OrTools" Version="9.8.3296" />
     <PackageReference Include="Google.Protobuf" Version="3.25.1" />
     <PackageReference Include="Gurobi.Optimizer" Version="10.0.3" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.6" />
+    <PackageReference Include="Hangfire.SqlServer" Version="1.8.6" />
     <PackageReference Include="Kingdom.OrTools.Core" Version="2.19.1.16195" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.17" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" />

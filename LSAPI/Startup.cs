@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.AspNetCore.Http;
 using LocalShipper.Service.Helpers.Momo;
+using Hangfire;
 
 namespace LSAPI
 {
@@ -52,7 +53,11 @@ namespace LSAPI
             services.AddScoped<IEmailService, EmailService>();
             services.AddHttpClient();
 
-
+            services.AddHangfire(configuration => configuration
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseSqlServerStorage(Configuration.GetConnectionString("DBLocalShipper")));
 
             //services.AddAuthorization(options =>
             //{
@@ -214,7 +219,10 @@ namespace LSAPI
             app.UseCors();
             app.UseAuthorization();
             app.UseAuthentication();
-            
+
+            app.UseHangfireDashboard();
+            app.UseHangfireServer();
+
 
             app.UseEndpoints(endpoints =>
             {

@@ -23,7 +23,7 @@ namespace LSAPI.Controllers
             _storeService = storeService;
         }
 
-       // [Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet()]
         public async Task<ActionResult<List<StoreResponse>>> GetStore(int id, string storeName, int status, int zoneId, int walletId, int accountId, int? pageNumber, int? pageSize)
         {
@@ -69,7 +69,7 @@ namespace LSAPI.Controllers
 
         }
 
-        [AllowAnonymous]
+        [Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPost()]
         public async Task<ActionResult<StoreResponse>> PostStore(StoreRequest request)
         {
@@ -193,6 +193,22 @@ namespace LSAPI.Controllers
             catch (Exception ex)
             {
                 return BadRequest($"update Store thất bại: {ex.Message}");
+            }
+
+        }
+
+       // [Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]
+        [HttpPut("set-time-delivery")]
+        public async Task<ActionResult<StoreResponse>> SetTimeDelivery(int id, StoreRequestTime storeRequest)
+        {
+            try
+            {              
+                var rs = await _storeService.SetTimeDelivery(id, storeRequest);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Thiết lập thời gian giao nhận hàng thất bại: {ex.Message}");
             }
 
         }

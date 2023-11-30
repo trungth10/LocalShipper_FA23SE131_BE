@@ -30,7 +30,7 @@ namespace LocalShipper.Data.Models
         public int AccountId { get; set; }
         public float? StoreLat { get; set; }
         public float? StoreLng { get; set; }
-
+        public int? TimeDelivery { get; set; }
 
         public virtual Account Account { get; set; }
         public virtual Template Template { get; set; }

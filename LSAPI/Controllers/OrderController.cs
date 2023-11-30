@@ -13,6 +13,7 @@ using LocalShipper.Data.Models;
 using MailKit.Search;
 using System.Text.RegularExpressions;
 using Azure.Core;
+using Microsoft.AspNetCore.Http;
 
 namespace LSAPI.Controllers
 {
@@ -470,7 +471,21 @@ namespace LSAPI.Controllers
             {
                 return BadRequest($"Gợi ý hóa đơn thất bại: {ex.Message}");
             }
+        }
 
+        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [HttpPut("shipper/api/orders/envidence")]
+        public async Task<ActionResult<string>> UploadImageToFirebase(int orderId, IFormFile image)
+        {
+            try
+            {
+                var imageUrl = await _orderService.UploadEvidence(orderId, image);
+                return Ok(imageUrl);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
     }
 }

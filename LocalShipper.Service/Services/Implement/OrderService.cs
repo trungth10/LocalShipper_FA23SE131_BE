@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Azure.Core;
+using Firebase.Auth;
+using Firebase.Storage;
 using LocalShipper.Data.Models;
 using LocalShipper.Data.Repository;
 using LocalShipper.Data.UnitOfWork;
@@ -9,6 +11,8 @@ using LocalShipper.Service.Exceptions;
 using LocalShipper.Service.Helpers;
 using LocalShipper.Service.Services.Interface;
 using MailKit.Search;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1.Ocsp;
@@ -17,6 +21,7 @@ using Org.BouncyCastle.Utilities.Collections;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -24,8 +29,12 @@ using System.Net.Mail;
 using System.Net.NetworkInformation;
 using System.Security.Policy;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Hangfire;
+using Hangfire.Server;
+
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -39,8 +48,12 @@ namespace LocalShipper.Service.Services.Implement
         private readonly HttpClient _httpClient;
         private const string AzureFunctionUrl = "https://localshipperor.azurewebsites.net/api/SolvePDP?code=flGXgZMvGEvpVHsBeuekD6UdYMIcrZP-NSTddJ1JUTvKAzFuviD5og==";
 
+        private readonly IWebHostEnvironment _env;
 
-        public OrderService(IMapper mapper, IUnitOfWork unitOfWork, IRouteService routeService, HttpClient httpClient, IAccountService accountService, IEmailService emailService)
+
+
+
+        public OrderService(IMapper mapper, IUnitOfWork unitOfWork, IRouteService routeService, HttpClient httpClient, IAccountService accountService, IEmailService emailService, IWebHostEnvironment env)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -48,6 +61,7 @@ namespace LocalShipper.Service.Services.Implement
             _httpClient = httpClient;
             _accountService = accountService;
             _emailService = emailService;
+            _env = env;
         }
 
 
@@ -62,7 +76,7 @@ namespace LocalShipper.Service.Services.Implement
              .Include(o => o.Type)
              .Include(o => o.Route)
              .FirstOrDefaultAsync(a => a.Id == id && string.IsNullOrWhiteSpace(cancelReason));
-          
+
 
             var orderCancel = await _unitOfWork.Repository<Order>()
              .GetAll()
@@ -137,6 +151,8 @@ namespace LocalShipper.Service.Services.Implement
                 order.Status = (int)status;
                 order.ShipperId = shipperId;
 
+                BackgroundJob.Schedule(() => CheckAcceptStatus(order.Id), TimeSpan.FromMinutes(15));
+
                 OrderHistory orderHistory = new OrderHistory
                 {
                     FromStatus = (int)OrderStatusEnum.IDLE,
@@ -155,6 +171,8 @@ namespace LocalShipper.Service.Services.Implement
                 order.Status = (int)status;
                 order.PickupTime = DateTime.Now;
 
+                BackgroundJob.Enqueue(() => CheckDeliveryStatus(order.Id, (int)order.Store.TimeDelivery));
+
                 OrderHistory orderHistory = new OrderHistory
                 {
                     FromStatus = (int)OrderStatusEnum.ACCEPTED,
@@ -170,17 +188,17 @@ namespace LocalShipper.Service.Services.Implement
             if (status == OrderStatusEnum.ASSIGNING && string.IsNullOrWhiteSpace(cancelReason) && (routesId == null || routesId == 0))
             {
                 order.Status = (int)status;
-
-               /* OrderHistory orderHistory = new OrderHistory
-                {
-                    FromStatus = (int)OrderStatusEnum.IDLE,
-                    ToStatus = (int)status,
-                    OrderId = order.Id,
-                    ShipperId = shipperId,
-                    Status = (int)OrderHistoryStatusEnum.ACTICE
-                };
-                await _unitOfWork.Repository<OrderHistory>().InsertAsync(orderHistory);
-                await _unitOfWork.CommitAsync();*/
+                BackgroundJob.Schedule(() => CheckAcceptStatus(order.Id), TimeSpan.FromMinutes(15));
+                /* OrderHistory orderHistory = new OrderHistory
+                 {
+                     FromStatus = (int)OrderStatusEnum.IDLE,
+                     ToStatus = (int)status,
+                     OrderId = order.Id,
+                     ShipperId = shipperId,
+                     Status = (int)OrderHistoryStatusEnum.ACTICE
+                 };
+                 await _unitOfWork.Repository<OrderHistory>().InsertAsync(orderHistory);
+                 await _unitOfWork.CommitAsync();*/
             }
 
             if (status == OrderStatusEnum.IDLE && string.IsNullOrWhiteSpace(cancelReason) && (routesId == null || routesId == 0))
@@ -201,7 +219,7 @@ namespace LocalShipper.Service.Services.Implement
 
             if (status == OrderStatusEnum.COMPLETED && string.IsNullOrWhiteSpace(cancelReason))
             {
-                if(routesId != null || routesId != 0)
+                if (routesId != null )
                 {
                     bool areAllOtherOrdersCompleted = await _unitOfWork.Repository<Order>()
                                                  .GetAll()
@@ -221,8 +239,71 @@ namespace LocalShipper.Service.Services.Implement
                     }
                 }
 
+                if(order.Cod > 0)
+                {
+                    var fromWallet = await _unitOfWork.Repository<Wallet>().FindAsync(x => x.ShipperId == order.ShipperId && x.Type == (int)WalletTypeEnum.VITHUHO);
+                    var toWallet = await _unitOfWork.Repository<Wallet>().FindAsync(x => x.Id == order.Store.WalletId);
+                    if (fromWallet.Balance < order.Cod)
+                    {
+                        throw new CrudException(HttpStatusCode.BadRequest, "Không đủ tiền để thực hiện giao dịch", fromWallet.Id.ToString());
+                    }
+
+                    
+
+                    if (order.Cod < 1200000)
+                    {
+                        fromWallet.Balance -= (decimal)order.Cod;
+                        fromWallet.UpdatedAt = DateTime.Now;
+                        await _unitOfWork.Repository<Wallet>().Update(fromWallet, fromWallet.Id);
+                        await _unitOfWork.CommitAsync();
+
+                        toWallet.Balance += (decimal)order.Cod;
+                        toWallet.UpdatedAt = DateTime.Now;
+
+                        await _unitOfWork.Repository<Wallet>().Update(toWallet, toWallet.Id);
+                        await _unitOfWork.CommitAsync();
+
+                        WalletTransaction walletTrans = new WalletTransaction
+                        {
+                            TransactionType = "Chuyển tiền thu hộ",
+                            FromWalletId = fromWallet.Id,
+                            ToWalletId = toWallet.Id,
+                            Amount = (decimal)order.Cod,
+                            Description = $"Shipper {fromWallet.Shipper.FullName} chuyển tiền thu hộ",
+                        };
+                        await _unitOfWork.Repository<WalletTransaction>().InsertAsync(walletTrans);
+                        await _unitOfWork.CommitAsync();
+
+                    }
+                    else
+                    {
+                        fromWallet.Balance -= (decimal)order.Cod * 0.65m;
+                        fromWallet.UpdatedAt = DateTime.Now;
+                        await _unitOfWork.Repository<Wallet>().Update(fromWallet, fromWallet.Id);
+                        await _unitOfWork.CommitAsync();
+
+                        toWallet.Balance += (decimal)order.Cod * 0.65m;
+                        toWallet.UpdatedAt = DateTime.Now;
+
+                        await _unitOfWork.Repository<Wallet>().Update(toWallet, toWallet.Id);
+                        await _unitOfWork.CommitAsync();
+
+                        WalletTransaction walletTrans = new WalletTransaction
+                        {
+                            TransactionType = "Chuyển tiền thu hộ",
+                            FromWalletId = fromWallet.Id,
+                            ToWalletId = toWallet.Id,
+                            Amount = (decimal)order.Cod * 0.65m,
+                            Description = $"Shipper {fromWallet.Shipper.FullName} chuyển tiền thu hộ",
+                        };
+                        await _unitOfWork.Repository<WalletTransaction>().InsertAsync(walletTrans);
+                        await _unitOfWork.CommitAsync();
+                    }                     
+                }
+
                 order.Status = (int)status;
                 order.CompleteTime = DateTime.Now;
+
                 OrderHistory orderHistory = new OrderHistory
                 {
                     FromStatus = (int)OrderStatusEnum.INPROCESS,
@@ -236,10 +317,11 @@ namespace LocalShipper.Service.Services.Implement
 
             }
 
-            if (status == OrderStatusEnum.CANCELLED && string.IsNullOrWhiteSpace(cancelReason) && (routesId == null || routesId == 0))
+            if (status == OrderStatusEnum.CANCELLED  && (routesId == null || routesId == 0))
             {
                 order.Status = (int)status;
                 order.CompleteTime = DateTime.Now;
+                order.CancelReason = cancelReason;
                 OrderHistory orderHistory = new OrderHistory
                 {
                     FromStatus = (int)OrderStatusEnum.INPROCESS,
@@ -369,8 +451,8 @@ namespace LocalShipper.Service.Services.Implement
 
 
         //GET Order
-        public async Task<List<OrderResponse>> GetOrder(int? zoneId,int? id, int? status, int? storeId, int? shipperId,
-                                     string? tracking_number, string? cancel_reason, decimal? distance,  decimal? distance_price,
+        public async Task<List<OrderResponse>> GetOrder(int? zoneId, int? id, int? status, int? storeId, int? shipperId,
+                                     string? tracking_number, string? cancel_reason, decimal? distance, decimal? distance_price,
                                      decimal? subtotal_price, decimal? COD, decimal? totalPrice, string? other, int? routeId,
                                      int? capacity, int? package_weight, int? package_width, int? package_height, int? package_length,
                                      string? customer_city, string? customer_commune, string? customer_district, string? customer_phone,
@@ -541,7 +623,7 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //GET Order v2
-        public async Task<List<OrderResponse>> GetOrderV2( OrderRequestV2 request,int? pageNumber, int? pageSize)
+        public async Task<List<OrderResponse>> GetOrderV2(OrderRequestV2 request, int? pageNumber, int? pageSize)
         {
 
             var orders = _unitOfWork.Repository<Order>().GetAll()
@@ -550,17 +632,17 @@ namespace LocalShipper.Service.Services.Implement
                                                        .Include(o => o.Action)
                                                        .Include(o => o.Type)
                                                        .Include(o => o.Route)
-                                                       .Where(a => !request.id.Any()  || request.id.Contains(a.Id))
+                                                       .Where(a => !request.id.Any() || request.id.Contains(a.Id))
                                                        .Where(a => !request.status.Any() || request.status.Contains(a.Status))
                                                        .Where(a => !request.storeId.Any() || request.storeId.Contains(a.StoreId))
                                                        .Where(a => !request.shipperId.Any() || request.shipperId.Contains((int)a.ShipperId))
                                                        .Where(a => !request.tracking_number.Any() || request.tracking_number.Contains(a.TrackingNumber))
-                                                       .Where(a => !request.cancel_reason.Any() || request.cancel_reason.Contains(a.CancelReason))                                                       
+                                                       .Where(a => !request.cancel_reason.Any() || request.cancel_reason.Contains(a.CancelReason))
                                                        .Where(a => (request.COD == null || request.COD == 0) || a.Cod <= request.COD)
                                                        .Where(a => (request.Distance == null || request.Distance == 0) || a.Distance <= request.Distance)
                                                        .Where(a => !request.other.Any() || request.other.Contains(a.Other))
                                                        .Where(a => !request.routeId.Any() || request.routeId.Contains((int)a.RouteId))
-                                                       .Where(a => (request.capacity == null || request.capacity == 0) || a.Capacity <= request.capacity)                                                      
+                                                       .Where(a => (request.capacity == null || request.capacity == 0) || a.Capacity <= request.capacity)
                                                        .Where(a => !request.customer_city.Any() || request.customer_city.Contains(a.CustomerCity))
                                                        .Where(a => !request.customer_commune.Any() || request.customer_commune.Contains(a.CustomerCommune))
                                                        .Where(a => !request.customer_district.Any() || request.customer_district.Contains(a.CustomerDistrict))
@@ -660,7 +742,7 @@ namespace LocalShipper.Service.Services.Implement
             double longitudeStore = 0;
             string coordinatesStore = "";
 
-           
+
             GeocodingResponse geocodingResponse = await ConvertAddress(address);
             if (geocodingResponse.status == "OK" && geocodingResponse.results.Count > 0)
             {
@@ -711,115 +793,115 @@ namespace LocalShipper.Service.Services.Implement
                 durationValue = durationValue / 360; //đơn vị (giờ)
             }
 
-            
-                var priceL = await _unitOfWork.Repository<PriceL>().GetAll()
-                    .FirstOrDefaultAsync(b => b.StoreId == storeId);
 
-                decimal? maxDistance = await GetMaxDistance(priceL.StoreId);
+            var priceL = await _unitOfWork.Repository<PriceL>().GetAll()
+                .FirstOrDefaultAsync(b => b.StoreId == storeId);
 
-                if (priceL != null)
+            decimal? maxDistance = await GetMaxDistance(priceL.StoreId);
+
+            if (priceL != null)
+            {
+                var priceItems = await _unitOfWork.Repository<PriceItem>().GetAll()
+                    .Where(b => b.PriceId == priceL.Id)
+                    .ToListAsync();
+                var id = priceItems.Select(b => b.Id).ToList();
+
+                var firstId = id.FirstOrDefault();
+
+                var secondItem = id.Skip(1).FirstOrDefault();
+                if (GetPriceItemId(priceItems, (double)distance) == priceItems.FirstOrDefault().Id)
                 {
-                    var priceItems = await _unitOfWork.Repository<PriceItem>().GetAll()
-                        .Where(b => b.PriceId == priceL.Id)
-                        .ToListAsync();
-                    var id = priceItems.Select(b => b.Id).ToList();
 
-                    var firstId = id.FirstOrDefault();
-
-                    var secondItem = id.Skip(1).FirstOrDefault();
-                    if (GetPriceItemId(priceItems, (double)distance) == priceItems.FirstOrDefault().Id)
+                    price1 = priceItems
+                   .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
+                   .Select(b => (decimal)b.Price)
+                   .FirstOrDefault();
+                    max1 = priceItems
+                            .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance && firstId == priceItems.FirstOrDefault().Id)
+                            .Select(b => (decimal)b.MaxDistance)
+                            .FirstOrDefault();
+                    maxAmount1 = priceItems
+                            .Where(b => b.MaxDistance < (double)distance)
+                            .Select(b => (decimal)b.MaxAmount)
+                            .FirstOrDefault();
+                    min1 = priceItems
+                            .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance && firstId == priceItems.FirstOrDefault().Id)
+                            .Select(b => (decimal)b.MinDistance)
+                            .FirstOrDefault();
+                    minAmount1 = priceItems
+                            .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance && firstId == priceItems.FirstOrDefault().Id)
+                            .Select(b => (decimal)b.MinAmount)
+                            .FirstOrDefault();
+                    if (distance >= min1 && distance <= max1)
                     {
-
-                        price1 = priceItems
-                       .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
-                       .Select(b => (decimal)b.Price)
-                       .FirstOrDefault();
-                        max1 = priceItems
-                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance && firstId == priceItems.FirstOrDefault().Id)
-                                .Select(b => (decimal)b.MaxDistance)
-                                .FirstOrDefault();
-                        maxAmount1 = priceItems
-                                .Where(b => b.MaxDistance < (double)distance)
-                                .Select(b => (decimal)b.MaxAmount)
-                                .FirstOrDefault();
-                        min1 = priceItems
-                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance && firstId == priceItems.FirstOrDefault().Id)
-                                .Select(b => (decimal)b.MinDistance)
-                                .FirstOrDefault();
-                        minAmount1 = priceItems
-                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance && firstId == priceItems.FirstOrDefault().Id)
-                                .Select(b => (decimal)b.MinAmount)
-                                .FirstOrDefault();
-                        if (distance >= min1 && distance <= max1)
-                        {
-                            distancePrice = priceItems
-                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
-                                .Select(b => b.Price)
-                                .FirstOrDefault();
-                            distancePriceMax1 = priceItems
-                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
-                                .Select(b => (decimal)b.MaxDistance)
-                                .FirstOrDefault();
-                            if (distance <= distancePriceMax1 && distance >= 1)
-                            {
-                                distancePrice = distance * distancePrice;
-
-
-                            }
-                            else if (distance < 1)
-                            {
-                                distancePrice = minAmount1;
-                            }
-                            else if (distance > max1)
-                            {
-                                distancePrice = maxAmount1;
-
-                            }
-
-                        }
-
-                    }
-
-                    else if (GetPriceItemId(priceItems, (double)distance) == priceItems.Skip(1).FirstOrDefault().Id || distance > maxDistance.Value)
-                    {
-
-                        max2 = priceItems
+                        distancePrice = priceItems
+                            .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
+                            .Select(b => b.Price)
+                            .FirstOrDefault();
+                        distancePriceMax1 = priceItems
                             .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
                             .Select(b => (decimal)b.MaxDistance)
                             .FirstOrDefault();
-                        maxAmount2 = priceItems
-                               .Where(b => b.MaxDistance < (double)distance)
-                               .Select(b => (decimal)b.MaxAmount)
-                               .FirstOrDefault();
-                        min2 = priceItems
-                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
-                                .Select(b => (decimal)b.MinDistance)
-                                .FirstOrDefault();
-                        minAmount2 = priceItems
-                                .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
-                                .Select(b => (decimal)b.MinAmount)
-                                .FirstOrDefault();
+                        if (distance <= distancePriceMax1 && distance >= 1)
+                        {
+                            distancePrice = distance * distancePrice;
 
-                        decimal max = (decimal)priceItems.FirstOrDefault().MaxDistance;
-                        decimal price = (decimal)priceItems.FirstOrDefault().Price;
-                        if (distance >= min2 && distance <= max2)
-                        {
-                            var distancePrice2 = priceItems
-                                .Where(b => b.MinDistance >= (double)min2 && b.MaxDistance <= (double)max2)
-                                .Select(b => b.Price)
-                                .FirstOrDefault();
-                            distancePrice = max * price + (distance - max) * distancePrice2;
+
                         }
-                        else if (distance > max2 && distance <= min2)
+                        else if (distance < 1)
                         {
-                            distancePrice = minAmount2;
+                            distancePrice = minAmount1;
                         }
-                        else if (distance > max2)
+                        else if (distance > max1)
                         {
-                            distancePrice = maxAmount2;
+                            distancePrice = maxAmount1;
+
                         }
+
+                    }
+
+                }
+
+                else if (GetPriceItemId(priceItems, (double)distance) == priceItems.Skip(1).FirstOrDefault().Id || distance > maxDistance.Value)
+                {
+
+                    max2 = priceItems
+                        .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
+                        .Select(b => (decimal)b.MaxDistance)
+                        .FirstOrDefault();
+                    maxAmount2 = priceItems
+                           .Where(b => b.MaxDistance < (double)distance)
+                           .Select(b => (decimal)b.MaxAmount)
+                           .FirstOrDefault();
+                    min2 = priceItems
+                            .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
+                            .Select(b => (decimal)b.MinDistance)
+                            .FirstOrDefault();
+                    minAmount2 = priceItems
+                            .Where(b => b.MinDistance <= (double)distance && b.MaxDistance >= (double)distance)
+                            .Select(b => (decimal)b.MinAmount)
+                            .FirstOrDefault();
+
+                    decimal max = (decimal)priceItems.FirstOrDefault().MaxDistance;
+                    decimal price = (decimal)priceItems.FirstOrDefault().Price;
+                    if (distance >= min2 && distance <= max2)
+                    {
+                        var distancePrice2 = priceItems
+                            .Where(b => b.MinDistance >= (double)min2 && b.MaxDistance <= (double)max2)
+                            .Select(b => b.Price)
+                            .FirstOrDefault();
+                        distancePrice = max * price + (distance - max) * distancePrice2;
+                    }
+                    else if (distance > max2 && distance <= min2)
+                    {
+                        distancePrice = minAmount2;
+                    }
+                    else if (distance > max2)
+                    {
+                        distancePrice = maxAmount2;
                     }
                 }
+            }
             return distancePrice;
         }
 
@@ -849,9 +931,9 @@ namespace LocalShipper.Service.Services.Implement
             if (geocodingResponse.status == "OK" && geocodingResponse.results.Count > 0)
             {
                 var location = geocodingResponse.results[0].geometry.location;
-                 latitude = location.lat;
-                 longitude = location.lng;
-                 coordinates = $"{latitude},{longitude}";
+                latitude = location.lat;
+                longitude = location.lng;
+                coordinates = $"{latitude},{longitude}";
             }
 
             GeocodingResponse geocodingStoreResponse = await ConvertAddress(_storeAddress);
@@ -863,7 +945,7 @@ namespace LocalShipper.Service.Services.Implement
                 coordinatesStore = $"{latitudeStore},{longitudeStore}";
             }
 
-            string distanceText ="";
+            string distanceText = "";
             int distanceValue = 0;
             string durationText = "";
             int durationValue = 0;
@@ -875,10 +957,10 @@ namespace LocalShipper.Service.Services.Implement
                 var row = distanceMatrixResonse.rows[0];
                 var element = row.elements[0];
 
-                 distanceText = element.distance.text;
-                 distanceValue = element.distance.value;
-                 durationText = element.duration.text;
-                 durationValue = element.duration.value;
+                distanceText = element.distance.text;
+                distanceValue = element.distance.value;
+                durationText = element.duration.text;
+                durationValue = element.duration.value;
             }
 
 
@@ -890,15 +972,15 @@ namespace LocalShipper.Service.Services.Implement
                 durationValue = durationValue / 60; //đơn vị (phút)
             }
 
-            if ((durationValue / 60 ) > 60)
+            if ((durationValue / 60) > 60)
             {
                 durationValue = durationValue / 360; //đơn vị (giờ)
             }
-  
-            
 
-             string customerAddress = $"{request.CustomerCommune}, {request.CustomerDistrict}, {request.CustomerCity}";
-             var customerCoordinates = await ConvertAddress(customerAddress);
+
+
+            string customerAddress = $"{request.CustomerCommune}, {request.CustomerDistrict}, {request.CustomerCity}";
+            var customerCoordinates = await ConvertAddress(customerAddress);
 
 
             var newOrder = new Order
@@ -935,7 +1017,7 @@ namespace LocalShipper.Service.Services.Implement
 
             await _accountService.SendTrackingOrder(newOrder.CustomerEmail, newOrder.TrackingNumber, newOrder.Id);
             var orderResponse = _mapper.Map<OrderCreateResponse>(newOrder);
-           
+
             return orderResponse;
         }
 
@@ -964,7 +1046,7 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<DistanceMatrixResponse> GetDistanceAndTime(string origins, string destinations)
         {
-            string apiKey = "Mhb5fDCqtwRuLPj27DtTxqcO0ygKX4IsS2KxWw0B"; 
+            string apiKey = "Mhb5fDCqtwRuLPj27DtTxqcO0ygKX4IsS2KxWw0B";
             string distanceMatrixApiUrl = "https://rsapi.goong.io/DistanceMatrix";
 
             using (var httpClient = new HttpClient())
@@ -987,8 +1069,8 @@ namespace LocalShipper.Service.Services.Implement
 
         public async Task<string> GenerateRandomTrackingNumber(int numberOfLetters, int numberOfDigits)
         {
-            string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
-            string digits = "0123456789"; 
+            string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            string digits = "0123456789";
 
             Random random = new Random();
 
@@ -1267,7 +1349,7 @@ namespace LocalShipper.Service.Services.Implement
             if (suggest == SuggestEnum.CAPACITY && (money == null || money == 0))
             {
                 orderSuggest.Where(a => a.Capacity <= 5).ToListAsync();
-            }           
+            }
             if (suggest == SuggestEnum.COD)
             {
                 orderSuggest.Where(a => a.Capacity <= money).ToListAsync();
@@ -1277,13 +1359,150 @@ namespace LocalShipper.Service.Services.Implement
             return orderResponse;
         }
 
-        
+
+        public async Task<string> UploadEvidence(int orderId, IFormFile evidence)
+        {
+            string bucket = "localshipper-fc4a5.appspot.com";
+            string authEmail = "tranbacong311@gmail.com";
+            string authPassword = "lai1nguoinua";
+            string apiKey = "AIzaSyDClgoRpinIEXy6Ho_Upk2mwoKtSc3Kl2M";
+
+            try
+            {
+
+                var order = await _unitOfWork.Repository<Order>().GetAll().FirstOrDefaultAsync(a => a.Id == orderId);
+
+                if (order == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Đơn hàng không tồn tại", order.ToString());
+                }
 
 
+                if (evidence == null || evidence.Length == 0)
+                {
+                    throw new Exception("Không có tệp tin nào được chọn hoặc tệp tin rỗng.");
+                }
+
+
+                string fileName = Path.GetFileName(evidence.FileName);
+                string folderName = "avatars";
+                if (_env != null)
+                {
+                    string path = Path.Combine(_env.WebRootPath, $"images/{folderName}");
+
+
+
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+
+
+                    using (var fileStream = new FileStream(Path.Combine(path, fileName), FileMode.Create))
+                    {
+                        await evidence.CopyToAsync(fileStream);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Error: HostingEnvironment is null.");
+
+                }
+
+
+
+                string imagePath = $"{folderName}/{fileName}";
+
+
+                var auth = new FirebaseAuthProvider(new FirebaseConfig(apiKey));
+                var authResult = await auth.SignInWithEmailAndPasswordAsync(authEmail, authPassword);
+
+
+                var cancellation = new CancellationTokenSource();
+                var firebaseStorage = new FirebaseStorage(
+                    bucket,
+                    new FirebaseStorageOptions
+                    {
+                        AuthTokenAsyncFactory = () => Task.FromResult(authResult.FirebaseToken),
+                        ThrowOnCancel = true
+                    });
+
+                var uploadTask = firebaseStorage.Child("images").Child(orderId.ToString()).Child(fileName).PutAsync(evidence.OpenReadStream(), cancellation.Token);
+                var imageUrl = await uploadTask;
+
+
+                order.Evidence = imageUrl;
+
+                await _unitOfWork.Repository<Order>().Update(order, orderId);
+                await _unitOfWork.CommitAsync();
+
+
+                return imageUrl;
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine($"Error uploading image: {ex.Message}");
+                throw;
+            }
+        }
+
+
+        public async Task CheckDeliveryStatus(int id, int timeRequest)
+        {
+            var orders = await _unitOfWork.Repository<Order>().GetAll()
+                                                       .Include(o => o.Store)
+                                                       .Include(o => o.Shipper)
+                                                       .Include(o => o.Action)
+                                                       .Include(o => o.Type)
+                                                       .Include(o => o.Route)
+                                                       .Where(a => a.Id == id)
+                                                       .FirstOrDefaultAsync();
+
+           
+                DateTime pickupTime = (DateTime)orders.PickupTime;
+                DateTime completeTime = (DateTime)orders.CompleteTime;
+                int storeDeliveryWindow = timeRequest;
+
+                TimeSpan delay = completeTime - pickupTime;
+
+                int storeDeliveryWindowInHours = storeDeliveryWindow;
+
+                if (delay.TotalHours > storeDeliveryWindowInHours)
+                {
+                   _accountService.SendNotificationToStore(orders.Store.StoreEmail, orders.TrackingNumber);
+                }
+            
+        }
+
+        public async Task CheckAcceptStatus(int orderId)
+        {
+            var orders = await _unitOfWork.Repository<Order>().GetAll()
+                                                       .Include(o => o.Store)
+                                                       .Include(o => o.Shipper)
+                                                       .Include(o => o.Action)
+                                                       .Include(o => o.Type)
+                                                       .Include(o => o.Route)
+                                                       .Where(a => a.Id == orderId)
+                                                       .FirstOrDefaultAsync();
+
+            if (orders.Status == (int)OrderStatusEnum.WAITING)
+            {
+                orders.Status = (int)OrderStatusEnum.IDLE;
+                await _unitOfWork.Repository<Order>().Update(orders, orderId);
+                await _unitOfWork.CommitAsync();
+                _accountService.SendNotificationToStoreWaiting(orders.Store.StoreEmail, orders.TrackingNumber);
+            }
+
+            if (orders.Status == (int)OrderStatusEnum.ASSIGNING)
+            {
+                orders.Status = (int)OrderStatusEnum.IDLE;
+                await _unitOfWork.Repository<Order>().Update(orders, orderId);
+                await _unitOfWork.CommitAsync();
+                _accountService.SendNotificationToStoreWaiting(orders.Store.StoreEmail, orders.TrackingNumber);
+            }
+        }
 
 
     }
-
-
-
 }

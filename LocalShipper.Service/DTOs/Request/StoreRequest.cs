@@ -22,4 +22,10 @@ namespace LocalShipper.Service.DTOs.Request
         public int WalletId { get; set; }
         public int AccountId { get; set; }
     }
+
+    public class StoreRequestTime
+    {
+
+        public int TimeDelivery { get; set; }
+    }
 }

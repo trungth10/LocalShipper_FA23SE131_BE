@@ -49,6 +49,7 @@ namespace LocalShipper.Data.Models
         public int ActionId { get; set; }
         public int TypeId { get; set; }
         public int? Eta { get; set; }
+        public string? Evidence { get; set; }
 
         public virtual PackageAction Action { get; set; }
         public virtual RouteEdge Route { get; set; }

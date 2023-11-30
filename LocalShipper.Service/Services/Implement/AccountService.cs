@@ -464,6 +464,29 @@ namespace LocalShipper.Service.Services.Implement
 
             await SendAccountShipper(request.Email, request.Password);
 
+            Wallet wallet1 = new Wallet
+            {
+                Balance = 0,
+                Type = (int)WalletTypeEnum.VICHINH,
+                ShipperId = shipper.Id
+            };
+            await _unitOfWork.Repository<Wallet>().InsertAsync(wallet1);
+            Wallet wallet2 = new Wallet
+            {
+                Balance = 0,
+                Type = (int)WalletTypeEnum.VITHUHO,
+                ShipperId = shipper.Id
+            };
+            await _unitOfWork.Repository<Wallet>().InsertAsync(wallet2);
+            Wallet wallet3 = new Wallet
+            {
+                Balance = 0,
+                Type = (int)WalletTypeEnum.VIKICHHOAT,
+                ShipperId = shipper.Id
+            };
+            await _unitOfWork.Repository<Wallet>().InsertAsync(wallet3);
+            await _unitOfWork.CommitAsync();
+
             return new AccountResponse
             {
                 Id = account.Id,
@@ -494,6 +517,24 @@ namespace LocalShipper.Service.Services.Implement
             string link = $"https://localshipper.vercel.app/tracking-order?orderId={orderId}";
             string subject = $"Đơn hàng {trackingNumber} - LocalShipper";
             string content = $"Cảm ơn bạn đã sử dụng LocalShipper, Bấm vào link để theo dõi đơn hàng {link}";
+
+            var message = new Message(new List<string> { email }, subject, content);
+            _emailService.SendEmail(message);
+        }
+
+        public async Task SendNotificationToStore(string email, string trackingNumber)
+        {
+            string subject = $"Đơn hàng {trackingNumber} - LocalShipper";
+            string content = $"Cảm ơn bạn đã sử dụng LocalShipper, Đơn hàng {trackingNumber} - Đã vượt quá thời gian nhận và giao hàng. Liên hệ shipper hoặc báo cáo về hệ thống LocalShipper theo số điện thoại: 076***4855";
+
+            var message = new Message(new List<string> { email }, subject, content);
+            _emailService.SendEmail(message);
+        }
+
+        public async Task SendNotificationToStoreWaiting(string email, string trackingNumber)
+        {
+            string subject = $"Đơn hàng {trackingNumber} - LocalShipper";
+            string content = $"Cảm ơn bạn đã sử dụng LocalShipper, Đơn hàng {trackingNumber} - Shipper không nhận đơn hoặc không có Shipper nào đang rảnh.";
 
             var message = new Message(new List<string> { email }, subject, content);
             _emailService.SendEmail(message);

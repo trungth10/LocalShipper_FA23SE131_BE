@@ -250,6 +250,9 @@ namespace LocalShipper.Data.Models
                     .HasColumnName("tracking_number");
 
                 entity.Property(e => e.TypeId).HasColumnName("typeId");
+                entity.Property(e => e.Evidence)
+                    .HasMaxLength(255)
+                    .HasColumnName("evidence");
 
                 entity.HasOne(d => d.Action)
                     .WithMany(p => p.Orders)
@@ -278,6 +281,8 @@ namespace LocalShipper.Data.Models
                     .HasForeignKey(d => d.TypeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Order_PackageType");
+
+
             });
 
             modelBuilder.Entity<OrderHistory>(entity =>
@@ -642,6 +647,10 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.StoreLng)
                     .HasColumnName("storeLng")
                     .HasColumnType("float");
+
+                entity.Property(e => e.TimeDelivery)
+                   .HasColumnType("int")
+                   .HasColumnName("timeDelivery");
 
                 entity.HasOne(d => d.Account)
                     .WithMany(p => p.Stores)

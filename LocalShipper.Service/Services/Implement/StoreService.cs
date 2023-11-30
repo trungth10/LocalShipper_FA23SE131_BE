@@ -83,6 +83,15 @@ namespace LocalShipper.Service.Services.Implement
              string storeAddress = request.StoreAddress;
              var storeCoordinates = await _routeService.ConvertAddress(storeAddress);
 
+            Wallet wallet = new Wallet
+            {
+                Balance = 0,
+            };
+
+            await _unitOfWork.Repository<Wallet>().InsertAsync(wallet);
+            await _unitOfWork.CommitAsync();
+
+
             var newStore = new Store
             {
                 StoreName = request.StoreName.Trim(),
@@ -95,17 +104,18 @@ namespace LocalShipper.Service.Services.Implement
                 Status = request.Status ?? 0,
                 TemplateId = request.TemplateId,
                 ZoneId = request.ZoneId,
-                WalletId = request.WalletId,
+                WalletId = wallet.Id,
                 AccountId = request.AccountId,
                 StoreLat = (float)storeCoordinates.Latitude,
                 StoreLng = (float)storeCoordinates.Longitude
         };
+         
 
-          
             await _unitOfWork.Repository<Store>().InsertAsync(newStore);
             await _unitOfWork.CommitAsync();
 
            
+
             var storeResponse = _mapper.Map<StoreResponse>(newStore);
             return storeResponse;
         }
@@ -143,6 +153,28 @@ namespace LocalShipper.Service.Services.Implement
             var updatedStoreResponse = _mapper.Map<StoreResponse>(store);
             return updatedStoreResponse;
         }
+
+        public async Task<StoreResponse> SetTimeDelivery(int id, StoreRequestTime storeRequest)
+        {
+            var store = await _unitOfWork.Repository<Store>()
+                .GetAll().Include(b => b.Wallet).Include(b => b.Account).Include(b => b.Zone).Include(b => b.Template)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (store == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy cửa hàng", id.ToString());
+            }
+
+           store.TimeDelivery = storeRequest.TimeDelivery;
+
+            await _unitOfWork.Repository<Store>().Update(store, id);
+            await _unitOfWork.CommitAsync();
+
+            var updatedStoreResponse = _mapper.Map<StoreResponse>(store);
+            return updatedStoreResponse;
+        }
+
+
         public async Task<MessageResponse> DeleteStore(int id)
         {
             var stores = await _unitOfWork.Repository<Store>().GetAll().FindAsync(id);

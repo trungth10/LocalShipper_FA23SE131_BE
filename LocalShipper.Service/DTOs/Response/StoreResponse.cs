@@ -22,6 +22,8 @@ namespace LocalShipper.Service.DTOs.Response
         public int? Status { get; set; }
         public int BrandId { get; set; }
         public int? TemplateId { get; set; }
+
+        public int? TimeDelivery { get; set; } 
         public TemplateResponse Template { get; set; }
         public int? ZoneId { get; set; }
         public ZoneResponse Zone { get; set; }
@@ -29,5 +31,7 @@ namespace LocalShipper.Service.DTOs.Response
         public WalletResponse Wallet { get; set; }
         public int AccountId { get; set; }
         public AccountResponse Account { get; set; }
+
+
     }
 }

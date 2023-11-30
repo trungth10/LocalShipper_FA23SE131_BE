@@ -1,6 +1,7 @@
 ﻿using LocalShipper.Service.DTOs.Request;
 using LocalShipper.Service.DTOs.Response;
 using LocalShipper.Service.Helpers;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +34,10 @@ namespace LocalShipper.Service.Services.Interface
 
         Task<List<OrderResponse>> GetOrderV2(OrderRequestV2 request, int? pageNumber, int? pageSize);
         Task<decimal> ConvertAddressToPrice(string addressStore, string address, int storeId);
-        Task<OrderResponse> GetOrderByCus(int id); 
+        Task<OrderResponse> GetOrderByCus(int id);
+
+        Task<string> UploadEvidence(int orderId, IFormFile evidence);
+        Task CheckDeliveryStatus(int id, int timeRequest);
 
     }
 }
