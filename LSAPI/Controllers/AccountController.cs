@@ -77,6 +77,23 @@ namespace LSAPI.Controllers
 
         }
 
+
+        [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
+        [HttpGet("api/accounts/send-otp-wallet")]
+        public async Task<IActionResult> SendOTPWallet(string email)
+        {
+            try
+            {
+                var rs = await _accountService.SendOTPWallet(email);
+                return Ok(rs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Gửi email thất bại: {ex.Message}");
+            }
+
+        }
+
         [Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPost("api/accounts/register-shipper-account")]
         public async Task<ActionResult<AccountResponse>> RegisterShipperAccount([FromBody] RegisterRequest request)
@@ -138,6 +155,22 @@ namespace LSAPI.Controllers
                     return BadRequest("Email phải có dạng example@gmail.com");
                 }
                 var rs = await _accountService.RegisterShipperPrivate(storeId,request);
+                return Ok(rs);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
+        [HttpPut("staff/api/accounts/active-shipper")]
+        public async Task<ActionResult<AccountResponse>> Activeshipper(int storeId, int zoneId)
+        {
+            try
+            {
+               
+                var rs = await _accountService.ActiveShipperFromStaff(storeId, zoneId);
                 return Ok(rs);
             }
             catch (Exception)

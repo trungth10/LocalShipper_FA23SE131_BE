@@ -31,5 +31,7 @@ namespace LocalShipper.Service.Services.Interface
         Task SendTrackingOrder(string email, string trackingNumber, int orderId);
         Task SendNotificationToStore(string email, string trackingNumber);
         Task SendNotificationToStoreWaiting(string email, string trackingNumber);
+        Task<AccountResponse> ActiveShipperFromStaff(int accountId, int zoneId);
+        Task<string> SendOTPWallet(string email);
     }
 }

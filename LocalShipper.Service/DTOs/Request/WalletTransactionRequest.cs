@@ -8,12 +8,16 @@ namespace LocalShipper.Service.DTOs.Request
 {
     public class WalletTransactionRequest
     {
-        public string TransactionType { get; set; }
         public int FromWalletId { get; set; }
         public int ToWalletId { get; set; }
         public decimal Amount { get; set; }
+    }
+
+    public class WalletTransactionRequestUpdate
+    {
+        public string TransactionType { get; set; }
         public string Description { get; set; }
     }
 
-   
+
 }

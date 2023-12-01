@@ -29,13 +29,15 @@ namespace LocalShipper.Service.Services.Implement
         private readonly IUnitOfWork _unitOfWork;
         private IMapper _mapper;
         private readonly IOptions<MomoOptionModel> _options;
+        private IAccountService _accountService;
 
 
-        public WalletService(IMapper mapper, IUnitOfWork unitOfWork, IOptions<MomoOptionModel> options)
+        public WalletService(IMapper mapper, IUnitOfWork unitOfWork, IOptions<MomoOptionModel> options, IAccountService accountService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _options = options;
+           _accountService = accountService;
         }
 
         //Get Wallet  
@@ -124,19 +126,44 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //UPDATE Wallet
-        public async Task<WalletResponse> UpdateWallet(int id, WalletRequest request)
+        public async Task<WalletResponse> UpdateWallet(int id, WalletRequest request, string? OTP, int type)
         {
             var wallet = await _unitOfWork.Repository<Wallet>()
                 .GetAll()              
                 .FirstOrDefaultAsync(a => a.Id == id);
 
+            var shipper = await _unitOfWork.Repository<Shipper>()
+               .GetAll()
+               .FirstOrDefaultAsync(a => a.Id == wallet.ShipperId);
+
+           
+
             if (wallet == null)
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy ví", id.ToString());
             }
-
-            wallet.Balance = request.Balance;
-            wallet.UpdatedAt = DateTime.Now;
+            if (type == 1)
+            {             
+                    wallet.Balance = wallet.Balance + request.Balance;
+                    wallet.UpdatedAt = DateTime.Now;                    
+            }
+            if (type == 2)
+            {
+                
+                if (OTP.Equals(shipper.Fcmtoken))
+                {
+                    if (request.Balance < wallet.Balance)
+                    {
+                        throw new CrudException(HttpStatusCode.NotFound, "Không đủ số dư để thực hiện giao dịch", id.ToString());
+                    }
+                    wallet.Balance = wallet.Balance - request.Balance;
+                    wallet.UpdatedAt = DateTime.Now;
+                }
+                else
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Nhập sai mã OTP", shipper.Id.ToString());
+                }
+            }
 
             await _unitOfWork.Repository<Wallet>().Update(wallet, id);
             await _unitOfWork.CommitAsync();           

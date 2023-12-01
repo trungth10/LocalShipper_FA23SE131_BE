@@ -206,7 +206,7 @@ namespace LSAPI.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut()]
-        public async Task<ActionResult<WalletResponse>> UpdateWallet(int id, [FromBody] WalletRequest request)
+        public async Task<ActionResult<WalletResponse>> UpdateWallet(int id, [FromBody] WalletRequest request, string? OTP, int type)
         {
             try
             {
@@ -222,7 +222,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Balance phải >= 0");
                 }
-                var response = await _walletService.UpdateWallet(id, request);
+                var response = await _walletService.UpdateWallet(id, request, OTP, type);
                 return Ok(response);
             }
             catch (Exception ex)

@@ -15,8 +15,8 @@ namespace LocalShipper.Service.Services.Interface
         Task<List<WalletResponse>> GetWallet(int? id, decimal? balance, int? shipperId, int? type, int? pageNumber, int? pageSize);
         Task<int> GetTotalWalletCount();
         Task<WalletResponse> CreateWallet(WalletRequest request);
-        Task<WalletResponse> UpdateWallet(int id, WalletRequest request);
         MomoExecuteResponseModel PaymentExecuteAsync(IQueryCollection collection);
         Task<MomoCreatePaymentResponseModel> CreatePaymentAsync(WalletTransactionPayment model);
+        Task<WalletResponse> UpdateWallet(int id, WalletRequest request, string? OTP, int type);
     }
 }

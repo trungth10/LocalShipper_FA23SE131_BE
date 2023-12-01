@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.Threading;
 using Firebase.Storage;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Identity.Client;
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -503,6 +504,85 @@ namespace LocalShipper.Service.Services.Implement
 
         }
 
+
+        //Store Add Shipper
+        public async Task<AccountResponse> ActiveShipperFromStaff(int accountId, int zoneId)
+        {
+            var accounts = await _unitOfWork.Repository<Account>()
+                .GetAll()
+                .Include(o => o.Role)
+                .FirstOrDefaultAsync(a => a.Id == accountId);
+
+
+
+            if (accounts == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Tài khoản không tồn tại", accountId.ToString());
+            }
+            //string otp = GenerateOTP();
+            // CreatePasswordHash(request.Password, out string passwordHash);
+
+            accounts.Active = true;
+
+            Shipper shipper = new Shipper
+            {
+                FullName = accounts.Fullname,
+                EmailShipper = accounts.Email,
+                PhoneShipper = accounts.Phone,
+                AccountId = accounts.Id,
+                ZoneId = zoneId,
+                Status = (int)ShipperStatusEnum.Offline,
+                Type = (int)ShipperTypeEnum.PUBLIC,
+            };
+
+
+            await _unitOfWork.Repository<Account>().Update(accounts, accountId);
+            await _unitOfWork.CommitAsync();
+
+            await _unitOfWork.Repository<Shipper>().InsertAsync(shipper);
+            await _unitOfWork.CommitAsync();
+
+            //await SendAccountShipper(request.Email, request.Password);
+
+            Wallet wallet1 = new Wallet
+            {
+                Balance = 0,
+                Type = (int)WalletTypeEnum.VICHINH,
+                ShipperId = shipper.Id
+            };
+            await _unitOfWork.Repository<Wallet>().InsertAsync(wallet1);
+            Wallet wallet2 = new Wallet
+            {
+                Balance = 0,
+                Type = (int)WalletTypeEnum.VITHUHO,
+                ShipperId = shipper.Id
+            };
+            await _unitOfWork.Repository<Wallet>().InsertAsync(wallet2);
+            Wallet wallet3 = new Wallet
+            {
+                Balance = 500000,
+                Type = (int)WalletTypeEnum.VIKICHHOAT,
+                ShipperId = shipper.Id
+            };
+            await _unitOfWork.Repository<Wallet>().InsertAsync(wallet3);
+            await _unitOfWork.CommitAsync();
+
+            return new AccountResponse
+            {
+                Id = accounts.Id,
+                Fullname = accounts.Fullname,
+                Phone = accounts.Phone,
+                Email = accounts.Email,
+                RoleId = accounts.RoleId,
+                Active = accounts.Active,
+                FcmToken = accounts.FcmToken,
+                CreateDate = accounts.CreateDate,
+                ImageUrl = accounts.ImageUrl,
+
+            };
+
+        }
+
         public async Task SendAccountShipper(string email, string password)
         {
             string subject = "Tài khoản LocalShipper";
@@ -539,6 +619,27 @@ namespace LocalShipper.Service.Services.Implement
             var message = new Message(new List<string> { email }, subject, content);
             _emailService.SendEmail(message);
         }
+
+        public async Task<string> SendOTPWallet(string email)
+        {
+            var shipper = await _unitOfWork.Repository<Shipper>()
+               .GetAll()
+               .FirstOrDefaultAsync(a => a.EmailShipper == email);
+
+            Random random = new Random();
+            int otp = random.Next(100000, 999999);
+
+            shipper.Fcmtoken =  otp.ToString();
+            await _unitOfWork.Repository<Shipper>().Update(shipper, shipper.Id);
+            await _unitOfWork.CommitAsync();
+
+            string subject = "Xác thực lệnh rút/nạp tiền - LocalShipper";
+            string content = $"Mã OTP của bạn là: {otp}";
+            var message = new Message(new List<string> { email }, subject, content);
+            _emailService.SendEmail(message);
+            return "Gửi Email thành công"; 
+        }
+
 
         //FORGOT PASSWORD
         public async Task<AccountResponse> SendMailForgotPassword(string email)

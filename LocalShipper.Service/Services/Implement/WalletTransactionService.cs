@@ -105,14 +105,39 @@ namespace LocalShipper.Service.Services.Implement
                 {
                     throw new CrudException(HttpStatusCode.BadRequest, "ví này phải có thời gian là 30 ngày kể từ lúc kích hoạt mới để được chuyển", "");
                 }
+
                 WalletTransaction walletTrans = new WalletTransaction
                 {
-                    TransactionType = request.TransactionType,
+                    TransactionType = "Chuyển tiền",
                     FromWalletId = request.FromWalletId,
                     ToWalletId = request.ToWalletId,
                     Amount = request.Amount,
-                    Description = request.Description,
+                    Description = "Chuyển tiền từ Ví chính sang Ví thu hộ",
                 };
+
+                if (fromWalletCheck.Type == (int)WalletTypeEnum.VICHINH && toWalletCheck.Type == (int)WalletTypeEnum.VITHUHO)
+                {
+                    walletTrans.TransactionType = "Chuyển tiền";
+                    walletTrans.Description = "Chuyển tiền từ Ví chính sang Ví thu hộ";
+                }
+                if (fromWalletCheck.Type == (int)WalletTypeEnum.VICHINH && toWalletCheck.Type == (int)WalletTypeEnum.VIKICHHOAT)
+                {
+                    
+                    walletTrans.TransactionType = "Chuyển tiền";
+                    walletTrans.Description = "Chuyển tiền từ Ví chính sang Ví kích hoạt";
+                }
+                if (fromWalletCheck.Type == (int)WalletTypeEnum.VITHUHO && toWalletCheck.Type == (int)WalletTypeEnum.VIKICHHOAT)
+                {                   
+                    walletTrans.TransactionType = "Chuyển tiền";
+                    walletTrans.Description = "Chuyển tiền từ Ví thu hộ sang Ví kích hoạt";
+                }
+                if (fromWalletCheck.Type == (int)WalletTypeEnum.VIKICHHOAT && toWalletCheck.Type == (int)WalletTypeEnum.VITHUHO)
+                {                  
+                    walletTrans.TransactionType = "Chuyển tiền";
+                    walletTrans.Description = "Chuyển tiền từ Ví kích hoạt sang Ví thu hộ";
+                }
+
+
                 // Update ví gửi
                 var fromWallet = await _unitOfWork.Repository<Wallet>()
                    .GetAll()
@@ -154,7 +179,7 @@ namespace LocalShipper.Service.Services.Implement
 
 
         //UPDATE WalletTransaction
-        public async Task<WalletTransactionResponse> UpdateWalletTrans(int id, WalletTransactionRequest request)
+        public async Task<WalletTransactionResponse> UpdateWalletTrans(int id, WalletTransactionRequestUpdate request)
         {
             var walletTrans = await _unitOfWork.Repository<WalletTransaction>()
                 .GetAll()
