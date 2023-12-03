@@ -11,6 +11,7 @@ using System;
 using LocalShipper.Service.Services.Interface;
 using LocalShipper.Service.DTOs.Response;
 using Azure;
+using System.Net.Http;
 
 namespace LSAPI.Controllers
 {
@@ -20,12 +21,18 @@ namespace LSAPI.Controllers
     public class LoginController : ControllerBase
     {
         private readonly ILoginService _iloginService;
-             private readonly IEmailService _iEmailService;
+        private readonly IEmailService _iEmailService;
+        private readonly HttpClient _httpClient;
+        private readonly string _azureFunctionUrl;
 
-        public LoginController(ILoginService loginService, IEmailService iEmailService)
+
+
+        public LoginController(ILoginService loginService, IEmailService iEmailService, IHttpClientFactory httpClientFactory)
         {
+            _httpClient = httpClientFactory.CreateClient();
             _iloginService = loginService;
             _iEmailService = iEmailService;
+            _azureFunctionUrl = "https://checklocalshipper.azurewebsites.net/api/Function1?code=ek2rrr4JzQFbWMX4zZuGSYxahWIFnEMinlJ0zoY7IPe6AzFupYiWmg==";
         }
 
 
@@ -38,7 +45,7 @@ namespace LSAPI.Controllers
             }
 
             var result = await _iloginService.AuthenticateAsync(request.Email, request.Password);
-          
+
             dynamic dynamicResult = result;
 
             if (dynamicResult != null)
@@ -141,7 +148,7 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
         [HttpGet("accesstoken-to-infoshipper")]
-        
+
         public async Task<IActionResult> GetAccountInfoShipperFromAccessToken()
         {
             try
@@ -225,21 +232,27 @@ namespace LSAPI.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize(AuthenticationSchemes = "Bearer")]       
         [HttpGet("check-email")]
-
         public async Task<ActionResult<EmailValidationResponse>> CheckEmailValidity(string email)
         {
             try
             {
-                var result = await _iEmailService.CheckEmailValidity(email);
-                return Ok(result);
+                // Call the Azure Function with the provided URL and key
+                HttpResponseMessage functionResponse = await _httpClient.GetAsync($"{_azureFunctionUrl}&email={Uri.EscapeDataString(email)}");
+
+                functionResponse.EnsureSuccessStatusCode(); // Ensure the response is successful.
+
+                string responseBody = await functionResponse.Content.ReadAsStringAsync();
+                // Parse and return the response as needed
+                return Ok(responseBody);
             }
-            catch (Exception ex)
+            catch (HttpRequestException ex)
             {
-                return StatusCode(500, "Có lỗi khi kiểm tra email:");
+                return StatusCode(500, $"Error calling Azure Function: {ex.Message}");
             }
         }
+
 
     }
 }

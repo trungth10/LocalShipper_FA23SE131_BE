@@ -115,11 +115,7 @@ namespace LSAPI.Controllers
                 if (request.Phone.Length < 9 || request.Phone.Length > 11)
                 {
                     return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
-                }
-                if (!regex3.IsMatch(request.Email))
-                {
-                    return BadRequest("Email phải có dạng example@gmail.com");
-                }
+                }              
                 var rs = await _accountService.RegisterShipperAccount(request);                              
                 return Ok(rs);
             }
@@ -150,10 +146,6 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
                 }
-                if (!regexEmail.IsMatch(request.Email))
-                {
-                    return BadRequest("Email phải có dạng example@gmail.com");
-                }
                 var rs = await _accountService.RegisterShipperPrivate(storeId,request);
                 return Ok(rs);
             }
@@ -165,12 +157,12 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPut("staff/api/accounts/active-shipper")]
-        public async Task<ActionResult<AccountResponse>> Activeshipper(int storeId, int zoneId)
+        public async Task<ActionResult<AccountResponse>> Activeshipper(int accountId, int zoneId)
         {
             try
             {
                
-                var rs = await _accountService.ActiveShipperFromStaff(storeId, zoneId);
+                var rs = await _accountService.ActiveShipperFromStaff(accountId, zoneId);
                 return Ok(rs);
             }
             catch (Exception)

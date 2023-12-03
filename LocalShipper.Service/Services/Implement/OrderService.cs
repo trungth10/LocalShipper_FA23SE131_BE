@@ -317,7 +317,7 @@ namespace LocalShipper.Service.Services.Implement
 
             }
 
-            if (status == OrderStatusEnum.CANCELLED  && (routesId == null || routesId == 0))
+            if (status == OrderStatusEnum.CANCELLED)
             {
                 order.Status = (int)status;
                 order.CompleteTime = DateTime.Now;
@@ -336,7 +336,7 @@ namespace LocalShipper.Service.Services.Implement
             }
 
 
-            if (status == OrderStatusEnum.RETURN && (routesId == null || routesId == 0))
+            if (status == OrderStatusEnum.RETURN)
             {
                 orderCancel.Status = (int)status;
                 orderCancel.CompleteTime = DateTime.Now;
@@ -1489,6 +1489,7 @@ namespace LocalShipper.Service.Services.Implement
             if (orders.Status == (int)OrderStatusEnum.WAITING)
             {
                 orders.Status = (int)OrderStatusEnum.IDLE;
+                orders.Shipper = null;
                 await _unitOfWork.Repository<Order>().Update(orders, orderId);
                 await _unitOfWork.CommitAsync();
                 _accountService.SendNotificationToStoreWaiting(orders.Store.StoreEmail, orders.TrackingNumber);
