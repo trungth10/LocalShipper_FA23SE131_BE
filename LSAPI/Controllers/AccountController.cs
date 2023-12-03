@@ -116,10 +116,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
                 }
-                if (!regex3.IsMatch(request.Email))
-                {
-                    return BadRequest("Email phải có dạng example@gmail.com");
-                }
+               
                 var rs = await _accountService.RegisterShipperAccount(request);                              
                 return Ok(rs);
             }
@@ -137,7 +134,7 @@ namespace LSAPI.Controllers
             {
                 var regex = new Regex("^[a-zA-Z ]+$");
                 var regex2 = new Regex("^[0-9]+$");            
-                var regexEmail = new Regex(@"^\w+@gmail\.com$");
+               
                 if (!regex.IsMatch(request.FullName))
                 {
                     return BadRequest("Tên không hợp lệ");
@@ -150,10 +147,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
                 }
-                if (!regexEmail.IsMatch(request.Email))
-                {
-                    return BadRequest("Email phải có dạng example@gmail.com");
-                }
+                
                 var rs = await _accountService.RegisterShipperPrivate(storeId,request);
                 return Ok(rs);
             }
@@ -165,12 +159,12 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPut("staff/api/accounts/active-shipper")]
-        public async Task<ActionResult<AccountResponse>> Activeshipper(int storeId, int zoneId)
+        public async Task<ActionResult<AccountResponse>> Activeshipper(int accountId, int zoneId)
         {
             try
             {
                
-                var rs = await _accountService.ActiveShipperFromStaff(storeId, zoneId);
+                var rs = await _accountService.ActiveShipperFromStaff(accountId, zoneId);
                 return Ok(rs);
             }
             catch (Exception)

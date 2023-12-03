@@ -307,11 +307,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
                 }
-                var regex = new Regex(@"^\w+@gmail\.com$");
-                if (!regex.IsMatch(request.CustomerEmail))
-                {
-                    return BadRequest("Email phải có địa chỉ tên miền @gmail.com");
-                }
+
                 if (string.IsNullOrWhiteSpace(request.CustomerEmail))
                 {
                     return BadRequest("CustomerEmail không được để trống");

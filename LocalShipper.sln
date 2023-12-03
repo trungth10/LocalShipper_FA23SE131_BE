@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalShipper.Data", "LocalS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tools", "Tools\Tools.csproj", "{23726045-EA76-4BB1-8CE3-161AE5D66E71}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailLocal", "MailLocal\MailLocal.csproj", "{0B131DE8-F3D2-4CD8-A183-A9A915E45A8E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,14 @@ Global
 		{23726045-EA76-4BB1-8CE3-161AE5D66E71}.Release|Any CPU.Build.0 = Release|Any CPU
 		{23726045-EA76-4BB1-8CE3-161AE5D66E71}.Release|x64.ActiveCfg = Release|Any CPU
 		{23726045-EA76-4BB1-8CE3-161AE5D66E71}.Release|x64.Build.0 = Release|Any CPU
+		{0B131DE8-F3D2-4CD8-A183-A9A915E45A8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B131DE8-F3D2-4CD8-A183-A9A915E45A8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B131DE8-F3D2-4CD8-A183-A9A915E45A8E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0B131DE8-F3D2-4CD8-A183-A9A915E45A8E}.Debug|x64.Build.0 = Debug|Any CPU
+		{0B131DE8-F3D2-4CD8-A183-A9A915E45A8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B131DE8-F3D2-4CD8-A183-A9A915E45A8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B131DE8-F3D2-4CD8-A183-A9A915E45A8E}.Release|x64.ActiveCfg = Release|Any CPU
+		{0B131DE8-F3D2-4CD8-A183-A9A915E45A8E}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

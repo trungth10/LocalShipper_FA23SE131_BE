@@ -11,6 +11,8 @@ using System;
 using LocalShipper.Service.Services.Interface;
 using LocalShipper.Service.DTOs.Response;
 using Azure;
+using System.Net.Http;
+using MailKit.Net.Smtp;
 
 namespace LSAPI.Controllers
 {
@@ -21,12 +23,17 @@ namespace LSAPI.Controllers
     {
         private readonly ILoginService _iloginService;
              private readonly IEmailService _iEmailService;
+        private readonly HttpClient _httpClient;
+        private readonly string _azureFunctionUrl;
 
-        public LoginController(ILoginService loginService, IEmailService iEmailService)
+        public LoginController(ILoginService loginService, IEmailService iEmailService, IHttpClientFactory httpClientFactory)
         {
             _iloginService = loginService;
             _iEmailService = iEmailService;
+            _httpClient = httpClientFactory.CreateClient();
+            _azureFunctionUrl = "https://mailchecklc.azurewebsites.net/api/Function1?code=Hr0yLNj5kw0jlmcu3KKGlb-JZYpbhN20mmSQDGAzSOvVAzFu3vh_YA==";
         }
+
 
 
         [HttpPost]
@@ -227,17 +234,22 @@ namespace LSAPI.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("check-email")]
-
         public async Task<ActionResult<EmailValidationResponse>> CheckEmailValidity(string email)
         {
             try
             {
-                var result = await _iEmailService.CheckEmailValidity(email);
-                return Ok(result);
+                // Call the Azure Function with the provided URL and key
+                HttpResponseMessage functionResponse = await _httpClient.GetAsync($"{_azureFunctionUrl}&email={Uri.EscapeDataString(email)}");
+
+                functionResponse.EnsureSuccessStatusCode(); // Ensure the response is successful.
+
+                string responseBody = await functionResponse.Content.ReadAsStringAsync();
+                // Parse and return the response as needed
+                return Ok(responseBody);
             }
-            catch (Exception ex)
+            catch (HttpRequestException ex)
             {
-                return StatusCode(500, "Có lỗi khi kiểm tra email:");
+                return StatusCode(500, $"Error calling Azure Function: {ex.Message}");
             }
         }
 
