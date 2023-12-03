@@ -13,6 +13,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -83,6 +84,19 @@ namespace LocalShipper.Service.Services.Implement
              string storeAddress = request.StoreAddress;
              var storeCoordinates = await _routeService.ConvertAddress(storeAddress);
 
+            Account account = new Account
+            {
+                Fullname = request.StoreName,
+                Email = request.StoreEmail,
+                Active = true,
+                Phone = request.StorePhone,
+                RoleId = 5,
+                Password = request.Password
+            };
+            await _unitOfWork.Repository<Account>().InsertAsync(account);
+            await _unitOfWork.CommitAsync();
+
+
             Wallet wallet = new Wallet
             {
                 Balance = 0,
@@ -92,17 +106,18 @@ namespace LocalShipper.Service.Services.Implement
             await _unitOfWork.CommitAsync();
 
 
+
+
             var newStore = new Store
             {
-                StoreName = request.StoreName.Trim(),
-                StoreAddress = request.StoreAddress.Trim(),
-                StorePhone = request.StorePhone.Trim(),
-                StoreEmail = request.StoreEmail.Trim(),
+                StoreName = account.Fullname,
+                StoreAddress = request.StoreAddress,
+                StorePhone = account.Phone,
+                StoreEmail = account.Email,
                 OpenTime = request.OpenTime,
                 CloseTime = request.CloseTime,
-                StoreDescription = request.StoreDescription.Trim(),
-                Status = request.Status ?? 0,
-                TemplateId = request.TemplateId,
+                StoreDescription = "Cửa hàng hệ thống LocalShipper HCM",
+                Status = 1,
                 ZoneId = request.ZoneId,
                 WalletId = wallet.Id,
                 AccountId = request.AccountId,
@@ -120,7 +135,7 @@ namespace LocalShipper.Service.Services.Implement
             return storeResponse;
         }
 
-        public async Task<StoreResponse> UpdateStore(int id, StoreRequest storeRequest)
+        public async Task<StoreResponse> UpdateStore(int id, StoreRequestPut storeRequest)
         {
             var store = await _unitOfWork.Repository<Store>()
                 .GetAll().Include(b => b.Wallet).Include(b => b.Account).Include(b => b.Zone).Include(b => b.Template)
@@ -137,9 +152,7 @@ namespace LocalShipper.Service.Services.Implement
             store.StoreEmail = storeRequest.StoreEmail.Trim();
             store.OpenTime = storeRequest.OpenTime;
             store.CloseTime = storeRequest.CloseTime;
-            store.StoreDescription = storeRequest.StoreDescription.Trim();
-            store.Status = storeRequest.Status ?? 0; 
-            store.TemplateId = storeRequest.TemplateId;
+            store.Status = storeRequest.Status; 
             store.ZoneId = storeRequest.ZoneId;
             store.WalletId = storeRequest.WalletId;
             store.AccountId = storeRequest.AccountId;

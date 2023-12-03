@@ -12,7 +12,7 @@ namespace LocalShipper.Service.Services.Interface
     {
         Task<List<StoreResponse>> GetStore(int? id, string? storeName, int? status, int? zoneId, int? walletId, int? accountId, int? pageNumber, int? pageSize);
         Task<StoreResponse> CreateStore(StoreRequest request);
-        Task<StoreResponse> UpdateStore(int id, StoreRequest storeRequest);
+        Task<StoreResponse> UpdateStore(int id, StoreRequestPut storeRequest);
         Task<MessageResponse> DeleteStore(int id);
         Task<int> GetTotalStoreCount();
         Task<StoreResponse> SetTimeDelivery(int id, StoreRequestTime storeRequest);

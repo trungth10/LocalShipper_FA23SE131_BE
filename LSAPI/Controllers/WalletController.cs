@@ -27,7 +27,7 @@ namespace LSAPI.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("wallet-transaction")]
         public async Task<ActionResult<WalletTransactionResponse>> GetWalletTrans(int id, string transactionType, int fromWallet, int toWallet,
-            decimal amount, string description, int orderId, int? pageNumber, int? pageSize)
+            decimal amount, string description, int orderId,int active, int? pageNumber, int? pageSize)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Id không hợp lệ");
                 }
-                var rs = await _walletTransService.GetWalletTrans(id, transactionType, fromWallet, toWallet, amount, description, orderId,  pageNumber, pageSize);
+                var rs = await _walletTransService.GetWalletTrans(id, transactionType, fromWallet, toWallet, amount, description, orderId, active,  pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)

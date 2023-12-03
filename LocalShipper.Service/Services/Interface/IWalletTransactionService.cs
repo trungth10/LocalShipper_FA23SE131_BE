@@ -11,7 +11,7 @@ namespace LocalShipper.Service.Services.Interface
     public interface IWalletTransactionService
     {
         Task<List<WalletTransactionResponse>> GetWalletTrans(int? id, string? transactionType, int? fromWallet, int? toWallet,
-            decimal? amount, string? description, int? orderId, int? pageNumber, int? pageSize);
+            decimal? amount, string? description, int? orderId, int? active, int? pageNumber, int? pageSize);
         Task<int> GetTotalWalletTransCount();
        Task<WalletTransactionResponse> CreateWalletTrans(WalletTransactionRequest request);
         //Task<WalletTransactionResponse> UpdateWalletTrans(int id, WalletTransactionRequest request);

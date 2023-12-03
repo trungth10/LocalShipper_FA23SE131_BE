@@ -800,6 +800,7 @@ namespace LocalShipper.Data.Models
                 entity.Property(e => e.OrderId).HasColumnName("orderId");
 
                 entity.Property(e => e.ToWalletId).HasColumnName("to_walletId");
+               
 
                 entity.Property(e => e.TransactionTime)
                     .HasColumnType("datetime")
@@ -810,6 +811,8 @@ namespace LocalShipper.Data.Models
                     .IsRequired()
                     .HasMaxLength(50)
                     .HasColumnName("transaction_type");
+
+                entity.Property(e => e.Active).HasColumnName("active");
 
                 entity.HasOne(d => d.FromWallet)
                     .WithMany(p => p.WalletTransactionFromWallets)

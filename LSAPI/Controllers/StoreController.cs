@@ -85,11 +85,7 @@ namespace LSAPI.Controllers
                 if (request.StorePhone.Length < 9 || request.StorePhone.Length > 11)
                 {
                     return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
-                }
-                if (request.Status <0)
-                {
-                    return BadRequest("Status phải là số nguyên dương");
-                }
+                }              
                 if (request.ZoneId < 0)
                 {
                     return BadRequest("zoneId phải là số nguyên dương");
@@ -101,16 +97,7 @@ namespace LSAPI.Controllers
                 if (request.AccountId < 0)
                 {
                     return BadRequest("accountId phải là số nguyên dương");
-                }
-                if (request.TemplateId < 0)
-                {
-                    return BadRequest("TemplateId phải là số nguyên dương");
-                }
-                var regex = new Regex(@"^\w+@gmail\.com$");
-                if (!regex.IsMatch(request.StoreEmail))
-                {
-                    return BadRequest("Email phải có địa chỉ tên miền @gmail.com");
-                }
+                }                             
                 //var regexTime = new Regex(@"^\d{1,2}:\d{2}:\d{2}$");
                 //if (!regexTime.IsMatch(request.OpenTime.ToString()) || !regexTime.IsMatch(request.CloseTime.ToString()))
                 //{
@@ -140,7 +127,7 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
-        public async Task<ActionResult<StoreResponse>> PutStore(int id, StoreRequest storeRequest)
+        public async Task<ActionResult<StoreResponse>> PutStore(int id, StoreRequestPut storeRequest)
         {
             try
             {
@@ -178,15 +165,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("accountId phải là số nguyên dương");
                 }
-                if (storeRequest.TemplateId < 0)
-                {
-                    return BadRequest("TemplateId phải là số nguyên dương");
-                }
-                var regex = new Regex(@"^\w+@gmail\.com$");
-                if (!regex.IsMatch(storeRequest.StoreEmail))
-                {
-                    return BadRequest("Email phải có địa chỉ tên miền @gmail.com");
-                }
+                
                 var rs = await _storeService.UpdateStore(id, storeRequest);
                 return Ok(rs);
             }

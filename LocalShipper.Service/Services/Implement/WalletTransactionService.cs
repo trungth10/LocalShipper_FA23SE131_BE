@@ -31,7 +31,7 @@ namespace LocalShipper.Service.Services.Implement
 
         //GET WalletTransaction
         public async Task<List<WalletTransactionResponse>> GetWalletTrans(int? id, string? transactionType, int? fromWallet, int? toWallet,
-            decimal? amount, string? description, int? orderId, int? pageNumber, int? pageSize)
+            decimal? amount, string? description, int? orderId,int? active, int? pageNumber, int? pageSize)
         {
 
             var walletTrans = _unitOfWork.Repository<WalletTransaction>().GetAll()
@@ -45,6 +45,7 @@ namespace LocalShipper.Service.Services.Implement
                                                               .Where(w => amount == 0 || w.Amount == amount)
                                                               .Where(w => string.IsNullOrWhiteSpace(description) || w.Description.Contains(description.Trim()))
                                                               .Where(w => orderId == 0 || w.OrderId == orderId)
+                                                              .Where(w => active == 0 || w.Active == active)
                                                               ;
             // Xác định giá trị cuối cùng của pageNumber
             pageNumber = pageNumber.HasValue ? Math.Max(1, pageNumber.Value) : 1;
@@ -113,6 +114,7 @@ namespace LocalShipper.Service.Services.Implement
                     ToWalletId = request.ToWalletId,
                     Amount = request.Amount,
                     Description = "Chuyển tiền từ Ví chính sang Ví thu hộ",
+                    Active = 1
                 };
 
                 if (fromWalletCheck.Type == (int)WalletTypeEnum.VICHINH && toWalletCheck.Type == (int)WalletTypeEnum.VITHUHO)
@@ -195,6 +197,7 @@ namespace LocalShipper.Service.Services.Implement
 
             walletTrans.TransactionType = request.TransactionType;
             walletTrans.Description = request.Description;
+            walletTrans.Active = request.Active;
 
             await _unitOfWork.Repository<WalletTransaction>().Update(walletTrans, id);
             await _unitOfWork.CommitAsync();

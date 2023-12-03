@@ -16,6 +16,8 @@ namespace LocalShipper.Data.Models
         public string Description { get; set; }
         public int? OrderId { get; set; }
         public DateTime? CreatedAt { get; set; }
+        public int? Active { get; set; }
+
 
         public virtual Wallet FromWallet { get; set; }
         public virtual Order Order { get; set; }

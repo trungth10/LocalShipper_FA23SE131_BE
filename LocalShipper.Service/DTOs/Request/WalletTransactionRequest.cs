@@ -17,6 +17,7 @@ namespace LocalShipper.Service.DTOs.Request
     {
         public string TransactionType { get; set; }
         public string Description { get; set; }
+        public int Active { get; set; }
     }
 
 
