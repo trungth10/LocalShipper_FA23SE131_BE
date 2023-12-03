@@ -232,7 +232,7 @@ namespace LSAPI.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        //[Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("check-email")]
         public async Task<ActionResult<EmailValidationResponse>> CheckEmailValidity(string email)
         {
