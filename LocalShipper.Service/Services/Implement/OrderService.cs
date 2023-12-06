@@ -1404,7 +1404,7 @@ namespace LocalShipper.Service.Services.Implement
                     }
                 }
                 else
-                {
+                {   
                     Console.WriteLine("Error: HostingEnvironment is null.");
 
                 }

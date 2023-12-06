@@ -259,7 +259,7 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //Get Account  
-        public async Task<List<AccountResponse>> GetAccount(int? id, string? phone, string? email, int? role, string? fcm_token, int? pageNumber, int? pageSize)
+        public async Task<List<AccountResponse>> GetAccount(int? id, string? phone, string? email, int? role, string? fcm_token, bool? active, int? pageNumber, int? pageSize)
         {
 
             var accounts = _unitOfWork.Repository<Account>().GetAll()
@@ -268,6 +268,7 @@ namespace LocalShipper.Service.Services.Implement
                                                               .Where(a => string.IsNullOrWhiteSpace(phone) || a.Phone.Contains(phone.Trim()))
                                                               .Where(a => string.IsNullOrWhiteSpace(email) || a.Email.Contains(email.Trim()))
                                                               .Where(a => role == 0 || a.RoleId == role)
+                                                              .Where(a => !active.HasValue || a.Active == active)
                                                               .Where(a => string.IsNullOrWhiteSpace(fcm_token) || a.FcmToken.Contains(fcm_token.Trim()));
 
             // Xác định giá trị cuối cùng của pageNumber
@@ -505,7 +506,7 @@ namespace LocalShipper.Service.Services.Implement
         }
 
 
-        //Store Add Shipper
+        //Staf aprove shipper
         public async Task<AccountResponse> ActiveShipperFromStaff(int accountId, int zoneId)
         {
             var accounts = await _unitOfWork.Repository<Account>()
@@ -565,6 +566,46 @@ namespace LocalShipper.Service.Services.Implement
                 ShipperId = shipper.Id
             };
             await _unitOfWork.Repository<Wallet>().InsertAsync(wallet3);
+            await _unitOfWork.CommitAsync();
+
+            return new AccountResponse
+            {
+                Id = accounts.Id,
+                Fullname = accounts.Fullname,
+                Phone = accounts.Phone,
+                Email = accounts.Email,
+                RoleId = accounts.RoleId,
+                Active = accounts.Active,
+                FcmToken = accounts.FcmToken,
+                CreateDate = accounts.CreateDate,
+                ImageUrl = accounts.ImageUrl,
+
+            };
+
+        }
+
+
+        public async Task<AccountResponse> InActiveShipperFromStaff(int accountId)
+        {
+            var accounts = await _unitOfWork.Repository<Account>()
+                .GetAll()
+                .Include(o => o.Role)
+                .FirstOrDefaultAsync(a => a.Id == accountId);
+
+            var shipper = await _unitOfWork.Repository<Shipper>()
+               .GetAll()
+               .FirstOrDefaultAsync(a => a.AccountId == accountId);
+
+            if (accounts == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Tài khoản không tồn tại", accountId.ToString());
+            }
+
+            accounts.Active = false;
+            shipper.Status = 1;
+
+            await _unitOfWork.Repository<Account>().Update(accounts, accountId);
+            await _unitOfWork.Repository<Shipper>().Update(shipper,shipper.Id);
             await _unitOfWork.CommitAsync();
 
             return new AccountResponse

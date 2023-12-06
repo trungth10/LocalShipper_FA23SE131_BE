@@ -13,7 +13,7 @@ namespace LocalShipper.Service.Services.Interface
 {
     public interface IAccountService
     {
-        Task<List<AccountResponse>> GetAccount(int? id, string? phone, string? email, int? role, string? fcm_token, int? pageNumber, int? pageSize);
+        Task<List<AccountResponse>> GetAccount(int? id, string? phone, string? email, int? role, string? fcm_token, bool? active, int? pageNumber, int? pageSize);
         Task<int> GetTotalAccountCount();
         Task<AccountResponse> RegisterShipperAccount(RegisterRequest request);
 
@@ -33,5 +33,6 @@ namespace LocalShipper.Service.Services.Interface
         Task SendNotificationToStoreWaiting(string email, string trackingNumber);
         Task<AccountResponse> ActiveShipperFromStaff(int accountId, int zoneId);
         Task<string> SendOTPWallet(string email);
+        Task<AccountResponse> InActiveShipperFromStaff(int accountId);
     }
 }

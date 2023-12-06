@@ -39,7 +39,7 @@ namespace MailLocal
                 try
                 {
                     var validationResponse = await CheckEmailValidity(email);
-                    response = new OkObjectResult($"Email Validation Result: {validationResponse.Status}");
+                    response = new OkObjectResult($"{validationResponse.Status}");
                 }
                 catch (Exception ex)
                 {

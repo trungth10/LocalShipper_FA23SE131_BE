@@ -90,7 +90,7 @@ namespace LocalShipper.Service.Services.Implement
                 Email = request.StoreEmail,
                 Active = true,
                 Phone = request.StorePhone,
-                RoleId = 5,
+                RoleId = 4,
                 Password = request.Password
             };
             await _unitOfWork.Repository<Account>().InsertAsync(account);

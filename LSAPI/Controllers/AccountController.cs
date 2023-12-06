@@ -30,9 +30,9 @@ namespace LSAPI.Controllers
             _accountService = accountService;           
         }
 
-        [Authorize(Roles= Roles.Admin, AuthenticationSchemes = "Bearer")]
+       // [Authorize(Roles= Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpGet("api/accounts/")]
-        public async Task<ActionResult<AccountResponse>> GetAccount(int id, string phone, string email, int role, string fcm_token, int? pageNumber, int? pageSize)
+        public async Task<ActionResult<AccountResponse>> GetAccount(int id, string phone, string email, int role, string fcm_token, bool active, int? pageNumber, int? pageSize)
         {
             try
             {
@@ -49,7 +49,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Id không hợp lệ");
                 }
-                var rs = await _accountService.GetAccount(id, phone, email, role, fcm_token, pageNumber, pageSize);
+                var rs = await _accountService.GetAccount(id, phone, email, role, fcm_token, active, pageNumber, pageSize);
                 return Ok(rs);
             }
             catch (Exception ex)
@@ -157,14 +157,30 @@ namespace LSAPI.Controllers
             }
         }
 
-        [Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpPut("staff/api/accounts/active-shipper")]
         public async Task<ActionResult<AccountResponse>> Activeshipper(int accountId, int zoneId)
         {
             try
             {
-               
+
                 var rs = await _accountService.ActiveShipperFromStaff(accountId, zoneId);
+                return Ok(rs);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [Authorize(Roles = Roles.Staff+ "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
+        [HttpPut("staff/api/accounts/inactive-shipper")]
+        public async Task<ActionResult<AccountResponse>> InActive(int accountId)
+        {
+            try
+            {
+
+                var rs = await _accountService.InActiveShipperFromStaff(accountId);
                 return Ok(rs);
             }
             catch (Exception)

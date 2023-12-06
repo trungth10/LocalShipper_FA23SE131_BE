@@ -186,7 +186,7 @@ namespace LSAPI.Controllers
 
 
         [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
-        [HttpDelete("api/routes/delete-order")]
+        [HttpPut("api/routes/delete-order")]
         public async Task<ActionResult<MessageResponse>> DeleteOrderidInRoute(IEnumerable<int> orderid)
         {
             try
