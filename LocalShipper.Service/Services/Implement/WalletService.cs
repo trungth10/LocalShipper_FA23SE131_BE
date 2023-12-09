@@ -126,11 +126,31 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //UPDATE Wallet
-        public async Task<WalletResponse> UpdateWallet(int id, WalletRequest request, string? OTP, int type)
+        public async Task<WalletResponse> UpdateWallet(string email, decimal balance, string? OTP, int type)
         {
-            var wallet = await _unitOfWork.Repository<Wallet>()
-                .GetAll()              
-                .FirstOrDefaultAsync(a => a.Id == id);
+            var account = await _unitOfWork.Repository<Account>()
+                .GetAll()
+                .FirstOrDefaultAsync(a => a.Email == email);
+
+            var walletQuery =  _unitOfWork.Repository<Wallet>()
+                .GetAll().Include(a => a.Shipper);
+
+            Wallet wallet = null;
+            var shippers = await _unitOfWork.Repository<Shipper>()
+                .GetAll()
+                .FirstOrDefaultAsync(a => a.EmailShipper == email);
+            var stores = await _unitOfWork.Repository<Store>()
+                .GetAll()
+                .FirstOrDefaultAsync(a => a.StoreEmail == email);
+            if (account.RoleId == 5)
+            {
+                wallet = await walletQuery.FirstOrDefaultAsync(a => a.ShipperId == shippers.Id && a.Type == 1);
+            }
+
+            if (account.RoleId == 4)
+            {
+                wallet = await walletQuery.FirstOrDefaultAsync(a => a.Id == stores.WalletId);
+            }
 
             var shipper = await _unitOfWork.Repository<Shipper>()
                .GetAll()
@@ -140,11 +160,11 @@ namespace LocalShipper.Service.Services.Implement
 
             if (wallet == null)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy ví", id.ToString());
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy ví", email);
             }
             if (type == 1)
             {             
-                    wallet.Balance = wallet.Balance + request.Balance;
+                    wallet.Balance = wallet.Balance + balance;
                     wallet.UpdatedAt = DateTime.Now;                    
             }
             if (type == 2)
@@ -152,11 +172,11 @@ namespace LocalShipper.Service.Services.Implement
                 
                 if (OTP.Equals(shipper.Fcmtoken))
                 {
-                    if (request.Balance < wallet.Balance)
+                    if (balance < wallet.Balance)
                     {
-                        throw new CrudException(HttpStatusCode.NotFound, "Không đủ số dư để thực hiện giao dịch", id.ToString());
+                        throw new CrudException(HttpStatusCode.NotFound, "Không đủ số dư để thực hiện giao dịch", email);
                     }
-                    wallet.Balance = wallet.Balance - request.Balance;
+                    wallet.Balance = wallet.Balance - balance;
                     wallet.UpdatedAt = DateTime.Now;
                 }
                 else
@@ -165,7 +185,7 @@ namespace LocalShipper.Service.Services.Implement
                 }
             }
 
-            await _unitOfWork.Repository<Wallet>().Update(wallet, id);
+            await _unitOfWork.Repository<Wallet>().Update(wallet, wallet.Id);
             await _unitOfWork.CommitAsync();           
 
             var walletResponse = new WalletResponse

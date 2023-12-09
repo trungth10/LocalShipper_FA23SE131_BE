@@ -61,8 +61,44 @@ namespace LocalShipper.Service.Services.Implement
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Giao dịch trên ví không có hoặc không tồn tại", id.ToString());
             }
+            var walletTransResponses = new List<WalletTransactionResponse>();
+            foreach (var item in walletTransList)
+            {
+                var transReponse = _mapper.Map<WalletTransactionResponse>(item);
+                if (item.FromWallet.ShipperId == null)
+                {
+                    var storeSender = await _unitOfWork.Repository<Store>()
+                  .GetAll()
+                  .FirstOrDefaultAsync(a => a.WalletId == item.FromWalletId);
+                    transReponse.Sender = storeSender.StoreName;
+                }
+                if (item.ToWallet.ShipperId == null)
+                {
+                    var storeReceiver = await _unitOfWork.Repository<Store>()
+                 .GetAll()
+                 .FirstOrDefaultAsync(a => a.WalletId == item.ToWalletId);
+                    transReponse.Receiver = storeReceiver.StoreName;
+                }
+                if (item.ToWallet.ShipperId != null)
+                {
+                    var shipperReceiver = await _unitOfWork.Repository<Wallet>()
+                 .GetAll()
+                 .Include(a => a.Shipper)
+                 .FirstOrDefaultAsync(a => a.Id == item.ToWalletId);
+                    transReponse.Receiver = shipperReceiver.Shipper.FullName;
+                }
+                if (item.FromWallet.ShipperId != null)
+                {
+                    var shipperSender = await _unitOfWork.Repository<Wallet>()
+                .GetAll()
+                .Include(a => a.Shipper)
+                .FirstOrDefaultAsync(a => a.Id == item.FromWalletId);
+                    transReponse.Sender = shipperSender.Shipper.FullName;
+                }
 
-            var walletTransResponses = _mapper.Map<List<WalletTransactionResponse>>(walletTransList);
+                walletTransResponses.Add(transReponse);
+            }
+            
             return walletTransResponses;
         }
 

@@ -204,25 +204,18 @@ namespace LSAPI.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        //[Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut()]
-        public async Task<ActionResult<WalletResponse>> UpdateWallet(int id, [FromBody] WalletRequest request, string? OTP, int type)
+        public async Task<ActionResult<WalletResponse>> UpdateWallet(string email, decimal balance, string? OTP, int type)
         {
             try
             {
-                if (id == 0)
-                {
-                    return BadRequest("Vui lòng nhập Id");
-                }
-                if (id < 0)
-                {
-                    return BadRequest("Id phải là số nguyên dương");
-                }
-                if (request.Balance < 0)
+              
+                if (balance < 0)
                 {
                     return BadRequest("Balance phải >= 0");
                 }
-                var response = await _walletService.UpdateWallet(id, request, OTP, type);
+                var response = await _walletService.UpdateWallet(email, balance, OTP, type);
                 return Ok(response);
             }
             catch (Exception ex)

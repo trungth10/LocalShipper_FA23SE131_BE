@@ -83,7 +83,7 @@ namespace LSAPI.Controllers
 
         [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
-        public async Task<ActionResult<ZoneResponse>> UpdateZone(int id, [FromBody] ZoneRequest request)
+        public async Task<ActionResult<ZoneResponse>> UpdateZone(int id, [FromBody] ZoneRequestUpdate request)
         {
             try
             {

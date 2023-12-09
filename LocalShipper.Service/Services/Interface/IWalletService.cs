@@ -17,6 +17,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<WalletResponse> CreateWallet(WalletRequest request);
         MomoExecuteResponseModel PaymentExecuteAsync(IQueryCollection collection);
         Task<MomoCreatePaymentResponseModel> CreatePaymentAsync(WalletTransactionPayment model);
-        Task<WalletResponse> UpdateWallet(int id, WalletRequest request, string? OTP, int type);
+        Task<WalletResponse> UpdateWallet(string email, decimal balance, string? OTP, int type);
     }
 }

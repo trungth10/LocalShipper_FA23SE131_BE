@@ -108,7 +108,7 @@ namespace LocalShipper.Service.Services.Implement
         }
 
         //UPDATE Zone
-        public async Task<ZoneResponse> UpdateZone(int id, ZoneRequest request)
+        public async Task<ZoneResponse> UpdateZone(int id, ZoneRequestUpdate request)
         {
             var zone = await _unitOfWork.Repository<Zone>()
                 .GetAll()
@@ -125,6 +125,7 @@ namespace LocalShipper.Service.Services.Implement
             zone.Longitude = request.Longitude;
             zone.Radius = request.Radius;
             zone.UpdateAt = DateTime.Now;
+            zone.Active = request.Active;
 
             await _unitOfWork.Repository<Zone>().Update(zone, id);
             await _unitOfWork.CommitAsync();

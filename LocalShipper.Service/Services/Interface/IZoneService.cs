@@ -13,7 +13,7 @@ namespace LocalShipper.Service.Services.Interface
         Task<List<ZoneResponse>> GetZones(int? id, string? zoneName, decimal? latitude, decimal? longtitude, decimal? radius, int? pageNumber, int? pageSize);
         Task<int> GetTotalZoneCount();
         Task<ZoneResponse> CreateZone(ZoneRequest request);
-        Task<ZoneResponse> UpdateZone(int id, ZoneRequest request);
+        Task<ZoneResponse> UpdateZone(int id, ZoneRequestUpdate request);
         Task<ZoneResponse> DeleteZone(int id);
         
     }
