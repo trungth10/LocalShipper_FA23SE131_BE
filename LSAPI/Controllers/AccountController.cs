@@ -393,6 +393,21 @@ namespace LSAPI.Controllers
                 return BadRequest();
             }
         }
+        [Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]
+        [HttpPut("store/api/accounts/change-password-shipper")]
+        public async Task<ActionResult<AccountResponse>> StoreUpdatePWForShipper(int shipperId, string newPassword)
+        {
+            try
+            {
+
+                var rs = await _accountService.StoreUpdatePWForShipper(shipperId, newPassword);
+                return Ok(rs);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
 
     }
 }

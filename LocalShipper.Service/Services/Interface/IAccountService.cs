@@ -34,5 +34,6 @@ namespace LocalShipper.Service.Services.Interface
         Task<AccountResponse> ActiveShipperFromStaff(int accountId, int zoneId);
         Task<string> SendOTPWallet(string email);
         Task<AccountResponse> InActiveShipperFromStaff(int accountId);
+        Task<string> StoreUpdatePWForShipper(int shipperId, string newPassword);
     }
 }

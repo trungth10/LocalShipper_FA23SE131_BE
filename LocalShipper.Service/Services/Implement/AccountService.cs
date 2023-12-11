@@ -774,6 +774,35 @@ namespace LocalShipper.Service.Services.Implement
             return "Mật khẩu đã được thay đổi thành công.";
         }
 
+        public async Task<string> StoreUpdatePWForShipper(int shipperId, string newPassword)
+        {
+            var shipper = await _unitOfWork.Repository<Shipper>()
+                .GetAll()
+                .FirstOrDefaultAsync(s => s.Id == shipperId);
+
+            if (shipper == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy shipper", shipperId.ToString());
+            }
+
+            var account = await _unitOfWork.Repository<Account>()
+                .GetAll()
+                .FirstOrDefaultAsync(a => a.Id == shipper.AccountId);
+
+            if (account == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy tài khoản cho shipper", shipperId.ToString());
+            }
+
+            
+            account.Password = newPassword;
+            await _unitOfWork.Repository<Account>().Update(account, account.Id);
+
+            
+            await _unitOfWork.CommitAsync();
+
+            return "Mật khẩu đã được cập nhật thành công";
+        }
 
 
     }
