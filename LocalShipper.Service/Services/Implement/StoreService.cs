@@ -75,11 +75,7 @@ namespace LocalShipper.Service.Services.Implement
             {
                 throw new CrudException(HttpStatusCode.BadRequest, "StoreEmail đã tồn tại", request.StoreEmail);
             }
-            var existingStoreAccountId = await _unitOfWork.Repository<Store>().FindAsync(b => b.AccountId == request.AccountId);
-            if (existingStoreEmail != null)
-            {
-                throw new CrudException(HttpStatusCode.BadRequest, "AccountId đã tồn tại", request.AccountId.ToString());
-            }
+           
 
              string storeAddress = request.StoreAddress;
              var storeCoordinates = await _routeService.ConvertAddress(storeAddress);
@@ -120,7 +116,7 @@ namespace LocalShipper.Service.Services.Implement
                 Status = 1,
                 ZoneId = request.ZoneId,
                 WalletId = wallet.Id,
-                AccountId = request.AccountId,
+                AccountId=account.Id,
                 StoreLat = (float)storeCoordinates.Latitude,
                 StoreLng = (float)storeCoordinates.Longitude
         };
@@ -147,16 +143,10 @@ namespace LocalShipper.Service.Services.Implement
             }
 
             store.StoreName = storeRequest.StoreName.Trim();
-            store.StoreAddress = storeRequest.StoreAddress.Trim();
             store.StorePhone = storeRequest.StorePhone.Trim();
-            store.StoreEmail = storeRequest.StoreEmail.Trim();
             store.OpenTime = storeRequest.OpenTime;
-            store.CloseTime = storeRequest.CloseTime;
-            store.Status = storeRequest.Status; 
-            store.ZoneId = storeRequest.ZoneId;
-            store.WalletId = storeRequest.WalletId;
-            store.AccountId = storeRequest.AccountId;
-            
+            store.CloseTime = storeRequest.CloseTime; 
+       
 
           
 

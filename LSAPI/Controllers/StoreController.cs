@@ -69,7 +69,7 @@ namespace LSAPI.Controllers
 
         }
 
-        [Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
+        //[Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPost()]
         public async Task<ActionResult<StoreResponse>> PostStore(StoreRequest request)
         {
@@ -90,14 +90,7 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("zoneId phải là số nguyên dương");
                 }
-                if (request.WalletId < 0)
-                {
-                    return BadRequest("walletId phải là số nguyên dương");
-                }
-                if (request.AccountId < 0)
-                {
-                    return BadRequest("accountId phải là số nguyên dương");
-                }                             
+                               
                 //var regexTime = new Regex(@"^\d{1,2}:\d{2}:\d{2}$");
                 //if (!regexTime.IsMatch(request.OpenTime.ToString()) || !regexTime.IsMatch(request.CloseTime.ToString()))
                 //{
@@ -125,7 +118,7 @@ namespace LSAPI.Controllers
 
         }
 
-        [Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]
+        //[Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<StoreResponse>> PutStore(int id, StoreRequestPut storeRequest)
         {
@@ -149,22 +142,8 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Id phải là số nguyên dương");
                 }
-                if (storeRequest.Status < 0)
-                {
-                    return BadRequest("Status không hợp lệ");
-                }
-                if (storeRequest.ZoneId < 0)
-                {
-                    return BadRequest("zoneId phải là số nguyên dương");
-                }
-                if (storeRequest.WalletId < 0)
-                {
-                    return BadRequest("walletId phải là số nguyên dương");
-                }
-                if (storeRequest.AccountId < 0)
-                {
-                    return BadRequest("accountId phải là số nguyên dương");
-                }
+               
+                            
                 
                 var rs = await _storeService.UpdateStore(id, storeRequest);
                 return Ok(rs);
