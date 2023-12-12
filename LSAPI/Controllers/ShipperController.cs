@@ -26,7 +26,7 @@ namespace LSAPI.Controllers
             _shipperService = shipperService;
         }
 
-        [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store, AuthenticationSchemes = "Bearer")]
         [HttpPut("status")]
         public async Task<ActionResult<ShipperResponse>> UpdateShipperStatus(int shipperId, [FromBody] UpdateShipperStatusRequest request)
         {

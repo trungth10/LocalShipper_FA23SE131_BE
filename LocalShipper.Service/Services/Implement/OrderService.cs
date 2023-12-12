@@ -317,20 +317,27 @@ namespace LocalShipper.Service.Services.Implement
 
             }
 
-            if (status == OrderStatusEnum.CANCELLED  )
+            if (status == OrderStatusEnum.CANCELLED)
             {
-                order.Status = (int)status;
-                order.CompleteTime = DateTime.Now;
-                order.CancelReason = cancelReason;
+                orderCancel.Status = (int)status;
+                orderCancel.CompleteTime = DateTime.Now;
+                orderCancel.CancelReason = cancelReason;
                 OrderHistory orderHistory = new OrderHistory
                 {
                     FromStatus = (int)OrderStatusEnum.INPROCESS,
                     ToStatus = (int)status,
-                    OrderId = order.Id,
+                    OrderId = orderCancel.Id,
                     ShipperId = shipperId,
                     Status = (int)OrderHistoryStatusEnum.ACTICE
                 };
+                await _unitOfWork.Repository<Order>().Update(orderCancel, id);
+
+                await _unitOfWork.CommitAsync();
+
+                return _mapper.Map<Order, OrderResponse>(orderCancel);
+
                 await _unitOfWork.Repository<OrderHistory>().InsertAsync(orderHistory);
+
                 await _unitOfWork.CommitAsync();
 
             }
@@ -338,6 +345,25 @@ namespace LocalShipper.Service.Services.Implement
 
             if (status == OrderStatusEnum.RETURN)
             {
+                if (routesId != null)
+                {
+                    bool areAllOtherOrdersCompleted = await _unitOfWork.Repository<Order>()
+                                                 .GetAll()
+                                                 .Where(o => o.RouteId == routesId && o.Id != id)
+                                                 .AllAsync(o => o.Status == (int)OrderStatusEnum.COMPLETED || o.Status == (int)OrderStatusEnum.RETURN);
+
+
+                    if (areAllOtherOrdersCompleted)
+                    {
+                        var route = await _unitOfWork.Repository<RouteEdge>().FindAsync(a => a.Id == routesId);
+                        if (route != null)
+                        {
+                            route.Status = (int)RouteEdgeStatusEnum.COMPLETE;
+                            await _unitOfWork.Repository<RouteEdge>().Update(route, route.Id);
+                            await _unitOfWork.CommitAsync();
+                        }
+                    }
+                }
                 orderCancel.Status = (int)status;
                 orderCancel.CompleteTime = DateTime.Now;
                 orderCancel.CancelReason = cancelReason;
