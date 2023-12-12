@@ -26,6 +26,7 @@ namespace LocalShipper.Service.DTOs.Request
         public string StorePhone { get; set; }
         public TimeSpan? OpenTime { get; set; }
         public TimeSpan? CloseTime { get; set; }
+        public int? Status { get; set; }
 
     }
 

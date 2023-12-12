@@ -69,7 +69,7 @@ namespace LSAPI.Controllers
 
         }
 
-        //[Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPost()]
         public async Task<ActionResult<StoreResponse>> PostStore(StoreRequest request)
         {
@@ -118,7 +118,7 @@ namespace LSAPI.Controllers
 
         }
 
-        //[Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPut()]
         public async Task<ActionResult<StoreResponse>> PutStore(int id, StoreRequestPut storeRequest)
         {
@@ -126,14 +126,7 @@ namespace LSAPI.Controllers
             {
                 var regex2 = new Regex("^[0-9]+$");
 
-                if (!regex2.IsMatch(storeRequest.StorePhone))
-                {
-                    return BadRequest("Số điện thoại không hợp lệ");
-                }
-                if (storeRequest.StorePhone.Length < 9 || storeRequest.StorePhone.Length > 11)
-                {
-                    return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
-                }
+               
                 if (id == 0)
                 {
                     return BadRequest("Vui lòng nhập Id");

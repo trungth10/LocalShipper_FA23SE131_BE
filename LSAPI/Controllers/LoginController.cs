@@ -13,6 +13,8 @@ using LocalShipper.Service.DTOs.Response;
 using Azure;
 using System.Net.Http;
 using MailKit.Net.Smtp;
+using LocalShipper.Data.UnitOfWork;
+using Microsoft.EntityFrameworkCore;
 
 namespace LSAPI.Controllers
 {
@@ -21,13 +23,15 @@ namespace LSAPI.Controllers
     [Route("api/logins")]
     public class LoginController : ControllerBase
     {
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILoginService _iloginService;
              private readonly IEmailService _iEmailService;
         private readonly HttpClient _httpClient;
         private readonly string _azureFunctionUrl;
 
-        public LoginController(ILoginService loginService, IEmailService iEmailService, IHttpClientFactory httpClientFactory)
+        public LoginController(ILoginService loginService, IEmailService iEmailService, IHttpClientFactory httpClientFactory, IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork;
             _iloginService = loginService;
             _iEmailService = iEmailService;
             _httpClient = httpClientFactory.CreateClient();
@@ -238,6 +242,11 @@ namespace LSAPI.Controllers
         {
             try
             {
+                var emailExit = await _unitOfWork.Repository<Account>().GetAll().FirstOrDefaultAsync(a => a.Email == email);
+                if(emailExit.Email == email)
+                {
+                    return BadRequest("email đã tồn tại");
+                }
                 // Call the Azure Function with the provided URL and key
                 HttpResponseMessage functionResponse = await _httpClient.GetAsync($"{_azureFunctionUrl}&email={Uri.EscapeDataString(email)}");
 

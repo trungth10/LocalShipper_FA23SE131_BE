@@ -142,11 +142,11 @@ namespace LocalShipper.Service.Services.Implement
                 throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy cửa hàng", id.ToString());
             }
 
-            store.StoreName = storeRequest.StoreName.Trim();
-            store.StorePhone = storeRequest.StorePhone.Trim();
-            store.OpenTime = storeRequest.OpenTime;
-            store.CloseTime = storeRequest.CloseTime; 
-       
+            store.StoreName = !string.IsNullOrWhiteSpace(storeRequest.StoreName) ? storeRequest.StoreName.Trim() : store.StoreName;
+            store.StorePhone = !string.IsNullOrWhiteSpace(storeRequest.StorePhone) ? storeRequest.StorePhone.Trim() : store.StorePhone;
+            store.OpenTime = storeRequest.OpenTime ?? store.OpenTime;
+            store.CloseTime = storeRequest.CloseTime ?? store.CloseTime;
+            store.Status= storeRequest.Status ?? store.Status;
 
           
 
