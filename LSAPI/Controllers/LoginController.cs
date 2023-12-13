@@ -242,11 +242,7 @@ namespace LSAPI.Controllers
         {
             try
             {
-                var emailExit = await _unitOfWork.Repository<Account>().GetAll().FirstOrDefaultAsync(a => a.Email == email);
-                if(emailExit.Email == email)
-                {
-                    return BadRequest("email đã tồn tại");
-                }
+              
                 // Call the Azure Function with the provided URL and key
                 HttpResponseMessage functionResponse = await _httpClient.GetAsync($"{_azureFunctionUrl}&email={Uri.EscapeDataString(email)}");
 

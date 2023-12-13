@@ -94,7 +94,7 @@ namespace LSAPI.Controllers
 
         }
 
-        [Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
+        //[Authorize(Roles = Roles.Staff, AuthenticationSchemes = "Bearer")]
         [HttpPost("api/accounts/register-shipper-account")]
         public async Task<ActionResult<AccountResponse>> RegisterShipperAccount([FromBody] RegisterRequest request)
         {
@@ -201,14 +201,7 @@ namespace LSAPI.Controllers
                 }
                 var regex = new Regex("^[0-9]+$");
                 var regex2 = new Regex("^[a-zA-Z]+$");
-                if (!regex.IsMatch(request.FullName))
-                {
-                    return BadRequest("Tên không hợp lệ");
-                }
-                if (!regex2.IsMatch(request.Phone))
-                {
-                    return BadRequest("Số điện thoại không hợp lệ");
-                }
+                            
                 if (request.Phone.Length < 9 || request.Phone.Length > 11)
                 {
                     return BadRequest("Số điện thoại phải có từ 9 đến 11 số");

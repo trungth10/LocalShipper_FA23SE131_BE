@@ -172,7 +172,7 @@ namespace LocalShipper.Service.Services.Implement
                 
                 if (OTP.Equals(shipper.Fcmtoken))
                 {
-                    if (balance < wallet.Balance)
+                    if (balance > wallet.Balance)
                     {
                         throw new CrudException(HttpStatusCode.NotFound, "Không đủ số dư để thực hiện giao dịch", email);
                     }
