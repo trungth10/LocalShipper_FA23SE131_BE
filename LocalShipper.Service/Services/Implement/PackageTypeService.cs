@@ -87,7 +87,7 @@ namespace LocalShipper.Service.Services.Implement
             }
 
             packageType.PackageType1 = packageTypeRequest.PackageType.Trim();
-            packageType.CreatedAt= DateTime.Now;
+            packageType.CreatedAt= DateTime.UtcNow;
             // Cập nhật các thuộc tính khác tương tự
 
             await _unitOfWork.Repository<PackageType>().Update(packageType, id);
@@ -96,7 +96,7 @@ namespace LocalShipper.Service.Services.Implement
             var updatedPackageTypeResponse = new PackageTypeResponse
             {
                 Id = packageType.Id,
-                CreatedAt= DateTime.Now,
+                CreatedAt= DateTime.UtcNow,
                
             };
 

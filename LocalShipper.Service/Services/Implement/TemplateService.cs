@@ -63,7 +63,7 @@ namespace LocalShipper.Service.Services.Implement
             {
                 TemplateName= request.TemplateName.Trim(),
                 ImageUrl= request.ImageUrl.Trim(),
-                CreateAt= DateTime.Now,
+                CreateAt= DateTime.UtcNow,
                 Deleted = request.Deleted,
             };
 
@@ -89,7 +89,7 @@ namespace LocalShipper.Service.Services.Implement
             // Cập nhật thông tin Template
             template.TemplateName = templateRequest.TemplateName.Trim();
             template.ImageUrl = templateRequest.ImageUrl.Trim();
-            template.CreateAt = DateTime.Now;
+            template.CreateAt = DateTime.UtcNow;
 
             // Lưu thay đổi vào cơ sở dữ liệu
             await _unitOfWork.Repository<Template>().Update(template, id);
@@ -101,7 +101,7 @@ namespace LocalShipper.Service.Services.Implement
                 Id = template.Id,
                 TemplateName = template.TemplateName,
                 ImageUrl= template.ImageUrl,
-                CreateAt= DateTime.Now,
+                CreateAt= DateTime.UtcNow,
                 
             };
 

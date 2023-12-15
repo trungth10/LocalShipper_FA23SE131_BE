@@ -124,7 +124,7 @@ namespace LocalShipper.Service.Services.Implement
             zone.Latitude = request.Latitude;
             zone.Longitude = request.Longitude;
             zone.Radius = request.Radius;
-            zone.UpdateAt = DateTime.Now;
+            zone.UpdateAt = DateTime.UtcNow;
             zone.Active = request.Active;
 
             await _unitOfWork.Repository<Zone>().Update(zone, id);

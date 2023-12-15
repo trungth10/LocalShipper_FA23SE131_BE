@@ -108,8 +108,14 @@ namespace LocalShipper.Service.Services.Implement
             {
                 order.Status = (int)status;
                 order.ShipperId = shipperId;
-                order.AcceptTime = DateTime.Now;
-
+                order.AcceptTime = DateTime.UtcNow;
+                var walletCOD = await _unitOfWork.Repository<Wallet>()
+                .GetAll()
+            .FirstOrDefaultAsync(a => a.ShipperId == shipperId && a.Type == 2);
+                if (walletCOD.Balance < order.Cod) 
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "Số tiền thu hộ không đủ để nhận đơn hàng", walletCOD.Id.ToString());
+                }
                 if (order.Status == (int)OrderStatusEnum.WAITING)
                 {
                     OrderHistory orderHistory = new OrderHistory
@@ -169,7 +175,7 @@ namespace LocalShipper.Service.Services.Implement
             if (status == OrderStatusEnum.INPROCESS && string.IsNullOrWhiteSpace(cancelReason) && (routesId == null || routesId == 0))
             {
                 order.Status = (int)status;
-                order.PickupTime = DateTime.Now;
+                order.PickupTime = DateTime.UtcNow;
 
                 BackgroundJob.Enqueue(() => CheckDeliveryStatus(order.Id, (int)order.Store.TimeDelivery));
 
@@ -253,12 +259,12 @@ namespace LocalShipper.Service.Services.Implement
                     if (order.Cod < 1200000)
                     {
                         fromWallet.Balance -= (decimal)order.Cod;
-                        fromWallet.UpdatedAt = DateTime.Now;
+                        fromWallet.UpdatedAt = DateTime.UtcNow;
                         await _unitOfWork.Repository<Wallet>().Update(fromWallet, fromWallet.Id);
                         await _unitOfWork.CommitAsync();
 
                         toWallet.Balance += (decimal)order.Cod;
-                        toWallet.UpdatedAt = DateTime.Now;
+                        toWallet.UpdatedAt = DateTime.UtcNow;
 
                         await _unitOfWork.Repository<Wallet>().Update(toWallet, toWallet.Id);
                         await _unitOfWork.CommitAsync();
@@ -278,12 +284,12 @@ namespace LocalShipper.Service.Services.Implement
                     else
                     {
                         fromWallet.Balance -= (decimal)order.Cod * 0.65m;
-                        fromWallet.UpdatedAt = DateTime.Now;
+                        fromWallet.UpdatedAt = DateTime.UtcNow;
                         await _unitOfWork.Repository<Wallet>().Update(fromWallet, fromWallet.Id);
                         await _unitOfWork.CommitAsync();
 
                         toWallet.Balance += (decimal)order.Cod * 0.65m;
-                        toWallet.UpdatedAt = DateTime.Now;
+                        toWallet.UpdatedAt = DateTime.UtcNow;
 
                         await _unitOfWork.Repository<Wallet>().Update(toWallet, toWallet.Id);
                         await _unitOfWork.CommitAsync();
@@ -302,7 +308,7 @@ namespace LocalShipper.Service.Services.Implement
                 }
 
                 order.Status = (int)status;
-                order.CompleteTime = DateTime.Now;
+                order.CompleteTime = DateTime.UtcNow;
 
                 OrderHistory orderHistory = new OrderHistory
                 {
@@ -320,7 +326,7 @@ namespace LocalShipper.Service.Services.Implement
             if (status == OrderStatusEnum.CANCELLED)
             {
                 orderCancel.Status = (int)status;
-                orderCancel.CompleteTime = DateTime.Now;
+                orderCancel.CompleteTime = DateTime.UtcNow;
                 orderCancel.CancelReason = cancelReason;
                 OrderHistory orderHistory = new OrderHistory
                 {
@@ -365,7 +371,7 @@ namespace LocalShipper.Service.Services.Implement
                     }
                 }
                 orderCancel.Status = (int)status;
-                orderCancel.CompleteTime = DateTime.Now;
+                orderCancel.CompleteTime = DateTime.UtcNow;
                 orderCancel.CancelReason = cancelReason;
                 await _unitOfWork.Repository<Order>().Update(orderCancel, id);
                 await _unitOfWork.CommitAsync();
@@ -1033,7 +1039,7 @@ namespace LocalShipper.Service.Services.Implement
                 CustomerPhone = request.CustomerPhone.Trim(),
                 ActionId = request.ActionId,
                 TypeId = request.TypeId,
-                CreateTime = DateTime.Now,
+                CreateTime = DateTime.UtcNow,
                 OrderTime = request.OrderTime,
                 Eta = durationValue,
                 Status = (int)OrderStatusEnum.IDLE,
@@ -1291,7 +1297,7 @@ namespace LocalShipper.Service.Services.Implement
             order.TotalPrice = distancePrice + request.SubtotalPrice + request.Cod;
             order.ActionId = request.ActionId;
             order.TypeId = request.TypeId;
-            order.CreateTime = DateTime.Now;
+            order.CreateTime = DateTime.UtcNow;
             order.OrderTime = request.OrderTime;
 
 

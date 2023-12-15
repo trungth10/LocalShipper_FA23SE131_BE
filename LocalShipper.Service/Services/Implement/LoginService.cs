@@ -66,30 +66,29 @@ namespace LocalShipper.Service.Services.Implement
                     .Include(a => a.Role).Include(a => a.Shippers).Include(a => a.Stores)
                     .FirstOrDefaultAsync();
 
+                if(account.Active == false)
+                {
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = "Tài khoản không được phép đăng nhập vô hệ thống"
+                    };
+                }
                 if (account == null)
                 {
                     return new LoginResponse
                     {
                         Success = false,
-                        Message = "Invalid email or password."
+                        Message = "Sai email hoặc mặt khẩu"
                     };
                 }
-
-                if (account.Active == false)
-                {
-                    return new LoginResponse
-                    {
-                        Success = false,
-                        Message = "Account is not active."
-                    };
-                }
-
+               
                 if (password != account.Password)
                 {
                     return new LoginResponse
                     {
                         Success = false,
-                        Message = "Invalid email or password."
+                        Message = "Sai email hoặc mặt khẩu"
                     };
                 }
 

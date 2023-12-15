@@ -138,18 +138,17 @@ namespace LocalShipper.Service.Services.Implement
                 {
                     throw new CrudException(HttpStatusCode.BadRequest, "không thể chuyển nếu ví này còn dưới 100.000", "");
                 }
-                if (fromWalletCheck.Type == 3 && (DateTime.Now - fromWalletCheck.CreatedAt.GetValueOrDefault()).Days < 30)
+                if (fromWalletCheck.Type == 3 && (DateTime.UtcNow - fromWalletCheck.CreatedAt.GetValueOrDefault()).Days < 30)
                 {
                     throw new CrudException(HttpStatusCode.BadRequest, "ví này phải có thời gian là 30 ngày kể từ lúc kích hoạt mới để được chuyển", "");
                 }
 
                 WalletTransaction walletTrans = new WalletTransaction
                 {
-                    TransactionType = "Chuyển tiền",
+                  
                     FromWalletId = request.FromWalletId,
                     ToWalletId = request.ToWalletId,
-                    Amount = request.Amount,
-                    Description = "Chuyển tiền từ Ví chính sang Ví thu hộ",
+                    Amount = request.Amount,                   
                     Active = 1
                 };
 
@@ -164,10 +163,11 @@ namespace LocalShipper.Service.Services.Implement
                     walletTrans.TransactionType = "Chuyển tiền";
                     walletTrans.Description = "Chuyển tiền từ Ví chính sang Ví kích hoạt";
                 }
-                if (fromWalletCheck.Type == (int)WalletTypeEnum.VITHUHO && toWalletCheck.Type == (int)WalletTypeEnum.VIKICHHOAT)
-                {                   
+              
+                if (fromWalletCheck.Type == (int)WalletTypeEnum.VITHUHO && toWalletCheck.Type == (int)WalletTypeEnum.VICHINH)
+                {
                     walletTrans.TransactionType = "Chuyển tiền";
-                    walletTrans.Description = "Chuyển tiền từ Ví thu hộ sang Ví kích hoạt";
+                    walletTrans.Description = "Chuyển tiền từ Ví thu hộ sang Ví Chính";
                 }
                 if (fromWalletCheck.Type == (int)WalletTypeEnum.VIKICHHOAT && toWalletCheck.Type == (int)WalletTypeEnum.VITHUHO)
                 {                  
@@ -187,7 +187,7 @@ namespace LocalShipper.Service.Services.Implement
                 }
 
                 fromWallet.Balance -= request.Amount;
-                fromWallet.UpdatedAt = DateTime.Now;
+                fromWallet.UpdatedAt = DateTime.UtcNow;
 
                 await _unitOfWork.Repository<Wallet>().Update(fromWallet, request.FromWalletId);
                 await _unitOfWork.CommitAsync();
@@ -198,7 +198,7 @@ namespace LocalShipper.Service.Services.Implement
                    .FirstOrDefaultAsync(a => a.Id == request.ToWalletId);
                 
                 toWallet.Balance += request.Amount;
-                toWallet.UpdatedAt = DateTime.Now;
+                toWallet.UpdatedAt = DateTime.UtcNow;
 
                 await _unitOfWork.Repository<Wallet>().Update(toWallet, request.ToWalletId);
                 await _unitOfWork.CommitAsync();

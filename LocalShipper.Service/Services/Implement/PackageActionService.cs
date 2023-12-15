@@ -87,7 +87,7 @@ namespace LocalShipper.Service.Services.Implement
             }
 
             packageAction.ActionType = packageActionRequest.ActionType.Trim();
-           packageAction.CreatedAt = DateTime.Now;
+           packageAction.CreatedAt = DateTime.UtcNow;
          
 
             await _unitOfWork.Repository<PackageAction>().Update(packageAction, id);
@@ -97,7 +97,7 @@ namespace LocalShipper.Service.Services.Implement
             {
                 Id = packageAction.Id,
                 ActionType = packageAction.ActionType,
-              CreatedAt = DateTime.Now,
+              CreatedAt = DateTime.UtcNow,
              
             };
 

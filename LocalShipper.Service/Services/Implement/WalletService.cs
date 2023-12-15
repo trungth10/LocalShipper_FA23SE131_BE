@@ -131,7 +131,7 @@ namespace LocalShipper.Service.Services.Implement
             var account = await _unitOfWork.Repository<Account>()
                 .GetAll()
                 .FirstOrDefaultAsync(a => a.Email == email);
-
+            
             var walletQuery =  _unitOfWork.Repository<Wallet>()
                 .GetAll().Include(a => a.Shipper);
 
@@ -165,7 +165,7 @@ namespace LocalShipper.Service.Services.Implement
             if (type == 1)
             {             
                     wallet.Balance = wallet.Balance + balance;
-                    wallet.UpdatedAt = DateTime.Now;                    
+                    wallet.UpdatedAt = DateTime.UtcNow;                    
             }
             if (type == 2)
             {
@@ -177,7 +177,7 @@ namespace LocalShipper.Service.Services.Implement
                         throw new CrudException(HttpStatusCode.NotFound, "Không đủ số dư để thực hiện giao dịch", email);
                     }
                     wallet.Balance = wallet.Balance - balance;
-                    wallet.UpdatedAt = DateTime.Now;
+                    wallet.UpdatedAt = DateTime.UtcNow;
                 }
                 else
                 {
