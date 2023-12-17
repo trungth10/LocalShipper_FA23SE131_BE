@@ -283,7 +283,7 @@ namespace LocalShipper.Service.Services.Implement
                     }
                     else
                     {
-                        fromWallet.Balance -= (decimal)order.Cod * 0.65m;
+                        fromWallet.Balance -= (decimal)order.Cod * (0.65m/100);
                         fromWallet.UpdatedAt = DateTime.UtcNow;
                         await _unitOfWork.Repository<Wallet>().Update(fromWallet, fromWallet.Id);
                         await _unitOfWork.CommitAsync();
@@ -299,7 +299,7 @@ namespace LocalShipper.Service.Services.Implement
                             TransactionType = "Chuyển tiền thu hộ",
                             FromWalletId = fromWallet.Id,
                             ToWalletId = toWallet.Id,
-                            Amount = (decimal)order.Cod * 0.65m,
+                            Amount = (decimal)order.Cod * (0.65m / 100),
                             Description = $"Shipper {fromWallet.Shipper.FullName} chuyển tiền thu hộ",
                         };
                         await _unitOfWork.Repository<WalletTransaction>().InsertAsync(walletTrans);
@@ -1014,7 +1014,6 @@ namespace LocalShipper.Service.Services.Implement
             string customerAddress = $"{request.CustomerCommune}, {request.CustomerDistrict}, {request.CustomerCity}";
             var customerCoordinates = await ConvertAddress(customerAddress);
 
-
             var newOrder = new Order
             {
                 StoreId = request.StoreId.HasValue ? request.StoreId.Value : 0,
@@ -1041,6 +1040,7 @@ namespace LocalShipper.Service.Services.Implement
                 TypeId = request.TypeId,
                 CreateTime = DateTime.UtcNow,
                 OrderTime = request.OrderTime,
+                Other = request.Other,
                 Eta = durationValue,
                 Status = (int)OrderStatusEnum.IDLE,
             };

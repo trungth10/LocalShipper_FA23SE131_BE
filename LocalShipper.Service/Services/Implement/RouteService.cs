@@ -20,6 +20,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace LocalShipper.Service.Services.Implement
 {
@@ -399,7 +400,7 @@ namespace LocalShipper.Service.Services.Implement
 
             using (var httpClient = new HttpClient())
             {
-                var requestUri = $"{geocodingApiUrl}?latlng={lat},{lng}&api_key={apiKey}";
+                var requestUri = $"{geocodingApiUrl}?latlng={lat.ToString(CultureInfo.InvariantCulture)},{lng.ToString(CultureInfo.InvariantCulture)}&api_key={apiKey}";
                 var response = await httpClient.GetAsync(requestUri);
 
                 if (response.IsSuccessStatusCode)
@@ -548,8 +549,9 @@ namespace LocalShipper.Service.Services.Implement
 
             using (var httpClient = new HttpClient())
             {
-                var origins = string.Join("%7C", location.Select(location => $"{location.Latitude},{location.Longitude}"));
-                var destinations = string.Join("%7C", location.Select(location => $"{location.Latitude},{location.Longitude}"));
+                var origins = string.Join("%7C", location.Select(location => $"{location.Latitude.ToString(CultureInfo.InvariantCulture)},{location.Longitude.ToString(CultureInfo.InvariantCulture)}"));
+                var destinations = string.Join("%7C", location.Select(location => $"{location.Latitude.ToString(CultureInfo.InvariantCulture)},{location.Longitude.ToString(CultureInfo.InvariantCulture)}"));
+
 
                 var requestUri = $"{distanceMatrixApiUrl}?origins={origins}&destinations={destinations}&vehicle=car&api_key={apiKey}";
                 var response = await httpClient.GetAsync(requestUri);
