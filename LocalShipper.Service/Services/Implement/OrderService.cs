@@ -1536,6 +1536,28 @@ namespace LocalShipper.Service.Services.Implement
             }
         }
 
+        public async Task<OrderComplateAndFailResponse> OrderComplateAndFail(int shipperId, int month, int year)
+        {
+            var ngayBatDau = new DateTime(year, month, 1);
+            var ngayKetThuc = ngayBatDau.AddMonths(1).AddDays(-1);
 
+            var soLuongDonHoanThanh = await _unitOfWork.Repository<Order>()
+                .GetAll()
+                .Where(o => o.ShipperId == shipperId && o.Status == (int)OrderStatusEnum.COMPLETED && o.CompleteTime >= ngayBatDau && o.CompleteTime <= ngayKetThuc)
+                .CountAsync();
+
+            var soLuongDonThatBai = await _unitOfWork.Repository<Order>()
+                .GetAll()
+                .Where(o => o.ShipperId == shipperId && (o.Status == (int)OrderStatusEnum.CANCELLED || o.Status == (int)OrderStatusEnum.RETURN) && o.CompleteTime >= ngayBatDau && o.CompleteTime <= ngayKetThuc)
+                .CountAsync();
+
+            var response = new OrderComplateAndFailResponse
+            {
+                ComplateOrder = soLuongDonHoanThanh,
+                FailOrder = soLuongDonThatBai
+            };
+
+            return response;
+        }
     }
 }

@@ -38,6 +38,6 @@ namespace LocalShipper.Service.Services.Interface
 
         Task<string> UploadEvidence(int orderId, IFormFile evidence);
         Task CheckDeliveryStatus(int id, int timeRequest);
-
+        Task<OrderComplateAndFailResponse> OrderComplateAndFail(int shipperId, int month, int year);
     }
 }

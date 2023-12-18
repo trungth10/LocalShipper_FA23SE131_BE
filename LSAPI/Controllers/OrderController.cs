@@ -483,5 +483,35 @@ namespace LSAPI.Controllers
                 return BadRequest($"Cập nhật hình ảnh thất bại: {ex.Message}");
             }
         }
+        [Authorize(Roles = Roles.Shipper + "," + Roles.Store, AuthenticationSchemes = "Bearer")]
+        [HttpGet("api/orders/order-completed-failed")]
+        public async Task<ActionResult<OrderComplateAndFailResponse>> GetOrderCompletedAndFailed(int shipperId, int month, int year)
+        {
+            try
+            {
+                if (shipperId == 0)
+                {
+                    return BadRequest("làm ơn nhập Id");
+                }
+                if (shipperId < 0)
+                {
+                    return BadRequest("id phải là số dương");
+                }
+                if (month <= 0 || month > 12)
+                {
+                    return BadRequest("làm ơn nhập đúng tháng");
+                }
+                if(year < 1990 || year > 9999)
+                {
+                    return BadRequest("làm ơn nhập đúng số năm");
+                }
+                var result = await _orderService.OrderComplateAndFail(shipperId, month, year);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Xem thất bại: {ex.Message}");
+            }
+        }
     }
 }
