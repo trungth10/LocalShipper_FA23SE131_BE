@@ -27,10 +27,10 @@ namespace LSAPI.Controllers
         private readonly IAccountService _accountService;
         public AccountController(IAccountService accountService)
         {
-            _accountService = accountService;           
+            _accountService = accountService;
         }
 
-       [Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("api/accounts/")]
         public async Task<ActionResult<AccountResponse>> GetAccount(int id, string phone, string email, int role, string fcm_token, bool? active, int? pageNumber, int? pageSize)
         {
@@ -56,7 +56,7 @@ namespace LSAPI.Controllers
             {
                 return BadRequest($"Xem tài khoản thất bại: {ex.Message}");
             }
-            
+
         }
 
 
@@ -116,25 +116,25 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
                 }
-               
-                var rs = await _accountService.RegisterShipperAccount(request);                              
+
+                var rs = await _accountService.RegisterShipperAccount(request);
                 return Ok(rs);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest($"Đăng ký thất bại: {ex.Message}");
             }
         }
 
         [Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]
         [HttpPost("store/api/accounts/add-shipper")]
-        public async Task<ActionResult<AccountResponse>> RegisterShipperPrivate(int storeId ,[FromBody] RegisterRequest request)
+        public async Task<ActionResult<AccountResponse>> RegisterShipperPrivate(int storeId, [FromBody] RegisterRequest request)
         {
             try
             {
                 var regex = new Regex("^[a-zA-Z ]+$");
-                var regex2 = new Regex("^[0-9]+$");            
-               
+                var regex2 = new Regex("^[0-9]+$");
+
                 if (!regex.IsMatch(request.FullName))
                 {
                     return BadRequest("Tên không hợp lệ");
@@ -147,13 +147,13 @@ namespace LSAPI.Controllers
                 {
                     return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
                 }
-                
-                var rs = await _accountService.RegisterShipperPrivate(storeId,request);
+
+                var rs = await _accountService.RegisterShipperPrivate(storeId, request);
                 return Ok(rs);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest($"Đăng ký thất bại: {ex.Message}");
             }
         }
 
@@ -167,13 +167,13 @@ namespace LSAPI.Controllers
                 var rs = await _accountService.ActiveShipperFromStaff(accountId, zoneId);
                 return Ok(rs);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest($"Kích hoạt thất bại: {ex.Message}");
             }
         }
 
-        [Authorize(Roles = Roles.Staff+ "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Roles.Staff + "," + Roles.Admin, AuthenticationSchemes = "Bearer")]
         [HttpPut("staff/api/accounts/inactive-shipper")]
         public async Task<ActionResult<AccountResponse>> InActive(int accountId)
         {
@@ -183,9 +183,9 @@ namespace LSAPI.Controllers
                 var rs = await _accountService.InActiveShipperFromStaff(accountId);
                 return Ok(rs);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest($"Hủy kích hoạt thất bại: {ex.Message}");
             }
         }
 
@@ -201,7 +201,7 @@ namespace LSAPI.Controllers
                 }
                 var regex = new Regex("^[0-9]+$");
                 var regex2 = new Regex("^[a-zA-Z]+$");
-                            
+
                 if (request.Phone.Length < 9 || request.Phone.Length > 11)
                 {
                     return BadRequest("Số điện thoại phải có từ 9 đến 11 số");
@@ -304,7 +304,7 @@ namespace LSAPI.Controllers
         }
 
         [HttpGet("api/accounts/verify-forgot")]
-        public async Task<ActionResult<AccountResponse>> VerifyForgotPassword(string email,string otp)
+        public async Task<ActionResult<AccountResponse>> VerifyForgotPassword(string email, string otp)
         {
             try
             {
@@ -323,7 +323,7 @@ namespace LSAPI.Controllers
         {
             try
             {
-                if(userId == 0)
+                if (userId == 0)
                 {
                     return BadRequest("làm ơn nhập userId");
                 }
@@ -345,17 +345,17 @@ namespace LSAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"thay đổi mật khẩu thất bại: {ex.Message}");
+                return BadRequest($"Thay đổi mật khẩu thất bại: {ex.Message}");
             }
 
-           
+
         }
         [HttpPost("api/accounts/reset-password")]
         public async Task<IActionResult> ChangePasswordOfForget(string email, string newPassword)
         {
             try
             {
-                
+
                 if (newPassword == null)
                 {
                     return BadRequest("làm ơn nhập newPassword");
@@ -366,7 +366,7 @@ namespace LSAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"thay đổi mật khẩu thất bại: {ex.Message}");
+                return BadRequest($"Thay đổi mật khẩu thất bại: {ex.Message}");
             }
 
 
@@ -381,9 +381,9 @@ namespace LSAPI.Controllers
                 var imageUrl = await _accountService.UploadImageToFirebase(accountId, image);
                 return Ok(imageUrl);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest($"Cập nhật ảnh thất bại: {ex.Message}");
             }
         }
         [Authorize(Roles = Roles.Store, AuthenticationSchemes = "Bearer")]
@@ -396,11 +396,11 @@ namespace LSAPI.Controllers
                 var rs = await _accountService.StoreUpdatePWForShipper(shipperId, newPassword);
                 return Ok(rs);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest($"Cập nhật mật khẩu thất bại: {ex.Message}");
             }
-        }
 
+        }
     }
 }

@@ -82,9 +82,9 @@ namespace LSAPI.Controllers
                 var rs = await _historyService.CreateHistory(request);
                 return Ok(rs);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest($"Tạo lịch sử thất bại: {ex.Message}");
             }
         }
 

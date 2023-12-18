@@ -87,7 +87,7 @@ namespace LSAPI.Controllers
             }
             catch(Exception ex)
             {
-                return BadRequest($"Update PackageAction thất bại: {ex.Message}");
+                return BadRequest($"Cập nhật PackageAction thất bại: {ex.Message}");
             }
             
         }
@@ -112,7 +112,7 @@ namespace LSAPI.Controllers
             }
             catch(Exception ex)
             {
-                return BadRequest($"xóa PackageAction thất bại: {ex.Message}");
+                return BadRequest($"Xóa PackageAction thất bại: {ex.Message}");
             }
            
         }

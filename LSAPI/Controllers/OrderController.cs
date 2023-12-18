@@ -478,9 +478,9 @@ namespace LSAPI.Controllers
                 var imageUrl = await _orderService.UploadEvidence(orderId, image);
                 return Ok(imageUrl);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest($"Cập nhật hình ảnh thất bại: {ex.Message}");
             }
         }
     }

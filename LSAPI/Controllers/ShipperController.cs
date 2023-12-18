@@ -78,7 +78,7 @@ namespace LSAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Không tìm thấy shipper");
+                return BadRequest($"Không tìm thấy shipper { ex.Message}");
             }
         }
 
@@ -164,10 +164,8 @@ namespace LSAPI.Controllers
                 var rs = await _shipperService.RegisterShipperInformation(request);
                 return Ok(rs);
             }
-            catch (Exception)
-            {
-                return BadRequest();
-            }
+            catch (Exception ex) 
+            { return BadRequest($"Thêm thông tin shipper thất bại: {ex.Message}"); }
         }
 
         [Authorize(Roles = Roles.Shipper, AuthenticationSchemes = "Bearer")]

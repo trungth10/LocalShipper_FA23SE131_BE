@@ -138,9 +138,9 @@ namespace LSAPI.Controllers
                 var rs = await _priceService.CreatePrice(request, accountId);
                 return Ok(rs);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest($"Tạo giá  thất bại: {ex.Message}");
             }
         }
 
